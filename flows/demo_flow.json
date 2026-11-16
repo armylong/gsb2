@@ -1,0 +1,73 @@
+{
+  "name": "demo_flow",
+  "settings": {"max_parallel": 4},
+  "resources": {"api_quota": 2},
+  "tasks": [
+    {
+      "name": "fetch_users",
+      "command": "python3 demo/collector.py ok --duration 3",
+      "timeout": 30, "retries": 0,
+      "needs": {"api_quota": 1}, "depends_on": []
+    },
+    {
+      "name": "fetch_orders",
+      "command": "python3 demo/collector.py ok --duration 3",
+      "timeout": 30, "retries": 0,
+      "needs": {"api_quota": 1}, "depends_on": []
+    },
+    {
+      "name": "fetch_flaky",
+      "command": "python3 demo/collector.py flaky --state {run_dir}/flaky.state",
+      "timeout": 30, "retries": 2, "retry_delay": 1,
+      "needs": {"api_quota": 1}, "depends_on": []
+    },
+    {
+      "name": "fetch_slow",
+      "command": "python3 demo/collector.py ok --duration 30",
+      "timeout": 4, "retries": 1, "retry_delay": 1,
+      "needs": {}, "depends_on": []
+    },
+    {
+      "name": "fetch_tree",
+      "command": "python3 demo/collector.py tree --duration 60",
+      "timeout": 6, "retries": 0,
+      "needs": {}, "depends_on": []
+    },
+    {
+      "name": "hog_a",
+      "command": "python3 demo/collector.py ok --duration 6",
+      "timeout": 30, "retries": 0,
+      "needs": {"api_quota": 2}, "depends_on": []
+    },
+    {
+      "name": "hog_b",
+      "command": "python3 demo/collector.py ok --duration 6",
+      "timeout": 30, "retries": 0,
+      "needs": {"api_quota": 2}, "depends_on": []
+    },
+    {
+      "name": "agg_main",
+      "command": "python3 demo/collector.py ok --duration 1",
+      "timeout": 30, "retries": 0,
+      "needs": {}, "depends_on": ["fetch_users", "fetch_orders", "fetch_flaky"]
+    },
+    {
+      "name": "report_slow",
+      "command": "python3 demo/collector.py ok --duration 1",
+      "timeout": 30, "retries": 0,
+      "needs": {}, "depends_on": ["fetch_slow"]
+    },
+    {
+      "name": "report_tree",
+      "command": "python3 demo/collector.py ok --duration 1",
+      "timeout": 30, "retries": 0,
+      "needs": {}, "depends_on": ["fetch_tree"]
+    },
+    {
+      "name": "final",
+      "command": "python3 demo/collector.py ok --duration 1",
+      "timeout": 30, "retries": 0,
+      "needs": {}, "depends_on": ["agg_main", "hog_a", "hog_b"]
+    }
+  ]
+}
