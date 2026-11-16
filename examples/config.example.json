@@ -1,0 +1,26 @@
+{
+  "snapshot_dir": "snapshot",
+  "changes_dir": "changes",
+  "target_db": "target/target.db",
+  "tables": {
+    "customer": {
+      "target_table": "customer",
+      "key": ["id"],
+      "columns": {
+        "id": {"target": "id", "type": "INTEGER"},
+        "name": {"target": "name", "type": "TEXT"},
+        "city": {"target": "city", "type": "TEXT"}
+      }
+    },
+    "order": {
+      "target_table": "customer_order",
+      "key": ["id"],
+      "columns": {
+        "id": {"target": "id", "type": "INTEGER"},
+        "customer_id": {"target": "customer_id", "type": "INTEGER"},
+        "amount": {"target": "amount", "type": "REAL"},
+        "status": {"target": "status", "type": "TEXT"}
+      }
+    }
+  }
+}
