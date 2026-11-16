@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漏洞复现证据工作台</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🛡️ 漏洞复现证据工作台 <span class="local-tag">仅本机 · 静态分析 · 无网络出站</span></div>
+  <div class="project-bar">
+    <input id="project-name" class="input" placeholder="工程名称">
+    <span id="project-path" class="muted" title="当前工程文件"></span>
+  </div>
+  <div class="actions">
+    <button class="btn" data-act="project-new">新建工程</button>
+    <button class="btn" data-act="project-open">打开工程</button>
+    <button class="btn primary" data-act="project-save">保存工程</button>
+    <button class="btn" data-act="project-saveas">另存为</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 左栏: 包与文件 -->
+  <aside class="sidebar">
+    <div class="side-head">
+      <strong>复现包与证据</strong>
+      <button class="btn small" data-act="import-package">导入复现包</button>
+    </div>
+    <div id="package-tree" class="tree"></div>
+    <div class="side-head mt">
+      <strong>关联实体</strong>
+      <button class="btn small" data-act="rebuild-corr">重建</button>
+    </div>
+    <div id="corr-list" class="corr-list"></div>
+  </aside>
+
+  <!-- 中栏: 文件查看器 -->
+  <main class="main">
+    <div class="viewer-head">
+      <div id="file-title" class="file-title">未选择文件</div>
+      <div class="viewer-actions">
+        <label class="switch"><input type="checkbox" id="mask-toggle" checked> 默认脱敏</label>
+        <button class="btn small" data-act="reveal">查看原文(审计)</button>
+      </div>
+    </div>
+    <div id="file-meta" class="file-meta"></div>
+    <div id="duplicate-banner" class="banner warn hidden"></div>
+    <div id="parse-warn" class="banner info hidden"></div>
+    <pre id="code-view" class="code"></pre>
+  </main>
+
+  <!-- 右栏: 标签页 -->
+  <aside class="rightbar">
+    <nav class="tabs">
+      <button class="tab active" data-tab="annotations">复现记录</button>
+      <button class="tab" data-tab="diff">差异比较</button>
+      <button class="tab" data-tab="mask">脱敏</button>
+      <button class="tab" data-tab="ops">操作记录</button>
+    </nav>
+
+    <section class="tab-panel active" id="tab-annotations">
+      <button class="btn small primary" data-act="ann-new">新增复现记录</button>
+      <div id="ann-list"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-diff">
+      <div class="form-row"><label>包 A</label><select id="diff-a"></select></div>
+      <div class="form-row"><label>包 B</label><select id="diff-b"></select></div>
+      <button class="btn small primary" data-act="diff-run">开始比较</button>
+      <div id="diff-summary"></div>
+      <div id="diff-result"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-mask">
+      <div class="form-row">
+        <label class="switch"><input type="checkbox" id="hide-default" checked> 界面默认隐藏命中内容</label>
+      </div>
+      <button class="btn small" data-act="mask-add">添加自定义规则</button>
+      <button class="btn small" data-act="mask-pending">查看待脱敏项</button>
+      <button class="btn small primary" data-act="export-json">脱敏导出 JSON</button>
+      <button class="btn small" data-act="export-md">脱敏导出 Markdown</button>
+      <div id="mask-rules"></div>
+      <div id="mask-pending-box"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-ops">
+      <div id="ops-list" class="ops-list"></div>
+    </section>
+  </aside>
+</div>
+
+<!-- 标注编辑弹窗 -->
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal">
+    <div class="modal-head"><strong id="modal-title">编辑复现记录</strong>
+      <button class="btn small" data-act="modal-close">关闭</button></div>
+    <div class="modal-body">
+      <label>标题</label><input id="ann-title" class="input">
+      <label>复现步骤</label><textarea id="ann-steps" class="input" rows="4"></textarea>
+      <label>预期现象</label><textarea id="ann-expected" class="input" rows="2"></textarea>
+      <label>实际现象</label><textarea id="ann-actual" class="input" rows="2"></textarea>
+      <label>结论 (每次修改保留历史)</label><textarea id="ann-conclusion" class="input" rows="2"></textarea>
+      <label>关联证据</label><div id="ann-linked" class="linked-box"></div>
+      <div id="ann-history" class="history-box"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn primary" data-act="ann-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>
