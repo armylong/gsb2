@@ -1,0 +1,8 @@
+{
+  "tables": [
+    {
+      "name": "regions",
+      "columns": ["code", "name", "timezone"]
+    }
+  ]
+}

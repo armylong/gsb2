@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SQL 字段血缘分析</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <h1>SQL 字段血缘分析 <span class="sub">离线 · sqlite 方言</span></h1>
+  <div id="stats" class="stats"></div>
+  <nav>
+    <button class="tab active" data-tab="forward">正向血缘（输出字段 → 来源）</button>
+    <button class="tab" data-tab="reverse">反向影响（来源字段 → 下游）</button>
+    <button class="tab" data-tab="unresolved">未解析项 <span id="unresolved-badge" class="badge hidden">0</span></button>
+  </nav>
+</header>
+
+<main>
+  <!-- Forward view -->
+  <section id="view-forward" class="view active">
+    <div class="layout">
+      <aside class="sidebar">
+        <input id="block-filter" type="search" placeholder="过滤文件 / 查询块 / 输出列…" />
+        <ul id="block-list" class="block-list"></ul>
+      </aside>
+      <div class="content">
+        <div id="forward-empty" class="empty">从左侧选择一个查询块查看字段血缘</div>
+        <div id="forward-detail" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reverse view -->
+  <section id="view-reverse" class="view">
+    <div class="layout">
+      <aside class="sidebar">
+        <input id="base-filter" type="search" placeholder="过滤 表.字段…" />
+        <ul id="base-list" class="block-list"></ul>
+      </aside>
+      <div class="content">
+        <div id="reverse-empty" class="empty">选择一个原始表字段，查看受影响的查询与输出列</div>
+        <div id="reverse-detail" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Unresolved view -->
+  <section id="view-unresolved" class="view">
+    <div id="unresolved-detail"></div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
