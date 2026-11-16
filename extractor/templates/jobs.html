@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>批处理</h1>
+
+<form method="post" action="{{ url_for('job_start') }}" style="display:inline">
+  <input type="hidden" name="mode" value="all">
+  <button type="submit">启动批量处理（全部文档，当前规则版本 {{ active_ruleset.version }}）</button>
+</form>
+<form method="post" action="{{ url_for('job_start') }}" style="display:inline">
+  <input type="hidden" name="mode" value="failed_only">
+  <button type="submit">只重试失败文档</button>
+</form>
+<p class="hint">批量处理会重新读取失败文档并按当前规则重抽；已确认的人工修正不会丢失。页面每 3 秒自动刷新。</p>
+<meta http-equiv="refresh" content="3">
+
+<table>
+  <thead><tr>
+    <th>ID</th><th>规则版本</th><th>模式</th><th>状态</th><th>进度</th><th>失败</th><th>更新时间</th><th>操作</th>
+  </tr></thead>
+  <tbody>
+  {% for j in jobs %}
+  <tr>
+    <td>{{ j.id }}</td>
+    <td><code>{{ j.ruleset_version }}</code></td>
+    <td>{{ '全部' if j.mode == 'all' else '仅失败' }}</td>
+    <td><span class="badge {{ j.status }}">{{ {'running':'运行中','paused':'已暂停','done':'完成'}[j.status] }}</span></td>
+    <td>{{ j.done }}/{{ j.total }}</td>
+    <td>
+      {{ j.failed }}
+      {% if failed_items.get(j.id) %}
+      <details><summary>失败明细</summary>
+        <ul>
+        {% for it in failed_items[j.id] %}
+          <li>{{ it.filename }}: {{ it.error }}</li>
+        {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </td>
+    <td>{{ j.updated_at }}</td>
+    <td>
+      {% if j.status == 'running' %}
+      <form method="post" action="{{ url_for('job_pause', job_id=j.id) }}" style="display:inline">
+        <button type="submit">暂停</button>
+      </form>
+      {% elif j.status == 'paused' %}
+      <form method="post" action="{{ url_for('job_resume', job_id=j.id) }}" style="display:inline">
+        <button type="submit">恢复</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" class="empty">还没有批处理任务。</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

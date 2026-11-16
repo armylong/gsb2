@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>结果核对（规则版本 {{ active_ruleset.version }}）</h1>
+
+<form method="get" class="filters">
+  状态:
+  <select name="status">
+    <option value="">全部</option>
+    {% for s in ['ok', 'missing', 'multiple', 'invalid'] %}
+    <option value="{{ s }}" {% if filter_status == s %}selected{% endif %}>{{ status_labels[s] }}</option>
+    {% endfor %}
+  </select>
+  字段:
+  <select name="field">
+    <option value="">全部</option>
+    {% for f in fields %}
+    <option value="{{ f }}" {% if filter_field == f %}selected{% endif %}>{{ f }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">筛选</button>
+  <span class="spacer"></span>
+  <a href="{{ url_for('export', kind='confirmed') }}">导出已确认结果 CSV</a>
+  <a href="{{ url_for('export', kind='anomalies') }}">导出异常清单 CSV</a>
+</form>
+
+<table>
+  <thead><tr>
+    <th>文档</th><th>字段</th><th>状态</th><th>有效值</th><th>机器值</th>
+    <th>来源</th><th>修正记录</th><th>人工修正</th>
+  </tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr class="st-{{ r.status }}">
+    <td><a href="{{ url_for('document', doc_id=r.document_id, highlight=r.id) }}#p{{ r.page_no }}l{{ r.line_no }}">{{ r.filename }}</a></td>
+    <td>{{ r.field }}</td>
+    <td>
+      <span class="badge {{ r.status }}">{{ status_labels.get(r.status, r.status) }}</span>
+      {% if r.correction %}<span class="badge corrected">已修正</span>{% endif %}
+    </td>
+    <td><strong>{{ r.effective or '—' }}</strong></td>
+    <td>{{ r.value or '—' }}</td>
+    <td>{% if r.page_no %}第{{ r.page_no }}页第{{ r.line_no }}行{% else %}—{% endif %}</td>
+    <td>
+      {% if r.correction %}
+        「{{ r.correction.original_value or '—' }}」→「{{ r.correction.corrected_value }}」
+        <small>{{ r.correction.operator }} @ {{ r.correction.created_at }}</small>
+      {% else %}—{% endif %}
+    </td>
+    <td>
+      <form method="post" action="{{ url_for('correct') }}" class="correct">
+        <input type="hidden" name="document_id" value="{{ r.document_id }}">
+        <input type="hidden" name="field" value="{{ r.field }}">
+        <input type="text" name="corrected_value" placeholder="修正值" required>
+        <input type="text" name="operator" placeholder="操作者" required>
+        <button type="submit">确认</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" class="empty">没有符合条件的结果。</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

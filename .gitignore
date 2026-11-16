@@ -42,3 +42,7 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 运行期产物（本场景） ----
+data/
+sample_data/generated/

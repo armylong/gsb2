@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>合同字段抽取工具</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <strong>合同字段抽取</strong>
+  <a href="{{ url_for('index') }}">文档</a>
+  <a href="{{ url_for('rules') }}">抽取规则</a>
+  <a href="{{ url_for('review') }}">结果核对</a>
+  <a href="{{ url_for('jobs_page') }}">批处理</a>
+  <span class="spacer"></span>
+  {% if active_ruleset %}
+  <span class="rulever">当前规则版本: {{ active_ruleset.version }}（{{ active_ruleset.name }}）</span>
+  {% endif %}
+</nav>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

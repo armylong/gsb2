@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ doc.filename }} <small>#{{ doc.id }}</small></h1>
+<p>
+  读取状态: <span class="badge {{ doc.status }}">{{ status_labels.get(doc.status, doc.status) }}</span>
+  {% if doc.error %}<span class="err">{{ doc.error }}</span>{% endif %}
+  {% if doc.status == 'ok' %}
+  <form method="post" action="{{ url_for('extract_one', doc_id=doc.id) }}" style="display:inline">
+    <button type="submit">按当前规则重抽</button>
+  </form>
+  {% endif %}
+</p>
+
+{% if stale_versions %}
+<p class="warn">注意：该文档存在旧规则版本（{{ stale_versions|join(', ') }}）的抽取结果，
+下表只显示当前版本 {{ active_ruleset.version }} 的结果。</p>
+{% endif %}
+
+<h2>抽取结果（规则版本 {{ active_ruleset.version }}）</h2>
+<table>
+  <thead><tr>
+    <th>字段</th><th>状态</th><th>有效值</th><th>机器值</th><th>候选数</th>
+    <th>来源位置</th><th>修正记录</th><th>人工修正</th>
+  </tr></thead>
+  <tbody>
+  {% for r in results %}
+  <tr class="st-{{ r.status }}">
+    <td>{{ r.field }}</td>
+    <td>
+      <span class="badge {{ r.status }}">{{ status_labels.get(r.status, r.status) }}</span>
+      {% if r.corrected %}<span class="badge corrected">已修正</span>{% endif %}
+    </td>
+    <td><strong>{{ r.effective_value or '—' }}</strong></td>
+    <td>{{ r.value or '—' }}</td>
+    <td>{{ r.candidates|length }}</td>
+    <td>
+      {% if r.page_no %}
+      <a href="{{ url_for('document', doc_id=doc.id, highlight=r.id) }}#p{{ r.page_no }}l{{ r.line_no }}">
+        第{{ r.page_no }}页 第{{ r.line_no }}行</a>
+      {% else %}—{% endif %}
+      {% if r.candidates|length > 1 %}
+      <details><summary>全部候选</summary>
+        <ul>
+        {% for c in r.candidates %}
+          <li>第{{ c.page_no }}页第{{ c.line_no }}行: {{ c.value }}
+            （{{ '格式有效' if c.valid else '格式无效' }}）<code>{{ c.context }}</code></li>
+        {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </td>
+    <td>
+      {% if r.correction %}
+        原值「{{ r.correction.original_value or '—' }}」→「{{ r.correction.corrected_value }}」<br>
+        <small>{{ r.correction.operator }} @ {{ r.correction.created_at }}</small>
+      {% else %}—{% endif %}
+    </td>
+    <td>
+      <form method="post" action="{{ url_for('correct') }}" class="correct">
+        <input type="hidden" name="document_id" value="{{ doc.id }}">
+        <input type="hidden" name="field" value="{{ r.field }}">
+        <input type="text" name="corrected_value" placeholder="修正值" required>
+        <input type="text" name="operator" placeholder="操作者" required>
+        <button type="submit">确认修正</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" class="empty">尚未按当前规则抽取。</td></tr>
+  {% endfor %}
+</table>
+
+<h2>原文</h2>
+{% for p in pages %}
+<section class="page" id="page-{{ p.page_no }}">
+  <h3>第 {{ p.page_no }} 页 <small>{{ '扫描件(OCR)' if p.source == 'ocr' else '文本' }}</small></h3>
+  {% if p.image_path %}
+  <div class="imgwrap">
+    <img src="{{ url_for('page_image', page_id=p.id) }}" data-width="{{ p.width }}" data-height="{{ p.height }}">
+    {% if highlight and highlight.page_no == p.page_no and highlight.bbox %}
+    <div class="hlbox" data-bbox="{{ highlight.bbox|tojson }}"></div>
+    {% endif %}
+  </div>
+  {% endif %}
+  <div class="lines">
+  {% for l in p.lines %}
+    <div class="line {% if highlight and highlight.page_no == p.page_no and highlight.line_no == l.line_no %}hl{% endif %}"
+         id="p{{ p.page_no }}l{{ l.line_no }}">
+      <span class="ln">{{ l.line_no }}</span>{{ l.text }}
+    </div>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<script>
+// 图片页：按显示比例画出命中区域
+document.querySelectorAll('.hlbox').forEach(function (box) {
+  var img = box.parentElement.querySelector('img');
+  function place() {
+    var b = JSON.parse(box.dataset.bbox);
+    var sx = img.clientWidth / parseFloat(img.dataset.width);
+    var sy = img.clientHeight / parseFloat(img.dataset.height);
+    box.style.left = b[0] * sx + 'px';
+    box.style.top = b[1] * sy + 'px';
+    box.style.width = (b[2] - b[0]) * sx + 'px';
+    box.style.height = (b[3] - b[1]) * sy + 'px';
+  }
+  if (img.complete) place(); else img.onload = place;
+});
+// 滚动到高亮行
+var hl = document.querySelector('.line.hl, .hlbox');
+if (hl) hl.scrollIntoView({block: 'center'});
+</script>
+{% endblock %}

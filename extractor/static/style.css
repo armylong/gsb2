@@ -1,0 +1,39 @@
+body { font-family: -apple-system, "PingFang SC", sans-serif; margin: 0; color: #222; }
+nav { display: flex; gap: 16px; align-items: center; background: #1f2937; color: #fff; padding: 10px 20px; }
+nav a { color: #cbd5e1; text-decoration: none; }
+nav a:hover { color: #fff; }
+nav .spacer { flex: 1; }
+.rulever { font-size: 12px; color: #94a3b8; }
+main { padding: 20px 28px; }
+table { border-collapse: collapse; width: 100%; margin: 12px 0 28px; font-size: 14px; }
+th, td { border: 1px solid #d7dce2; padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f1f4f8; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; background: #e5e7eb; }
+.badge.ok, .badge.done { background: #d1f2df; color: #146c2e; }
+.badge.missing { background: #fef3c7; color: #92400e; }
+.badge.multiple { background: #fde2e2; color: #991b1b; }
+.badge.invalid { background: #ffe4d6; color: #9a3412; }
+.badge.failed { background: #fde2e2; color: #991b1b; }
+.badge.pending, .badge.paused { background: #e0e7ff; color: #3730a3; }
+.badge.running { background: #dbeafe; color: #1d4ed8; }
+.badge.corrected { background: #ede9fe; color: #5b21b6; }
+.err { color: #b91c1c; font-size: 13px; }
+.warn { background: #fef3c7; border: 1px solid #f59e0b; padding: 8px 12px; border-radius: 6px; }
+.hint { color: #6b7280; font-size: 13px; }
+.empty { color: #9ca3af; text-align: center; }
+.filters { display: flex; gap: 12px; align-items: center; }
+.filters .on { font-weight: bold; }
+.upload { margin: 10px 0; display: flex; gap: 10px; align-items: center; }
+.ruleeditor { width: 100%; font-family: ui-monospace, monospace; font-size: 13px; }
+.correct input { width: 110px; }
+.page { border: 1px solid #d7dce2; border-radius: 6px; margin-bottom: 18px; padding: 10px 14px; }
+.page h3 { margin: 4px 0 10px; }
+.line { font-family: ui-monospace, monospace; font-size: 13px; padding: 1px 4px; white-space: pre-wrap; }
+.line .ln { display: inline-block; width: 34px; color: #9ca3af; user-select: none; }
+.line.hl { background: #fff3a3; outline: 2px solid #f59e0b; }
+.imgwrap { position: relative; display: inline-block; max-width: 100%; }
+.imgwrap img { max-width: 100%; display: block; }
+.hlbox { position: absolute; border: 2px solid #f59e0b; background: rgba(245, 158, 11, .25); }
+tr.on td { background: #ecfdf5; }
+details summary { cursor: pointer; color: #1d4ed8; }
+code { background: #f3f4f6; padding: 0 4px; border-radius: 3px; }
