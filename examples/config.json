@@ -1,0 +1,32 @@
+{
+  "db": "eventreplay.db",
+  "window": "1d",
+  "sources": [
+    {
+      "name": "pay",
+      "path": "data/pay/*.csv",
+      "format": "csv",
+      "mapping": {
+        "event_id": "order_id",
+        "biz_time": "pay_time",
+        "biz_key": "merchant",
+        "amount": "amount",
+        "status": "state"
+      },
+      "time_formats": ["%Y-%m-%d %H:%M:%S", "iso"]
+    },
+    {
+      "name": "refund",
+      "path": "data/refund/*.jsonl",
+      "format": "jsonl",
+      "mapping": {
+        "event_id": "rid",
+        "biz_time": "ts",
+        "biz_key": "shop",
+        "amount": "amt",
+        "status": "result"
+      },
+      "time_formats": ["iso", "epoch"]
+    }
+  ]
+}

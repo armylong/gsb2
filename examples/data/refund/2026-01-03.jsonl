@@ -1,0 +1,4 @@
+{"rid": "R2001", "ts": "2026-01-01T12:00:00Z", "shop": "shopA", "amt": 40, "result": "done"}
+{"rid": "R2002", "ts": "2026-01-02T13:30:00Z", "shop": "shopA", "amt": 15.5, "result": "done"}
+{"rid": "R2003", "ts": "not-a-time", "shop": "shopB", "amt": 5, "result": "done"}
+{"rid": "R2002", "ts": "2026-01-02T13:30:00Z", "shop": "shopA", "amt": 99, "result": "done"}
