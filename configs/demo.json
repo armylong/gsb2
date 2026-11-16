@@ -1,0 +1,152 @@
+{
+  "base_url": "http://127.0.0.1:8765",
+  "allowed_hosts": ["127.0.0.1", "localhost"],
+  "allowed_ports": [8765],
+  "seed": 20261115,
+  "secret_fields": ["password", "confirm_password", "authorization"],
+  "scope_probes": [
+    {"name": "外部主机绝对地址（应拦截）",
+     "method": "GET", "url": "http://example.invalid/elsewhere"},
+    {"name": "非白名单本机端口（应拦截）",
+     "method": "GET", "url": "http://127.0.0.1:9999/health"},
+    {"name": "非 http 协议（应拦截）",
+     "method": "GET", "url": "file:///etc/passwd"},
+    {"name": "服务端跳转到范围外（跟随前应拦截）",
+     "method": "GET", "url": "/api/redirect"}
+  ],
+  "limits": {
+    "max_requests": 1200,
+    "max_concurrency": 4,
+    "timeout_seconds": 5.0,
+    "max_runtime_seconds": 240.0,
+    "max_redirects": 3
+  },
+  "endpoints": [
+    {
+      "name": "create_user",
+      "method": "POST",
+      "path": "/api/users",
+      "sample": {
+        "name": "alice",
+        "email": "alice@example.test",
+        "age": 30,
+        "profile": {"geo": "geo:cn", "tags": ["v1"], "meta": {"level": 2}}
+      },
+      "rules": ["missing", "type", "boundary", "nested", "unknown", "malformed"],
+      "response_contract": [
+        {"type": "status", "expect": [201, 400, 404]}
+      ],
+      "stateful": false
+    },
+    {
+      "name": "register",
+      "method": "POST",
+      "path": "/api/register",
+      "sample": {
+        "username": "bob",
+        "password": "s3cret-pwd",
+        "confirm_password": "s3cret-pwd",
+        "type": "business",
+        "company": "acme"
+      },
+      "rules": ["missing", "type", "boundary", "nested", "unknown", "constraint", "malformed"],
+      "constraints": [
+        {"type": "equals_field", "field": "confirm_password", "equals": "password"},
+        {"type": "value_dependency", "field": "type",
+         "when": {"field": "type", "value": "business"}, "require": "company"}
+      ],
+      "response_contract": [
+        {"type": "status", "expect": [201, 400]}
+      ],
+      "stateful": false,
+      "headers": {"Authorization": "Bearer demo-token-secret"}
+    },
+    {
+      "name": "update_user_state",
+      "method": "PUT",
+      "path": "/api/users/{user_id}",
+      "sample": {"name": "alice-renamed", "age": 31},
+      "rules": ["missing", "type", "boundary", "nested", "unknown"],
+      "response_contract": [
+        {"type": "status", "expect": [200, 400, 404]}
+      ],
+      "stateful": true,
+      "setup": [
+        {"name": "create_user",
+         "method": "POST", "path": "/api/users",
+         "body": {"name": "setup-user", "email": "setup@example.test",
+                  "age": 1, "profile": {"geo": "geo:cn"}},
+         "save": {"user_id": "$.user.id"}}
+      ],
+      "cleanup": [
+        {"name": "delete_user",
+         "method": "DELETE", "path": "/api/users/{user_id}"}
+      ],
+      "state_query": {
+        "name": "get_user", "method": "GET", "path": "/api/users/{user_id}"
+      },
+      "postcondition": [
+        {"type": "json_path", "path": "$.user.is_admin", "expect": "__ABSENT__"},
+        {"type": "json_path", "path": "$.user.role", "expect": "__ABSENT__"}
+      ]
+    },
+    {
+      "name": "transaction_active",
+      "method": "POST",
+      "path": "/api/accounts/{account_id}/transactions",
+      "sample": {"amount": 100, "memo": "payment"},
+      "rules": ["missing", "type", "boundary", "nested", "unknown", "malformed"],
+      "response_contract": [
+        {"type": "status", "expect": [201, 400, 404, 409]}
+      ],
+      "stateful": true,
+      "setup": [
+        {"name": "create_account",
+         "method": "POST", "path": "/api/accounts",
+         "body": {"owner": "alice"},
+         "save": {"account_id": "$.account.id"}}
+      ],
+      "cleanup": [
+        {"name": "delete_account",
+         "method": "DELETE", "path": "/api/accounts/{account_id}"}
+      ],
+      "precondition": [
+        {"type": "json_path", "path": "$.account.status", "expect": "active"}
+      ],
+      "state_query": {
+        "name": "get_account", "method": "GET",
+        "path": "/api/accounts/{account_id}"
+      }
+    },
+    {
+      "name": "transaction_closed",
+      "method": "POST",
+      "path": "/api/accounts/{account_id}/transactions",
+      "sample": {"amount": 100, "memo": "payment"},
+      "rules": ["missing", "type", "boundary", "nested", "unknown", "malformed"],
+      "response_contract": [
+        {"type": "status", "expect": [201, 400, 404, 409]}
+      ],
+      "stateful": true,
+      "setup": [
+        {"name": "create_account",
+         "method": "POST", "path": "/api/accounts",
+         "body": {"owner": "bob"},
+         "save": {"account_id": "$.account.id"}},
+        {"name": "close_account",
+         "method": "POST", "path": "/api/accounts/{account_id}/close"}
+      ],
+      "cleanup": [
+        {"name": "delete_account",
+         "method": "DELETE", "path": "/api/accounts/{account_id}"}
+      ],
+      "precondition": [
+        {"type": "json_path", "path": "$.account.status", "expect": "closed"}
+      ],
+      "state_query": {
+        "name": "get_account", "method": "GET",
+        "path": "/api/accounts/{account_id}"
+      }
+    }
+  ]
+}
