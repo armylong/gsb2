@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三维点选 / 框选工具</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="viewport">
+        <canvas id="scene"></canvas>
+
+        <!-- 拖框选择矩形：覆盖层与画布同原点，坐标即画布 CSS 像素 -->
+        <div id="marquee" hidden></div>
+
+        <!-- 悬停提示 -->
+        <div id="tooltip" hidden></div>
+
+        <!-- 精简统计面板 -->
+        <aside id="hud">
+          <h1>实例选择工具</h1>
+          <div class="stat-grid">
+            <div class="stat">
+              <span class="stat-label">物件总数</span>
+              <span class="stat-value" id="stat-total">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">可见 / 隐藏</span>
+              <span class="stat-value">
+                <span id="stat-visible">0</span> / <span id="stat-hidden">0</span>
+              </span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">已选数量</span>
+              <span class="stat-value accent" id="stat-selected">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">当前模式</span>
+              <span class="stat-value mode" id="stat-mode">替换选择</span>
+            </div>
+          </div>
+
+          <div class="mode-switch" role="group" aria-label="选择模式">
+            <button id="mode-replace" class="mode-btn active">替换 (1)</button>
+            <button id="mode-add" class="mode-btn">追加 (2)</button>
+            <button id="mode-remove" class="mode-btn">剔除 (3)</button>
+          </div>
+
+          <div class="hint-block">
+            <p class="hint-title">操作方式</p>
+            <ul>
+              <li><b>左键单击</b>：点选最近物件（点空白处清空）</li>
+              <li><b>左键拖框</b>：框选投影中心在矩形内的物件</li>
+              <li><b>Shift</b>：临时追加　<b>Ctrl/⌘ 或 Alt</b>：临时剔除</li>
+              <li><b>右键拖拽</b>：旋转视角　<b>中键/滚轮</b>：平移/缩放</li>
+              <li><b>Esc</b>：清空选择　<b>Ctrl/⌘+Z</b>：撤销隐藏</li>
+            </ul>
+          </div>
+
+          <div class="btn-grid">
+            <button id="btn-move" title="把已选物件随机移动一段距离（身份不变）">移动已选</button>
+            <button id="btn-hide" title="批量隐藏已选物件（可撤销）">隐藏已选</button>
+            <button id="btn-undo-restore" title="恢复全部隐藏物件">恢复全部</button>
+            <button id="btn-undo" title="撤销最近一次批量隐藏" disabled>撤销隐藏</button>
+            <button id="btn-clear" class="warn" title="清空选择（不影响可见性）" disabled>清空选择</button>
+            <button id="btn-reset-view" title="重置相机视角">重置视角</button>
+          </div>
+
+          <p id="last-action" class="last-action">就绪</p>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
