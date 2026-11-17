@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本地视频防抖工作台</title>
+<style>
+  :root {
+    --bg: #14181f; --panel: #1d232d; --panel2: #242c38;
+    --line: #33404f; --text: #e6ebf2; --muted: #8a97a6;
+    --accent: #4f9dff; --green: #42d67a; --orange: #ff9f43;
+    --red: #ff6b6b; --yellow: #ffd166;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 13px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 18px; background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  .hint { color: var(--muted); font-size: 12px; }
+  main { padding: 14px 18px; display: grid; gap: 14px; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .panel h2 {
+    margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--accent);
+  }
+  button {
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 7px;
+    padding: 6px 12px; cursor: pointer; font-size: 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent);
+    color: #0b1622; font-weight: 600; }
+  input[type=range] { width: 260px; vertical-align: middle; }
+  input[type=number], input[type=text] {
+    width: 90px; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px;
+  }
+  .videos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+  .vidbox { background: #000; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--line); }
+  .vidbox .cap {
+    padding: 6px 10px; color: var(--muted); font-size: 12px;
+    display: flex; justify-content: space-between; background: var(--panel2);
+  }
+  video { width: 100%; display: block; background: #000; }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .stat { font-variant-numeric: tabular-nums; }
+  .badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+  .badge.ok { background: rgba(66,214,122,.15); color: var(--green); }
+  .badge.warn { background: rgba(255,107,107,.18); color: var(--red); }
+  .badge.run { background: rgba(79,157,255,.15); color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { border: 1px solid var(--line); padding: 5px 8px;
+    text-align: right; font-variant-numeric: tabular-nums; }
+  th { background: var(--panel2); color: var(--muted); font-weight: 500; }
+  td.l, th.l { text-align: left; }
+  .warnbox {
+    border: 1px solid var(--red); background: rgba(255,107,107,.1);
+    border-radius: 8px; padding: 8px 12px; color: #ffb3b3;
+    display: none; margin-top: 8px;
+  }
+  .cut-item { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted);
+    flex-wrap: wrap; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+    margin-right: 4px; vertical-align: middle; }
+  canvas.chart { width: 100%; height: 150px; display: block; }
+  #toast {
+    position: fixed; right: 18px; bottom: 18px; max-width: 380px;
+    background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 14px; display: none; z-index: 50;
+  }
+  .muted { color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 1100px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>本地视频防抖工作台</h1>
+  <span class="hint">≤15s · ≤720p · CFR MP4 · 全部处理在本机完成</span>
+  <span style="flex:1"></span>
+  <span id="jobBadge" class="badge run" style="display:none"></span>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>1. 导入 / 生成样例</h2>
+    <div class="controls">
+      <input type="file" id="fileInput" accept=".mp4">
+      <button id="uploadBtn" class="primary" disabled>上传并分析</button>
+      <button id="sampleBtn">生成合成样例(含已知抖动/缓推/硬切)</button>
+      <span class="muted">或核对已导出结果:</span>
+      <input type="file" id="reopenVideo" accept=".mp4" title="output.mp4">
+      <input type="file" id="reopenSidecar" accept=".json" title="output.sidecar.json">
+      <button id="reopenBtn" disabled>重新打开核对</button>
+    </div>
+    <div id="mediaInfo" class="hint" style="margin-top:8px"></div>
+  </section>
+
+  <section class="panel" id="workPanel" style="display:none">
+    <h2>2. 防抖参数 (改动后路径/画面/裁切同步刷新, 不残留旧结果)</h2>
+    <div class="controls">
+      <label>平滑强度 σ(帧)
+        <input type="range" id="sigma" min="1" max="40" step="1" value="8">
+        <span id="sigmaVal" class="stat">8</span>
+      </label>
+      <span class="hint">σ 越大越平滑; 缓慢运镜作为低频成分保留</span>
+    </div>
+    <div class="controls" style="margin-top:8px">
+      <label>硬切帧(自动检测, 可手动校正):</label>
+      <div id="cutList"></div>
+      <input type="number" id="newCut" min="1" placeholder="帧号">
+      <button id="addCut">添加切点</button>
+    </div>
+    <div class="warnbox" id="retainWarn"></div>
+  </section>
+
+  <section class="panel" id="viewPanel" style="display:none">
+    <h2>3. 原片 vs 防抖预览 (同一源帧, 可暂停/逐帧/定位)</h2>
+    <div class="controls" style="margin-bottom:10px">
+      <button id="playBtn">播放/暂停</button>
+      <button id="prevBtn">◀ 上一帧</button>
+      <button id="nextBtn">下一帧 ▶</button>
+      <label>定位 <input type="number" id="seekFrame" min="0" step="1"></label>
+      <span class="stat" id="frameLabel">帧 -/- · 0.000s</span>
+      <span style="flex:1"></span>
+      <label class="legend">
+        <span><i class="dot" style="background:#42d67a"></i>逐帧有效边界</span>
+        <span><i class="dot" style="background:#ffd166"></i>镜头统一安全框</span>
+      </label>
+      <span id="previewState" class="badge run" style="display:none"></span>
+    </div>
+    <div class="videos">
+      <div class="vidbox">
+        <div class="cap"><span>原片</span><span id="srcCap"></span></div>
+        <video id="srcVideo" muted preload="auto"></video>
+      </div>
+      <div class="vidbox">
+        <div class="cap"><span>防抖结果(叠加边界)</span><span id="stabCap"></span></div>
+        <video id="stabVideo" muted preload="auto"></video>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid2" id="dataPanel" style="display:none">
+    <div class="panel">
+      <h2>4. 相机运动路径 (原始 vs 平滑)</h2>
+      <div class="controls" style="margin-bottom:6px">
+        <button data-ch="tx" class="chbtn primary">水平位移</button>
+        <button data-ch="ty" class="chbtn">垂直位移</button>
+        <button data-ch="angle" class="chbtn">旋转</button>
+        <span class="hint">蓝=原始相机运动, 绿=平滑路径, 红竖线=硬切</span>
+      </div>
+      <canvas class="chart" id="pathChart"></canvas>
+    </div>
+    <div class="panel">
+      <h2>5. 有效画幅与安全裁切 (每镜头统一)</h2>
+      <table id="cropTable">
+        <thead><tr>
+          <th class="l">镜头</th><th>帧范围</th><th>统一缩放</th>
+          <th>等效保留分辨率</th><th>保留面积比</th><th>状态</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="hint" style="margin-bottom:0">
+        安全框是该镜头所有帧有效区域的交集, 导出帧绝不露黑边;
+        保留面积比低于 <span id="warnTh"></span> 会告警, 此时应调低 σ。
+      </p>
+    </div>
+  </section>
+
+  <section class="panel" id="exportPanel" style="display:none">
+    <h2>6. 导出与复核</h2>
+    <div class="controls">
+      <button id="exportBtn" class="primary">按当前参数导出 MP4(原分辨率/帧率/帧数/原音频)</button>
+      <a id="dlVideo" style="display:none"><button>下载 output.mp4</button></a>
+      <a id="dlSidecar" style="display:none"><button>下载 sidecar 核对数据</button></a>
+      <span id="exportState"></span>
+    </div>
+    <div id="reopenInfo" style="display:none; margin-top:10px"></div>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let state = {
+  taskId: null, info: null, geo: null, version: 0,
+  cuts: [], sigma: 8, channel: "tx", computeTimer: null,
+  previewVersion: 0, reopen: null,
+};
+
+function toast(msg, isErr=false) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.style.borderColor = isErr ? "var(--red)" : "var(--line)";
+  t.style.color = isErr ? "#ffb3b3" : "var(--text)";
+  t.style.display = "block";
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 3500);
+}
+function badge(el, text, cls) {
+  el.textContent = text; el.className = "badge " + cls; el.style.display = "";
+}
+
+// ---------- 上传 / 样例 / 任务轮询 ----------
+$("fileInput").addEventListener("change", () =>
+  $("uploadBtn").disabled = !$("fileInput").files.length);
+$("uploadBtn").onclick = () => {
+  const fd = new FormData();
+  fd.append("file", $("fileInput").files[0]);
+  startJob("/api/upload", fd, "分析中(逐帧运动估计与硬切检测)…");
+};
+$("sampleBtn").onclick = () => startJob("/api/sample", null, "生成样例并分析中…");
+
+async function startJob(url, fd, runningText) {
+  const r = await fetch(url, fd ? {method:"POST", body: fd} : {method:"POST"});
+  if (!r.ok) return toast((await r.json()).message || "请求失败", true);
+  const {task_id} = await r.json();
+  state.taskId = task_id; state.reopen = null;
+  badge($("jobBadge"), runningText, "run");
+  pollJob();
+}
+async function pollJob() {
+  const r = await fetch(`/api/job/${state.taskId}`);
+  const j = await r.json();
+  if (j.status === "running") return setTimeout(pollJob, 700);
+  if (j.status === "error") {
+    $("jobBadge").style.display = "none"; return toast(j.error, true);
+  }
+  state.info = j; state.cuts = j.auto_cuts.slice();
+  $("jobBadge").style.display = "none";
+  showWorkbench();
+}
+
+function showWorkbench() {
+  const i = state.info;
+  $("mediaInfo").textContent =
+    `${i.width}×${i.height} · ${i.fps.toFixed(2)}fps · ${i.frame_count}帧 ` +
+    `· ${(i.frame_count/i.fps).toFixed(2)}s · 音频:${i.has_audio ? "有" : "无"}`;
+  ["workPanel","viewPanel","dataPanel","exportPanel"].forEach(id =>
+    $(id).style.display = "");
+  $("srcVideo").src = `/video/${state.taskId}/source?t=${Date.now()}`;
+  $("seekFrame").max = i.frame_count - 1;
+  $("newCut").max = i.frame_count - 1;
+  renderCuts();
+  scheduleCompute();
+}
+
+function renderCuts() {
+  const box = $("cutList"); box.innerHTML = "";
+  if (!state.cuts.length) box.innerHTML = '<span class="muted">未检测到切点(单镜头)</span>';
+  state.cuts.forEach((c, idx) => {
+    const div = document.createElement("div");
+    div.className = "cut-item";
+    div.innerHTML = `<input type="number" value="${c}" min="1"
+        max="${state.info.frame_count-1}">
+      <button data-i="${idx}" class="delCut">删除</button>`;
+    div.querySelector("input").onchange = e => {
+      let v = parseInt(e.target.value, 10);
+      if (isNaN(v)) return;
+      state.cuts[idx] = v; state.cuts = [...new Set(state.cuts)].sort((a,b)=>a-b);
+      renderCuts(); scheduleCompute();
+    };
+    div.querySelector(".delCut").onclick = () => {
+      state.cuts.splice(idx, 1); renderCuts(); scheduleCompute();
+    };
+    box.appendChild(div);
+  });
+}
+$("addCut").onclick = () => {
+  const v = parseInt($("newCut").value, 10);
+  if (isNaN(v) || v < 1 || v >= state.info.frame_count)
+    return toast("帧号超出范围", true);
+  state.cuts = [...new Set([...state.cuts, v])].sort((a,b)=>a-b);
+  renderCuts(); scheduleCompute();
+};
+
+// ---------- 参数改动 -> 重算 (去抖, 旧结果版本号失效) ----------
+$("sigma").oninput = e => {
+  $("sigmaVal").textContent = e.target.value;
+  state.sigma = parseInt(e.target.value, 10);
+  scheduleCompute();
+};
+function scheduleCompute() {
+  clearTimeout(state.computeTimer);
+  state.computeTimer = setTimeout(doCompute, 220);
+}
+async function doCompute() {
+  const r = await fetch(`/api/compute/${state.taskId}`, {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({sigma: state.sigma, cuts: state.cuts,
+                          version: state.version}),
+  });
+  if (!r.ok) return toast((await r.json()).message || "计算失败", true);
+  const geo = await r.json();
+  if (geo.sigma !== state.sigma ||
+      JSON.stringify(geo.cuts) !== JSON.stringify(state.cuts)) return; // 已过期
+  state.geo = geo; state.version = geo.version;
+  renderGeometry(); pollPreview();
+}
+function pollPreview() {
+  badge($("previewState"), "预览渲染中…", "run");
+  const tick = async () => {
+    const j = await (await fetch(
+      `/api/preview/${state.taskId}`)).json();
+    if (j.status === "running") return setTimeout(tick, 600);
+    if (j.status === "error") return badge($("previewState"), "预览失败", "warn");
+    const t = Date.now();
+    const v = $("stabVideo");
+    const wasPlaying = !v.paused; const ft = currentFrame();
+    v.src = `/video/${state.taskId}/preview?t=${t}`;
+    v.addEventListener("loadedmetadata", () => seekToFrame(ft, wasPlaying),
+                       {once: true});
+    badge($("previewState"), "预览已更新(与当前参数一致)", "ok");
+  };
+  tick();
+}
+
+// ---------- 数据面板 ----------
+function renderGeometry() {
+  const g = state.geo;
+  $("warnTh").textContent = (g.warn_threshold * 100).toFixed(0) + "%";
+  const tb = $("cropTable").querySelector("tbody");
+  tb.innerHTML = "";
+  let anyWarn = false;
+  g.shots.forEach(s => {
+    if (s.below_warn) anyWarn = true;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="l">镜头 ${s.index}</td>
+      <td>${s.start_frame}–${s.end_frame_exclusive-1}</td>
+      <td>${s.uniform_zoom.toFixed(4)}×</td>
+      <td>${s.kept_px[0]}×${s.kept_px[1]}</td>
+      <td>${(s.retained_area_ratio*100).toFixed(1)}%</td>
+      <td>${s.below_warn
+        ? '<span class="badge warn">画幅过小</span>'
+        : '<span class="badge ok">正常</span>'}</td>`;
+    tb.appendChild(tr);
+  });
+  const wb = $("retainWarn");
+  if (anyWarn) {
+    const bad = g.shots.filter(s => s.below_warn)
+      .map(s => `镜头${s.index} 仅保留 ${(s.retained_area_ratio*100).toFixed(1)}%`)
+      .join("; ");
+    wb.textContent = "⚠ " + bad + " — 请调低平滑强度 σ 后再导出。";
+    wb.style.display = "block";
+  } else wb.style.display = "none";
+  drawChart();
+}
+
+document.querySelectorAll(".chbtn").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".chbtn").forEach(x =>
+    x.classList.toggle("primary", x === b));
+  state.channel = b.dataset.ch; drawChart();
+});
+
+function drawChart() {
+  const g = state.geo; if (!g) return;
+  const cv = $("pathChart");
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth * dpr, H = 150 * dpr;
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d");
+  const idx = {tx:0, ty:1, angle:2}[state.channel];
+  const n = g.frames.length;
+  const raw = g.frames.map(f => f.raw[idx]);
+  const sm = g.frames.map(f => f.smooth[idx]);
+  const min = Math.min(...raw, ...sm), max = Math.max(...raw, ...sm);
+  const pad = 34 * dpr;
+  const X = i => pad + i * (W - 2*pad) / (n - 1);
+  const Y = v => H - pad - (v - min) * (H - 2*pad) / Math.max(max-min, 1e-6);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = "#33404f"; ctx.lineWidth = dpr;
+  ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H-pad);
+  ctx.lineTo(W-pad, H-pad); ctx.stroke();
+  ctx.fillStyle = "#8a97a6"; ctx.fontSize = 10*dpr;
+  ctx.font = `${10*dpr}px sans-serif`;
+  ctx.fillText(max.toFixed(1), 2*dpr, pad+4*dpr);
+  ctx.fillText(min.toFixed(1), 2*dpr, H-pad);
+  const unit = state.channel === "angle" ? "°" : "px";
+  ctx.fillText(unit, W-20*dpr, pad+4*dpr);
+  g.cuts.forEach(c => {
+    ctx.strokeStyle = "rgba(255,107,107,.8)";
+    ctx.beginPath(); ctx.moveTo(X(c), pad); ctx.lineTo(X(c), H-pad); ctx.stroke();
+  });
+  const line = (arr, color) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 1.6*dpr; ctx.beginPath();
+    arr.forEach((v,i) => i ? ctx.lineTo(X(i),Y(v)) : ctx.moveTo(X(i),Y(v)));
+    ctx.stroke();
+  };
+  line(raw, "#4f9dff"); line(sm, "#42d67a");
+  // 当前帧游标
+  const cf = currentFrame();
+  if (cf >= 0) {
+    ctx.strokeStyle = "#e6ebf2";
+    ctx.beginPath(); ctx.moveTo(X(cf), pad); ctx.lineTo(X(cf), H-pad); ctx.stroke();
+  }
+}
+
+// ---------- 双视频同步: 同一源帧 ----------
+const srcV = $("srcVideo"), stabV = $("stabVideo");
+let syncLock = false;
+function currentFrame() {
+  const g = state.geo; if (!g) return 0;
+  return Math.min(g.frame_count - 1,
+                  Math.round(srcV.currentTime * g.fps));
+}
+function seekToFrame(f, play=false) {
+  const g = state.geo; if (!g) return;
+  f = Math.max(0, Math.min(g.frame_count - 1, f));
+  const t = f / g.fps;
+  syncLock = true;
+  srcV.currentTime = t; stabV.currentTime = t;
+  $("seekFrame").value = f;
+  $("frameLabel").textContent = `帧 ${f}/${g.frame_count-1} · ${t.toFixed(3)}s`;
+  setTimeout(() => syncLock = false, 60);
+  drawChart();
+}
+srcV.addEventListener("seeked", () => { if (!syncLock) seekToFrame(currentFrame()); });
+stabV.addEventListener("seeked", () => { if (!syncLock) seekToFrame(currentFrame()); });
+srcV.addEventListener("timeupdate", () => {
+  if (!syncLock && Math.abs(srcV.currentTime - stabV.currentTime) >
+      0.5/state.geo.fps) seekToFrame(currentFrame());
+});
+$("playBtn").onclick = () => {
+  if (srcV.paused) { srcV.play(); stabV.play(); }
+  else { srcV.pause(); stabV.pause(); }
+};
+$("prevBtn").onclick = () => { srcV.pause(); stabV.pause();
+  seekToFrame(currentFrame()-1); };
+$("nextBtn").onclick = () => { srcV.pause(); stabV.pause();
+  seekToFrame(currentFrame()+1); };
+$("seekFrame").onchange = e => {
+  srcV.pause(); stabV.pause();
+  seekToFrame(parseInt(e.target.value, 10) || 0);
+};
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowLeft") $("prevBtn").click();
+  if (e.key === "ArrowRight") $("nextBtn").click();
+  if (e.key === " ") { e.preventDefault(); $("playBtn").click(); }
+});
+
+// ---------- 导出 ----------
+$("exportBtn").onclick = async () => {
+  $("exportState").textContent = "导出中(全分辨率渲染+原音频封装)…";
+  await fetch(`/api/export/${state.taskId}`, {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({sigma: state.sigma, cuts: state.cuts}),
+  });
+  pollExport();
+};
+function pollExport() {
+  const tick = async () => {
+    const j = await (await fetch(
+      `/api/export/${state.taskId}/status`)).json();
+    if (j.status === "running") return setTimeout(tick, 800);
+    if (j.status === "error") {
+      $("exportState").textContent = "导出失败: " + j.error; return;
+    }
+    $("exportState").textContent = "导出完成";
+    const t = Date.now();
+    $("dlVideo").href = `/video/${state.taskId}/output?t=${t}`;
+    $("dlSidecar").href = `/api/sidecar/${state.taskId}?t=${t}`;
+    $("dlVideo").style.display = $("dlSidecar").style.display = "";
+    toast("导出完成, 可下载并用「重新打开核对」复核");
+  };
+  tick();
+}
+
+// ---------- 重新打开输出核对 ----------
+$("reopenSidecar").addEventListener("change", () =>
+  $("reopenBtn").disabled = !($("reopenVideo").files[0] &&
+                              $("reopenSidecar").files[0]));
+$("reopenVideo").addEventListener("change", () =>
+  $("reopenBtn").disabled = !($("reopenVideo").files[0] &&
+                              $("reopenSidecar").files[0]));
+$("reopenBtn").onclick = async () => {
+  const fd = new FormData();
+  fd.append("video", $("reopenVideo").files[0]);
+  fd.append("sidecar", $("reopenSidecar").files[0]);
+  const r = await fetch("/api/reopen", {method:"POST", body: fd});
+  if (!r.ok) return toast((await r.json()).message || "重开失败", true);
+  const j = await r.json();
+  state.taskId = j.task_id; state.reopen = j.sidecar;
+  showReopen(j.sidecar);
+};
+function showReopen(sc) {
+  ["workPanel","viewPanel","dataPanel"].forEach(id => $(id).style.display="none");
+  $("exportPanel").style.display = "";
+  $("mediaInfo").textContent =
+    `复核输出: ${sc.output_video} · 源 ${sc.source_video} · ` +
+    `${sc.video.width}×${sc.video.height} · ${sc.video.fps}fps · ` +
+    `${sc.video.frame_count}帧 · σ=${sc.params.sigma_frames} · 切点=[${sc.params.cut_frames}]`;
+  const v = document.createElement("video");
+  v.controls = true; v.src = `/video/${state.taskId}/output?t=${Date.now()}`;
+  v.style.width = "100%";
+  const box = $("reopenInfo");
+  box.style.display = "block";
+  box.innerHTML = `<h2 style="color:var(--accent)">输出复核 (与导出时同一时间的边界/比例)</h2>
+    <div class="vidbox" style="max-width:760px"></div>`;
+  box.querySelector(".vidbox").appendChild(v);
+  const rows = sc.shots.map(s => `<tr>
+      <td class="l">镜头${s.index}</td><td>${s.start_frame}–${s.end_frame_exclusive-1}</td>
+      <td>${s.uniform_zoom.toFixed(4)}×</td>
+      <td>${(s.retained_area_ratio*100).toFixed(1)}%</td>
+      <td>${s.below_warn_threshold ?
+        '<span class="badge warn">过小</span>' :
+        '<span class="badge ok">正常</span>'}</td></tr>`).join("");
+  box.insertAdjacentHTML("beforeend",
+    `<table style="margin-top:10px;max-width:760px"><thead><tr>
+      <th class="l">镜头</th><th>帧范围</th><th>缩放</th><th>保留面积比</th><th>状态</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    <p class="hint">sidecar 含 ${sc.frames.length} 帧的有效边界、安全框与路径数据,
+    可用 verify.py 做独立像素级核验。</p>`);
+}
+</script>
+</body>
+</html>

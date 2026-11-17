@@ -20,6 +20,9 @@ data.json
 *.sqlite3
 tmp/
 
+# 本工具的本地任务工作区 (上传视频、渲染产物、sidecar)
+workspace/
+
 # ---- 依赖与构建产物 ----
 node_modules/
 __pycache__/
