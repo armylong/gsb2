@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDF 等值面提取预览</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header>
+    <h1>SDF 等值面提取预览 <span class="units">（坐标单位：su，采样范围 [-10, 10]³ su）</span></h1>
+    <div id="status" class="status idle">空闲</div>
+  </header>
+  <main>
+    <aside id="controls">
+      <section>
+        <h2>样例（固定标量场）</h2>
+        <select id="sample"></select>
+        <div id="sampleInfo" class="info"></div>
+        <div id="truncBadge" class="badge"></div>
+      </section>
+      <section>
+        <h2>提取参数</h2>
+        <label>等值阈值 iso = <span id="isoVal">0.00</span> su
+          <input id="iso" type="range" min="-4" max="6" step="0.05" value="0" />
+        </label>
+        <label>采样分辨率 N = <span id="resVal">48</span> /轴
+          <input id="res" type="range" min="32" max="64" step="1" value="48" />
+        </label>
+        <div class="note">场值 = 到球面的有符号距离（内负外正）：负 iso 表面内缩，正 iso 表面外扩；超出场值范围时为空结果。</div>
+      </section>
+      <section>
+        <h2>显示方式</h2>
+        <div class="row">
+          <label><input type="radio" name="view" value="solid" checked /> 实体</label>
+          <label><input type="radio" name="view" value="wireframe" /> 线框</label>
+          <label><input type="radio" name="view" value="transparent" /> 透明</label>
+        </div>
+        <div class="note">坐标轴：X=红，Y=绿，Z=蓝。灰框为采样边界。</div>
+      </section>
+      <section>
+        <h2>切片位置</h2>
+        <label>X 切片 = <span id="sliceXVal">0.0</span> su
+          <input id="sliceX" type="range" min="-10" max="10" step="0.1" value="0" />
+        </label>
+        <label>Y 切片 = <span id="sliceYVal">0.0</span> su
+          <input id="sliceY" type="range" min="-10" max="10" step="0.1" value="0" />
+        </label>
+        <label>Z 切片 = <span id="sliceZVal">0.0</span> su
+          <input id="sliceZ" type="range" min="-10" max="10" step="0.1" value="0" />
+        </label>
+      </section>
+      <section>
+        <h2>网格统计</h2>
+        <div id="meshStats" class="info">—</div>
+        <div id="errorScale" class="note"></div>
+      </section>
+      <section>
+        <h2>导出</h2>
+        <button id="exportBtn" disabled>导出当前网格（STL + JSON）</button>
+        <div id="exportHint" class="note">计算中或参数已变化时不可导出，防止旧网格冒充当前参数结果。</div>
+      </section>
+      <section>
+        <h2>请求状态</h2>
+        <div id="requestLog" class="info">—</div>
+        <button id="retryBtn" disabled>重新提取</button>
+      </section>
+    </aside>
+    <div id="viewport"><canvas id="gl"></canvas></div>
+    <aside id="slices">
+      <section>
+        <h2>切片 XY（垂直 Z 轴）</h2>
+        <canvas id="sliceXY" width="280" height="280"></canvas>
+      </section>
+      <section>
+        <h2>切片 XZ（垂直 Y 轴）</h2>
+        <canvas id="sliceXZ" width="280" height="280"></canvas>
+      </section>
+      <section>
+        <h2>切片 YZ（垂直 X 轴）</h2>
+        <canvas id="sliceYZ" width="280" height="280"></canvas>
+      </section>
+      <div class="note">底色=场值（蓝负/红正），绿线=当前阈值截线（场），品红线=提取网格与切片的交线。两者应在同一坐标上重合，偏差尺度见"网格统计"。</div>
+    </aside>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
