@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>三维透视贴花投射演示</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #14171c; color: #d7dce3;
+      font: 13px/1.5 "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    #app { display: flex; height: 100%; }
+    #viewport { flex: 1; position: relative; min-width: 0; }
+    #viewport canvas { display: block; }
+    #hint { position: absolute; left: 10px; bottom: 8px; color: #8b94a1; font-size: 12px;
+      pointer-events: none; text-shadow: 0 1px 2px #000; }
+    #panel { width: 360px; overflow-y: auto; background: #1b1f26; border-left: 1px solid #2a3038;
+      padding: 10px 12px 40px; }
+    h1 { font-size: 15px; margin: 4px 0 10px; color: #eef2f7; }
+    h2 { font-size: 13px; margin: 16px 0 6px; color: #9fb4d0; border-bottom: 1px solid #2a3038;
+      padding-bottom: 4px; }
+    .row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+    .row label { flex: 0 0 92px; color: #aab3bf; }
+    .row input[type="number"] { width: 62px; }
+    .row input[type="text"] { flex: 1; min-width: 0; }
+    input, select, textarea, button { background: #252b34; color: #d7dce3;
+      border: 1px solid #39414d; border-radius: 4px; padding: 3px 6px; font: inherit; }
+    input:focus, select:focus, textarea:focus { outline: 1px solid #4f8fdd; }
+    input.invalid { outline: 1px solid #e05555; }
+    button { cursor: pointer; padding: 4px 10px; }
+    button:hover { background: #2f3742; }
+    button.primary { background: #2f5f9e; border-color: #3f77bd; color: #fff; }
+    button.primary:hover { background: #3a70b8; }
+    button.warn { background: #7a4a2a; border-color: #9a6038; color: #fff; }
+    .btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+    .msg { color: #e08080; font-size: 12px; min-height: 16px; white-space: pre-line; }
+    .ok { color: #7fc97f; }
+    .info { background: #151920; border: 1px solid #2a3038; border-radius: 4px; padding: 6px 8px;
+      font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: pre-wrap;
+      word-break: break-all; color: #b8c4d4; max-height: 180px; overflow-y: auto; }
+    textarea { width: 100%; height: 90px; font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px; resize: vertical; }
+    .vec { display: flex; gap: 4px; flex: 1; }
+    .vec input { width: 0; flex: 1; }
+    .check-pass { color: #7fc97f; }
+    .check-fail { color: #e08080; }
+    #verify-results div { margin: 2px 0; font-size: 12px; }
+    .tol { color: #77808d; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="viewport">
+      <div id="hint">左键拖动变换手柄移动目标 · 空白处拖动旋转视角 · 滚轮缩放</div>
+    </div>
+    <div id="panel"></div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
