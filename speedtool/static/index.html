@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>单视频分段变速工具</title>
+<style>
+  :root { --bd:#d0d4da; --bg:#f6f7f9; --accent:#2563eb; --err:#b91c1c; --ok:#15803d; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+         margin: 0; background: var(--bg); color: #1f2430; }
+  header { background:#1f2430; color:#fff; padding:12px 20px; }
+  header h1 { font-size:17px; margin:0; }
+  header p { font-size:12px; margin:4px 0 0; color:#aab2c0; }
+  main { max-width: 1180px; margin: 0 auto; padding: 16px 20px 60px; }
+  section { background:#fff; border:1px solid var(--bd); border-radius:8px;
+            padding:14px 16px; margin-bottom:14px; }
+  section h2 { font-size:14px; margin:0 0 10px; color:#374151; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:6px;
+           padding:7px 14px; font-size:13px; cursor:pointer; }
+  button.ghost { background:#fff; color:#374151; border:1px solid var(--bd); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  input[type=number], input[type=text] { width:90px; padding:5px 6px; font-size:13px;
+           border:1px solid var(--bd); border-radius:5px; }
+  table { border-collapse:collapse; font-size:13px; margin-top:8px; }
+  th, td { border:1px solid var(--bd); padding:5px 10px; text-align:right; }
+  th { background:#eef1f5; font-weight:600; }
+  td.c, th.c { text-align:center; }
+  .err { color:var(--err); font-size:13px; margin-top:8px; white-space:pre-line; }
+  .ok  { color:var(--ok); font-size:13px; margin-top:8px; }
+  .row { display:flex; gap:24px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:340px; }
+  video { width:100%; background:#000; border-radius:6px; }
+  .mapline { font-size:13px; margin-top:6px; color:#111827; min-height:20px;
+             font-variant-numeric: tabular-nums; }
+  .hint { font-size:12px; color:#6b7280; margin-top:6px; }
+  .segrow input { width:80px; }
+  .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .mono { font-family: ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<header>
+  <h1>单视频分段变速工具</h1>
+  <p>导入 ≤20s 带音频 mp4 → 最多 5 段连续变速（0.5x–2.0x，音频保调）→ 双向时间定位 → 导出 30fps mp4</p>
+</header>
+<main>
+
+<section>
+  <h2>1. 视频来源</h2>
+  <div class="toolbar">
+    <button id="btnSample">生成样例视频（12s，计时画面+440Hz测试音）</button>
+    <label class="toolbar" style="gap:6px">
+      <button class="ghost" onclick="document.getElementById('fileInput').click()">上传 mp4</button>
+      <input type="file" id="fileInput" accept="video/mp4" style="display:none">
+    </label>
+    <span id="videoInfo" class="hint"></span>
+  </div>
+  <div class="err" id="loadErr"></div>
+  <div class="row" style="margin-top:10px">
+    <div>
+      <div class="hint">源视频</div>
+      <video id="srcVideo" controls preload="auto"></video>
+      <div class="mapline mono" id="srcMapLine"></div>
+    </div>
+    <div>
+      <div class="hint">输出预览（生成后显示；拖动或播放时与源画面联动定位）</div>
+      <video id="outVideo" controls preload="auto"></video>
+      <div class="mapline mono" id="outMapLine"></div>
+    </div>
+  </div>
+  <div class="hint">联动定位：<label><input type="checkbox" id="syncLink" checked> 拖动任一播放器时，另一侧自动定位到对应时刻</label></div>
+</section>
+
+<section>
+  <h2>2. 分段设置（必须连续完整覆盖原片，最多 5 段）</h2>
+  <div class="toolbar">
+    <button class="ghost" id="btnAddSeg">添加分段</button>
+    <button class="ghost" id="btnPreset">均分三段：0.5x / 1.0x / 2.0x</button>
+  </div>
+  <table id="segTable">
+    <thead><tr>
+      <th class="c">段</th><th>源起点(s)</th><th>源终点(s)</th><th>速度(x)</th><th class="c">操作</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="err" id="segErr"></div>
+  <table id="planTable" style="display:none">
+    <thead><tr>
+      <th class="c">段</th><th>源起(s)</th><th>源止(s)</th><th>速度</th>
+      <th>输出起(s)</th><th>输出止(s)</th><th>输出时长(s)</th>
+    </tr></thead>
+    <tbody></tbody>
+    <tfoot><tr><td colspan="5"></td><th>预计总时长</th><th id="planTotal"></th></tr></tfoot>
+  </table>
+</section>
+
+<section>
+  <h2>3. 双向时间查询</h2>
+  <div class="toolbar">
+    <span>源时间 <input type="number" id="qSrc" step="0.001" min="0"> s</span>
+    <button class="ghost" id="btnSrc2Out">→ 输出时间</button>
+    <span class="mono" id="ansSrc2Out"></span>
+  </div>
+  <div class="toolbar" style="margin-top:8px">
+    <span>输出时间 <input type="number" id="qOut" step="0.001" min="0"> s</span>
+    <button class="ghost" id="btnOut2Src">→ 源时间</button>
+    <span class="mono" id="ansOut2Src"></span>
+  </div>
+  <div class="hint">边界约定：每段左闭右开，最后一段含终点；边界时刻两侧映射结果相同，不会重复或丢失。</div>
+</section>
+
+<section>
+  <h2>4. 预览与导出（输出固定 30fps，预览与导出为同一次渲染）</h2>
+  <div class="toolbar">
+    <button id="btnRender" disabled>生成预览</button>
+    <a id="exportLink" style="display:none"><button class="ghost">导出 MP4</button></a>
+    <span id="renderStatus" class="hint"></span>
+  </div>
+  <div class="err" id="renderErr"></div>
+  <div class="ok" id="renderOk"></div>
+</section>
+
+</main>
+
+<script>
+let videoId = null, videoDuration = 0, plan = null, renderData = null;
+let syncing = false;
+
+const $ = id => document.getElementById(id);
+const fmt = t => (t == null ? "" : Number(t).toFixed(3));
+
+async function api(path, body) {
+  const opt = body instanceof FormData
+    ? { method: "POST", body }
+    : { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || ("HTTP " + r.status));
+  return data;
+}
+
+/* ---------- 1. 视频来源 ---------- */
+$("btnSample").onclick = async () => {
+  $("loadErr").textContent = ""; $("btnSample").disabled = true;
+  try {
+    const d = await api("/api/sample", {});
+    loadVideo(d);
+  } catch (e) { $("loadErr").textContent = e.message; }
+  $("btnSample").disabled = false;
+};
+
+$("fileInput").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  $("loadErr").textContent = "";
+  const fd = new FormData(); fd.append("file", f);
+  try {
+    const d = await api("/api/upload", fd);
+    loadVideo(d);
+  } catch (e) { $("loadErr").textContent = e.message; }
+  ev.target.value = "";
+};
+
+function loadVideo(d) {
+  videoId = d.video_id; videoDuration = d.info.duration;
+  $("srcVideo").src = d.url;
+  $("videoInfo").textContent =
+    `时长 ${fmt(d.info.duration)}s | ${d.info.width}x${d.info.height} | 源帧率 ${d.info.fps.toFixed(2)}fps | 含音频`;
+  $("outVideo").removeAttribute("src"); $("outVideo").load();
+  $("exportLink").style.display = "none"; renderData = null;
+  setPreset();
+  refreshPlan();
+}
+
+/* ---------- 2. 分段编辑 ---------- */
+function segRows() {
+  return [...$("segTable").querySelector("tbody").children].map(tr => ({
+    start: parseFloat(tr.querySelector(".s-start").value),
+    end: parseFloat(tr.querySelector(".s-end").value),
+    speed: parseFloat(tr.querySelector(".s-speed").value),
+    _tr: tr,
+  }));
+}
+
+function addSegRow(start, end, speed) {
+  const tbody = $("segTable").querySelector("tbody");
+  const tr = document.createElement("tr");
+  tr.className = "segrow";
+  tr.innerHTML = `
+    <td class="c idx"></td>
+    <td><input type="number" class="s-start" step="0.001" min="0" value="${start}"></td>
+    <td><input type="number" class="s-end" step="0.001" min="0" value="${end}"></td>
+    <td><input type="number" class="s-speed" step="0.1" min="0.5" max="2" value="${speed}"></td>
+    <td class="c"><button class="ghost del">删除</button></td>`;
+  tr.querySelector(".del").onclick = () => { tr.remove(); refreshPlan(); };
+  tr.querySelectorAll("input").forEach(i => i.oninput = () => refreshPlan());
+  tbody.appendChild(tr);
+}
+
+$("btnAddSeg").onclick = () => {
+  const rows = segRows();
+  if (rows.length >= 5) { $("segErr").textContent = "最多 5 个分段"; return; }
+  const prevEnd = rows.length ? rows[rows.length - 1].end : 0;
+  addSegRow(prevEnd.toFixed(3), videoDuration.toFixed(3), 1.0);
+  refreshPlan();
+};
+
+function setPreset() {
+  $("segTable").querySelector("tbody").innerHTML = "";
+  const third = videoDuration / 3;
+  addSegRow("0.000", third.toFixed(3), 0.5);
+  addSegRow(third.toFixed(3), (2 * third).toFixed(3), 1.0);
+  addSegRow((2 * third).toFixed(3), videoDuration.toFixed(3), 2.0);
+}
+$("btnPreset").onclick = () => { setPreset(); refreshPlan(); };
+
+async function refreshPlan() {
+  [...$("segTable").querySelector("tbody").children].forEach((tr, i) =>
+    tr.querySelector(".idx").textContent = i + 1);
+  plan = null; $("btnRender").disabled = true;
+  $("planTable").style.display = "none"; $("segErr").textContent = "";
+  if (!videoId) return;
+  const segs = segRows().map(({start, end, speed}) => ({start, end, speed}));
+  try {
+    const d = await api("/api/plan", {video_id: videoId, segments: segs});
+    plan = d;
+    const tbody = $("planTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    d.rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="c">${r.index + 1}</td><td>${fmt(r.src_start)}</td>
+        <td>${fmt(r.src_end)}</td><td>${r.speed}x</td>
+        <td>${fmt(r.out_start)}</td><td>${fmt(r.out_end)}</td><td>${fmt(r.out_len)}</td>`;
+      tbody.appendChild(tr);
+    });
+    $("planTotal").textContent = fmt(d.total);
+    $("planTable").style.display = "";
+    $("btnRender").disabled = false;
+  } catch (e) {
+    $("segErr").textContent = e.message;
+  }
+}
+
+/* ---------- 3. 双向查询 ---------- */
+async function query(side, value) {
+  const segs = segRows().map(({start, end, speed}) => ({start, end, speed}));
+  const body = {video_id: videoId, segments: segs};
+  body[side === "src" ? "src_time" : "out_time"] = value;
+  return api("/api/map", body);
+}
+
+$("btnSrc2Out").onclick = async () => {
+  $("ansSrc2Out").textContent = "";
+  try {
+    const d = await query("src", parseFloat($("qSrc").value));
+    $("ansSrc2Out").textContent =
+      `源 ${fmt(d.src_time)}s → 输出 ${fmt(d.out_time)}s（第 ${d.segment + 1} 段）`;
+    seekBoth(d.src_time, d.out_time);
+  } catch (e) { $("ansSrc2Out").textContent = e.message; }
+};
+
+$("btnOut2Src").onclick = async () => {
+  $("ansOut2Src").textContent = "";
+  try {
+    const d = await query("out", parseFloat($("qOut").value));
+    $("ansOut2Src").textContent =
+      `输出 ${fmt(d.out_time)}s → 源 ${fmt(d.src_time)}s（第 ${d.segment + 1} 段）`;
+    seekBoth(d.src_time, d.out_time);
+  } catch (e) { $("ansOut2Src").textContent = e.message; }
+};
+
+function seekBoth(srcT, outT) {
+  syncing = true;
+  const sv = $("srcVideo"), ov = $("outVideo");
+  if (sv.src) { sv.pause(); sv.currentTime = srcT; }
+  if (ov.src && renderData) { ov.pause(); ov.currentTime = outT; }
+  setTimeout(() => syncing = false, 300);
+}
+
+/* ---------- 4. 渲染 / 导出 / 联动定位 ---------- */
+$("btnRender").onclick = async () => {
+  $("renderErr").textContent = ""; $("renderOk").textContent = "";
+  $("btnRender").disabled = true;
+  $("renderStatus").textContent = "渲染中…";
+  const segs = segRows().map(({start, end, speed}) => ({start, end, speed}));
+  try {
+    const d = await api("/api/render", {video_id: videoId, segments: segs});
+    renderData = d;
+    $("outVideo").src = d.url;
+    $("exportLink").href = d.export_url;
+    $("exportLink").style.display = "";
+    const oi = d.output_info;
+    $("renderOk").textContent =
+      `预览已生成：实际时长 ${fmt(oi.duration)}s（预计 ${fmt(d.total)}s），` +
+      `${oi.fps.toFixed(0)}fps，含音频。`;
+    $("renderStatus").textContent = "";
+  } catch (e) {
+    $("renderErr").textContent = e.message;
+    $("renderStatus").textContent = "";
+  }
+  $("btnRender").disabled = false;
+};
+
+// 客户端镜像映射（与服务端 segments.py 同一套左闭右开规则）
+function mapTime(t, side) {
+  if (!renderData) return null;
+  const rows = renderData.rows;
+  const last = rows[rows.length - 1];
+  if (side === "out") {  // 输出时间 -> 源时间
+    t = Math.min(Math.max(t, 0), last.out_end);
+    for (const r of rows)
+      if (t < r.out_end || r === last) return r.src_start + (t - r.out_start) * r.speed;
+  } else {               // 源时间 -> 输出时间
+    t = Math.min(Math.max(t, 0), last.src_end);
+    for (const r of rows)
+      if (t < r.src_end || r === last) return r.out_start + (t - r.src_start) / r.speed;
+  }
+  return null;
+}
+
+$("outVideo").addEventListener("seeked", () => {
+  if (syncing || !renderData || !$("syncLink").checked) return;
+  const t = $("outVideo").currentTime;
+  const src = mapTime(t, "out");
+  if (src == null) return;
+  $("outMapLine").textContent = `输出 ${fmt(t)}s ↔ 源 ${fmt(src)}s`;
+  syncing = true;
+  const sv = $("srcVideo");
+  if (sv.src) { sv.pause(); sv.currentTime = src; }
+  setTimeout(() => syncing = false, 300);
+});
+
+$("srcVideo").addEventListener("seeked", () => {
+  if (syncing || !renderData || !$("syncLink").checked) return;
+  const t = $("srcVideo").currentTime;
+  const out = mapTime(t, "src");
+  if (out == null) return;
+  $("srcMapLine").textContent = `源 ${fmt(t)}s ↔ 输出 ${fmt(out)}s`;
+  syncing = true;
+  const ov = $("outVideo");
+  if (ov.src) { ov.pause(); ov.currentTime = out; }
+  setTimeout(() => syncing = false, 300);
+});
+</script>
+</body>
+</html>
