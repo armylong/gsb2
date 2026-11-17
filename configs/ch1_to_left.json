@@ -1,0 +1,11 @@
+{
+  "description": "声道1 -> 左 (验证左右分配:左=声道1,右无声)",
+  "channels": [
+    {"invert": false, "delay": 0, "L": {"on": true, "gain": 1.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}}
+  ]
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>多声道 → 立体声 路由验证工具</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<h1>多声道 → 立体声 路由 / 极性 / 延时 验证工具</h1>
+
+<section>
+  <h2>1. 加载样例(≤6 声道 · 48kHz · 16bit · ≤10s)</h2>
+  <select id="testFiles"></select>
+  <button id="btnLoadTest">载入测试音</button>
+  &nbsp;或上传 WAV:<input type="file" id="upload" accept=".wav">
+  <div id="fileInfo" class="info"></div>
+  <div id="waves"></div>
+</section>
+
+<section>
+  <h2>2. 路由矩阵 / 极性 / 延时</h2>
+  <div>预设:<select id="presets"></select> <button id="btnPreset">载入预设</button>
+    <span id="presetDesc" class="dim"></span></div>
+  <table id="matrix">
+    <thead><tr>
+      <th>输入声道</th><th>极性反转</th><th>延时(采样 0–960)</th>
+      <th>→左 开关</th><th>→左 增益</th><th>→右 开关</th><th>→右 增益</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+  <label><input type="checkbox" id="protect" checked> 峰值保护(超满幅时整体统一衰减,不削波)</label>
+  <button id="btnApply">应用并试听</button>
+</section>
+
+<section>
+  <h2>3. 输出监测</h2>
+  <div id="stats" class="info">尚未处理</div>
+</section>
+
+<section>
+  <h2>4. 试听</h2>
+  <div class="aud"><b>处理结果</b><audio id="audProc" controls></audio></div>
+  <div class="aud"><b>原始输入参考</b>(声道1→L、2→R、3→L…等增益,自动保护)<audio id="audSrc" controls></audio></div>
+  <div class="aud"><b>单声道合听</b>(处理结果 (L+R)/2)<audio id="audMono" controls></audio></div>
+</section>
+
+<section>
+  <h2>5. 导出</h2>
+  <label id="allowClipWrap" hidden class="warn">
+    <input type="checkbox" id="allowClip"> 我已了解输出将削波失真,仍要导出
+  </label>
+  <button id="btnExport">导出 48kHz / 16bit 立体声 WAV</button>
+  <div id="exportResult" class="info"></div>
+</section>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

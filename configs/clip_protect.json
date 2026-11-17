@@ -1,0 +1,11 @@
+{
+  "description": "声道1+声道2 同相叠加到左右 (峰值约 1.6,配合峰值保护验证统一衰减)",
+  "channels": [
+    {"invert": false, "delay": 0, "L": {"on": true, "gain": 1.0}, "R": {"on": true, "gain": 1.0}},
+    {"invert": false, "delay": 0, "L": {"on": true, "gain": 1.0}, "R": {"on": true, "gain": 1.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}},
+    {"invert": false, "delay": 0, "L": {"on": false, "gain": 0.0}, "R": {"on": false, "gain": 0.0}}
+  ]
+}
