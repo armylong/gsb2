@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本地视频拼接工具</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>本地视频拼接工具</h1>
+  <p class="subtitle">单条顺序时间线 · 最多 6 段 · 全部处理在本机完成（ffmpeg）</p>
+</header>
+
+<main>
+  <!-- 1. 片段管理 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>1. 片段列表（按播放顺序）</h2>
+      <span id="clip-count" class="badge">0 / 6</span>
+    </div>
+    <div class="toolbar">
+      <label class="btn primary">
+        添加视频
+        <input type="file" id="file-input" accept="video/*" multiple hidden>
+      </label>
+      <button class="btn" id="btn-samples">生成并载入内置样例</button>
+      <input type="text" id="path-input" placeholder="或输入本机绝对路径后回车" class="path-input">
+    </div>
+    <ul id="clip-list" class="clip-list"></ul>
+    <p class="hint">出错片段会红色标注，可单独「替换」，其他片段的已处理结果会被保留。</p>
+  </section>
+
+  <!-- 2. 输出设置与预览 -->
+  <section class="card">
+    <div class="card-head"><h2>2. 输出设置与画面预览</h2></div>
+    <div class="settings-grid">
+      <label>输出宽度
+        <input type="number" id="set-width" min="0" step="2" placeholder="0=沿用首段">
+      </label>
+      <label>输出高度
+        <input type="number" id="set-height" min="0" step="2" placeholder="0=沿用首段">
+      </label>
+      <label>输出帧率
+        <input type="number" id="set-fps" min="0" step="1" placeholder="0=沿用首段">
+      </label>
+      <label>画面适配
+        <select id="set-fit">
+          <option value="contain">contain：等比缩放 + 黑边填充（不裁切）</option>
+          <option value="cover">cover：等比放大 + 居中裁切（无黑边）</option>
+        </select>
+      </label>
+    </div>
+    <p class="hint">两种方式都只做等比变换，预览中的画面绝不会被拉伸；无声片段统一补等长静音轨。</p>
+    <div class="preview-wrap">
+      <canvas id="preview" width="720" height="420"></canvas>
+      <p id="preview-caption" class="hint"></p>
+    </div>
+    <div id="junction-box" class="junction-box"></div>
+  </section>
+
+  <!-- 3. 导出前检查与导出 -->
+  <section class="card">
+    <div class="card-head"><h2>3. 导出前检查与导出</h2></div>
+    <div id="export-summary" class="summary">尚未添加有效片段。</div>
+    <div class="toolbar">
+      <input type="text" id="output-name" value="output.mp4" class="path-input">
+      <button class="btn primary" id="btn-export">导出</button>
+      <button class="btn" id="btn-verify" disabled>导出后回读校验</button>
+    </div>
+    <div id="progress-box" class="progress-box hidden">
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <span id="progress-text"></span>
+    </div>
+    <div id="export-msg"></div>
+  </section>
+
+  <!-- 4. 校验结果 -->
+  <section class="card hidden" id="verify-card">
+    <div class="card-head">
+      <h2>4. 导出文件回读校验</h2>
+      <span id="verify-verdict" class="badge"></span>
+    </div>
+    <h3>检查项</h3>
+    <ul id="verify-checks" class="check-list"></ul>
+    <div class="verify-columns">
+      <div>
+        <h3>片段顺序采样（时间窗中心色）</h3>
+        <ul id="verify-order" class="check-list"></ul>
+      </div>
+      <div>
+        <h3>交界帧检查</h3>
+        <ul id="verify-junctions" class="check-list"></ul>
+      </div>
+      <div>
+        <h3>分段音频电平</h3>
+        <ul id="verify-audio" class="check-list"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  本机服务，仅监听 127.0.0.1；文件不会上传到任何外部服务。
+</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

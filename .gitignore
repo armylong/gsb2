@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# 视频拼接工具运行期产物
+.videojoiner_work/
+demo_samples/
+*.mp4
