@@ -1,0 +1,25 @@
+{
+  "name": "chunked-terrain-lod-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "分块地形 LOD 演示:WebWorker 程序化高度图、层级接缝、异步任务过期控制",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.app.json && vite build",
+    "preview": "vite preview",
+    "test": "tsc --noEmit -p tsconfig.test.json && node --import tsx --test test/*.test.ts",
+    "smoke:browser": "zsh scripts/run-browser-smoke.sh",
+    "verify": "npm run build && npm run test && npm run smoke:browser"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.170.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

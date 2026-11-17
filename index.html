@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>分块地形 LOD 演示</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+
+      <section id="panel">
+        <h1>分块地形 LOD 演示</h1>
+        <p class="sub">WebWorker 程序化高度图 · 三层 LOD · 跨层级无缝 · 异步过期控制</p>
+
+        <div class="group">
+          <h2>演示入口</h2>
+          <div class="btn-row">
+            <button id="demo-seed" title="同一固定种子重建两次,结果完全一致">① 固定种子可复现</button>
+            <button id="demo-seam" title="相机停在阈值处,相邻块处于不同层级,检查公共边缘">② 跨层级接缝</button>
+            <button id="demo-stale" title="高延迟下快速往返移动,观察旧结果过期丢弃与最终收敛">③ 慢任务往返</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>地形</h2>
+          <label>种子
+            <input id="seed" type="number" value="1337" step="1" />
+          </label>
+          <button id="rebuild">重建地形</button>
+        </div>
+
+        <div class="group">
+          <h2>相机</h2>
+          <div class="btn-row">
+            <button id="cam-orbit" class="cam-btn active">轨道观察</button>
+            <button id="cam-ground" class="cam-btn">地面移动</button>
+          </div>
+          <label class="inline"><input id="follow" type="checkbox" checked /> 贴地飞行(高度跟随高度场)</label>
+          <p class="hint">轨道:拖拽旋转 · 滚轮缩放<br>地面:WASD 移动 · Q/E 升降 · Shift 加速 · 拖拽转向</p>
+        </div>
+
+        <div class="group">
+          <h2>LOD 与异步</h2>
+          <label>近距阈值 <input id="near" type="number" value="70" step="5" style="width:70px" /></label>
+          <label>远距阈值 <input id="far" type="number" value="140" step="5" style="width:70px" /></label>
+          <label>迟滞带宽 <input id="hyst" type="number" value="12" step="2" style="width:70px" /></label>
+          <label>Worker 延迟 <span id="delay-val">0</span> ms
+            <input id="delay" type="range" min="0" max="1500" step="20" value="0" />
+          </label>
+        </div>
+
+        <div class="group">
+          <h2>显示</h2>
+          <div class="btn-row">
+            <button id="mode-fill" class="mode-btn active">填充</button>
+            <button id="mode-both" class="mode-btn">填充+线框</button>
+            <button id="mode-wire" class="mode-btn">仅线框</button>
+          </div>
+          <label class="inline"><input id="tint" type="checkbox" checked /> 按层级着色(LOD 色调)</label>
+        </div>
+
+        <div class="group">
+          <h2>高度查询 / 标记</h2>
+          <label>X <input id="qx" type="number" value="0" style="width:70px" /></label>
+          <label>Z <input id="qz" type="number" value="0" style="width:70px" /></label>
+          <div class="btn-row">
+            <button id="query">查询并标记</button>
+            <button id="clear-markers">清除标记</button>
+          </div>
+          <p class="hint">也可以直接点选地形表面放置标记</p>
+        </div>
+
+        <div class="group">
+          <h2>实时状态</h2>
+          <div id="hud"></div>
+        </div>
+
+        <p id="message" class="message"></p>
+      </section>
+
+      <div id="marker-label" class="marker-label" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
