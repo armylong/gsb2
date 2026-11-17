@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>旁白驱动音乐自动闪避</title>
+<style>
+  body{font-family:-apple-system,"PingFang SC",sans-serif;margin:16px;background:#1c1f24;color:#dde}
+  h1{font-size:18px;margin:0 0 12px}
+  .row{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
+  input[type=text]{width:340px;background:#2a2e35;color:#dde;border:1px solid #444;border-radius:4px;padding:4px 6px}
+  button{background:#3a6ea5;color:#fff;border:0;border-radius:4px;padding:5px 12px;cursor:pointer}
+  button:hover{background:#4a7eb5}
+  button.warn{background:#a53a3a}
+  label{font-size:13px}
+  canvas{display:block;background:#14161a;border:1px solid #333;border-radius:4px;margin:4px 0}
+  .panel{border:1px solid #333;border-radius:6px;padding:10px;margin:8px 0}
+  .slider{display:flex;align-items:center;gap:6px;font-size:13px}
+  .slider input{width:120px}
+  .badge{padding:2px 8px;border-radius:10px;font-size:12px}
+  .ok{background:#2e7d32}.hit{background:#c62828}
+  #segList{font-size:12px;max-height:110px;overflow:auto}
+  #segList div{cursor:pointer;padding:1px 4px;border-radius:3px}
+  #segList div.sel{background:#3a6ea5}
+  .hint{font-size:12px;color:#889}
+</style>
+</head>
+<body>
+<h1>旁白驱动音乐自动闪避</h1>
+
+<div class="panel">
+  <div class="row">
+    <label>旁白 wav</label><input type=text id=narrPath>
+    <label>音乐 wav</label><input type=text id=musicPath>
+    <button onclick="loadFiles()">导入</button>
+    <button onclick="useSamples()">使用样例</button>
+    <span id=loadMsg class=hint></span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="row">
+    <div class=slider><label>压低 <span id=duckV>-12</span> dB</label>
+      <input type=range id=duck min=-30 max=0 step=1 value=-12></div>
+    <div class=slider><label>提前压低 <span id=lookV>300</span> ms</label>
+      <input type=range id=look min=0 max=1000 step=20 value=300></div>
+    <div class=slider><label>恢复 <span id=relV>600</span> ms</label>
+      <input type=range id=rel min=50 max=2000 step=50 value=600></div>
+    <div class=slider><label>停顿合并 <span id=gapV>400</span> ms</label>
+      <input type=range id=gap min=0 max=1500 step=50 value=400></div>
+    <button onclick="redetect()">重新检测语音</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class=row>
+    <button onclick="togglePlay()">播放/暂停</button>
+    <button id=abBtn onclick="toggleAB()">试听: 处理后</button>
+    <button onclick="auditionSeg()">试听选中区间</button>
+    <span id=timeDisp class=hint>0.00 / 0.00</span>
+    <span id=protBadge class="badge ok">峰值保护: 未触发</span>
+    <span id=peakDisp class=hint></span>
+  </div>
+  <div class=hint>旁白波形（绿色=语音段，可拖动边缘调整、空白处拖拽新增、点选后删除）</div>
+  <canvas id=waveNarr width=1100 height=110></canvas>
+  <div class=row>
+    <button class=warn onclick="delSeg()">删除选中段</button>
+    <label class=hint>起点</label><input type=text id=segS size=7>
+    <label class=hint>终点</label><input type=text id=segE size=7>
+    <button onclick="applySegEdit()">修改选中段</button>
+    <div id=segList style="flex:1"></div>
+  </div>
+  <div class=hint>音乐波形 + 实际作用的音量曲线（黄色），点击定位试听</div>
+  <canvas id=waveMusic width=1100 height=110></canvas>
+</div>
+
+<div class="panel">
+  <div class=row>
+    <label>导出路径</label><input type=text id=exportPath value="export_mix.wav">
+    <button onclick="doExport()">导出立体声 wav</button>
+    <span id=exportMsg class=hint></span>
+  </div>
+</div>
+
+<audio id=player></audio>
+
+<script>
+let S = null;            // 服务器状态
+let narrPeaks = [], musicPeaks = [];
+let selSeg = -1;
+let mode = 'mix';        // 'mix' | 'original'
+let audioVer = 0;
+let drag = null;         // {canvas, kind:'create'|'edgeL'|'edgeR', idx, x0}
+const player = document.getElementById('player');
+
+const $ = id => document.getElementById(id);
+const fmt = t => t.toFixed(2);
+
+async function api(url, body) {
+  const r = await fetch(url, body !== undefined
+    ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}
+    : {});
+  if (!r.ok) { const j = await r.json().catch(()=>({})); throw new Error(j.error || r.status); }
+  return r.json();
+}
+
+function setParamLabels(){
+  duckV.textContent = duck.value; lookV.textContent = look.value;
+  relV.textContent = rel.value; gapV.textContent = gap.value;
+}
+for (const id of ['duck','look','rel','gap']) {
+  $(id).oninput = setParamLabels;
+  $(id).onchange = pushParams;
+}
+async function pushParams(){
+  if (!S || !S.loaded) return;
+  await refresh(await api('/api/params', {
+    duck_db:+duck.value, lookahead_ms:+look.value,
+    release_ms:+rel.value, merge_gap_ms:+gap.value}));
+}
+
+async function loadFiles(){
+  try {
+    const st = await api('/api/load', {narration:narrPath.value, music:musicPath.value});
+    loadMsg.textContent = '';
+    await refresh(st, true);
+  } catch(e){ loadMsg.textContent = '导入失败: ' + e.message; }
+}
+async function useSamples(){
+  const r = await fetch('/api/samplepaths'); const j = await r.json();
+  narrPath.value = j.narration; musicPath.value = j.music;
+  exportPath.value = j.export;
+  await loadFiles();
+}
+async function redetect(){ if(S?.loaded) await refresh(await api('/api/detect', {})); }
+
+function setAudioSource(){
+  const t = player.currentTime, playing = !player.paused;
+  player.src = '/api/audio?which=' + mode + '&v=' + (++audioVer);
+  player.onloadedmetadata = () => {
+    player.currentTime = Math.min(t, S ? S.duration : t);
+    if (playing) player.play();
+  };
+}
+
+async function refresh(st, reloadWave){
+  S = st; selSeg = -1;
+  if (reloadWave) {
+    narrPeaks = (await (await fetch('/api/waveform?track=narration')).json()).peaks;
+    musicPeaks = (await (await fetch('/api/waveform?track=music')).json()).peaks;
+  }
+  setAudioSource();  // 保持播放位置
+  protBadge.textContent = S.protection_triggered
+    ? `峰值保护: 已触发 (${S.protection_gain_db.toFixed(1)} dB)` : '峰值保护: 未触发';
+  protBadge.className = 'badge ' + (S.protection_triggered ? 'hit' : 'ok');
+  peakDisp.textContent = `最终峰值 ${S.final_peak.toFixed(3)} (${S.final_peak_db.toFixed(1)} dBFS)`;
+  renderSegList(); drawAll();
+}
+
+function toggleAB(){
+  mode = mode === 'mix' ? 'original' : 'mix';
+  abBtn.textContent = '试听: ' + (mode === 'mix' ? '处理后' : '原始');
+  setAudioSource();
+}
+function togglePlay(){ if (!S?.loaded) return;
+  if (player.paused) player.play(); else player.pause(); }
+
+let auditionUntil = null;
+function auditionSeg(){
+  if (selSeg < 0 || !S) return;
+  const [s,e] = S.segments[selSeg];
+  player.currentTime = Math.max(0, s - 0.3);
+  auditionUntil = Math.min(S.duration, e + 0.3);
+  player.play();
+}
+player.ontimeupdate = () => {
+  if (S) timeDisp.textContent = fmt(player.currentTime) + ' / ' + fmt(S.duration);
+  if (auditionUntil && player.currentTime >= auditionUntil) { player.pause(); auditionUntil = null; }
+  drawAll();
+};
+
+// ---------- 绘制 ----------
+function drawWave(cv, peaks, segs, curve){
+  const ctx = cv.getContext('2d'), W = cv.width, H = cv.height, mid = H/2;
+  ctx.clearRect(0,0,W,H);
+  const dur = S ? S.duration : 1;
+  if (segs) { ctx.fillStyle = 'rgba(60,160,80,.25)';
+    for (const [s,e] of segs) ctx.fillRect(s/dur*W, 0, (e-s)/dur*W, H); }
+  ctx.fillStyle = '#5aa';
+  if (peaks.length) {
+    const bw = W / peaks.length;
+    peaks.forEach(([mn,mx],i) => ctx.fillRect(i*bw, mid+mn*mid*0.9, Math.max(1,bw*0.8), Math.max(1,(mx-mn)*mid*0.9)));
+  }
+  if (curve && curve.length) {
+    ctx.strokeStyle = '#e8c33a'; ctx.lineWidth = 2; ctx.beginPath();
+    curve.forEach((g,i) => { const x=i/(curve.length-1)*W, y=mid-(g-0.5)*H*0.9;
+      i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+    ctx.stroke();
+  }
+  // 播放头
+  if (S) { ctx.strokeStyle = '#f55'; ctx.lineWidth = 1;
+    const x = player.currentTime / dur * W;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+}
+function drawAll(){
+  if (!S?.loaded) return;
+  drawWave(waveNarr, narrPeaks, S.segments, null);
+  drawWave(waveMusic, musicPeaks, S.merged, S.curve);
+  if (selSeg >= 0 && S.segments[selSeg]) {
+    const ctx = waveNarr.getContext('2d'), W = waveNarr.width, H = waveNarr.height;
+    const [s,e] = S.segments[selSeg];
+    ctx.strokeStyle = '#4f4'; ctx.lineWidth = 2;
+    ctx.strokeRect(s/S.duration*W, 1, (e-s)/S.duration*W, H-2);
+  }
+}
+
+// ---------- 区间编辑 ----------
+function xToTime(cv, evt){
+  const r = cv.getBoundingClientRect();
+  return (evt.clientX - r.left) / r.width * S.duration;
+}
+waveNarr.onmousedown = evt => {
+  if (!S?.loaded) return;
+  const t = xToTime(waveNarr, evt), W = waveNarr.width;
+  const px = 8 / W * S.duration;  // 8px 命中范围
+  for (let i = 0; i < S.segments.length; i++) {
+    const [s,e] = S.segments[i];
+    if (Math.abs(t-s) < px) { drag={kind:'edgeL',idx:i}; selSeg=i; return; }
+    if (Math.abs(t-e) < px) { drag={kind:'edgeR',idx:i}; selSeg=i; return; }
+    if (t > s+px && t < e-px) { selSeg=i; renderSegList(); drawAll(); return; }
+  }
+  drag = {kind:'create', t0:t};
+};
+window.onmousemove = evt => {
+  if (!drag || !S) return;
+  const t = Math.max(0, Math.min(S.duration, xToTime(waveNarr, evt)));
+  if (drag.kind === 'create') { drag.t1 = t; drawAll();
+    const ctx = waveNarr.getContext('2d'), W=waveNarr.width, H=waveNarr.height;
+    ctx.fillStyle='rgba(80,200,120,.35)';
+    ctx.fillRect(Math.min(drag.t0,t)/S.duration*W, 0, Math.abs(t-drag.t0)/S.duration*W, H);
+  } else {
+    const segs = S.segments.map(s=>[...s]);
+    segs[drag.idx][drag.kind==='edgeL'?0:1] = t;
+    if (segs[drag.idx][1]-segs[drag.idx][0] > 0.02) { S.segments = segs; drawAll(); }
+  }
+};
+window.onmouseup = async evt => {
+  if (!drag || !S) { drag=null; return; }
+  const segs = S.segments.map(s=>[...s]);
+  if (drag.kind === 'create' && drag.t1 !== undefined) {
+    const [a,b] = [Math.min(drag.t0,drag.t1), Math.max(drag.t0,drag.t1)];
+    if (b-a > 0.02) segs.push([a,b]);
+  }
+  drag = null;
+  segs.sort((a,b)=>a[0]-b[0]);
+  await refresh(await api('/api/segments', {segments:segs}));
+};
+function renderSegList(){
+  segList.innerHTML = '';
+  (S?.segments||[]).forEach(([s,e],i)=>{
+    const d = document.createElement('div');
+    d.textContent = `#${i+1}  ${fmt(s)} - ${fmt(e)}`;
+    if (i===selSeg) d.className='sel';
+    d.onclick = ()=>{ selSeg=i; segS.value=fmt(s); segE.value=fmt(e);
+      player.currentTime = Math.max(0, s-0.2); renderSegList(); drawAll(); };
+    segList.appendChild(d);
+  });
+  if (selSeg>=0 && S.segments[selSeg]) {
+    segS.value = fmt(S.segments[selSeg][0]); segE.value = fmt(S.segments[selSeg][1]);
+  }
+}
+async function delSeg(){
+  if (selSeg<0 || !S) return;
+  const segs = S.segments.filter((_,i)=>i!==selSeg);
+  await refresh(await api('/api/segments', {segments:segs}));
+}
+async function applySegEdit(){
+  if (selSeg<0 || !S) return;
+  const segs = S.segments.map(s=>[...s]);
+  segs[selSeg] = [parseFloat(segS.value), parseFloat(segE.value)];
+  await refresh(await api('/api/segments', {segments:segs}));
+}
+waveMusic.onmousedown = evt => { if (S?.loaded) player.currentTime = xToTime(waveMusic, evt); };
+waveNarr.ondblclick = evt => { if (S?.loaded) player.currentTime = xToTime(waveNarr, evt); };
+
+async function doExport(){
+  try {
+    const j = await api('/api/export', {path: exportPath.value});
+    exportMsg.textContent = j.ok
+      ? `已导出并核对通过: ${j.path}（${j.n_samples} 采样, 峰值 ${j.final_peak.toFixed(3)}）`
+      : `导出核对失败: ${JSON.stringify(j)}`;
+  } catch(e){ exportMsg.textContent = '导出失败: ' + e.message; }
+}
+setParamLabels();
+</script>
+</body>
+</html>
