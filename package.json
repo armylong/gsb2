@@ -1,0 +1,24 @@
+{
+  "name": "camera-dolly-preview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local three.js + TypeScript camera dolly preview tool: editable 3D path, arc-length / time-curve playback, stateless seeking, JSON export and numeric verification.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "vitest run --reporter=verbose 2>&1 | tee verification-output.txt"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}

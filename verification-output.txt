@@ -1,0 +1,41 @@
+
+ RUN  v5.1.0 /Users/zhangzelong/works/gsb2/tasks/10387/repo
+
+ ✓ src/core/core.test.ts > CameraPath: arc-length parameterization > constant-speed mode gives equal arc length per equal time step, even with uneven points 17ms
+ ✓ src/core/core.test.ts > CameraPath: arc-length parameterization > positionAt walks the arc-length table: cumulative distance tracks q * totalLength 7ms
+ ✓ src/core/core.test.ts > CameraPath: parallel-transport frames > never flips through the vertical preset (max adjacent rotation stays small) 5ms
+ ✓ src/core/core.test.ts > CameraPath: parallel-transport frames > up vectors stay perpendicular to tangents 5ms
+ ✓ src/core/core.test.ts > CameraPath: parallel-transport frames > closed loop transport frame matches at the seam 1ms
+ ✓ src/core/core.test.ts > time mapping > evaluates knots and clamps outside the range 0ms
+ ✓ src/core/core.test.ts > time mapping > sanitizeKnots keeps time order and non-decreasing progress 0ms
+ ✓ src/core/core.test.ts > time mapping > timed mode actually changes speed; constant mode does not 8ms
+ ✓ src/core/core.test.ts > stateless seek vs continuous playback > preset "ordinary" — identical poses regardless of visit order 6ms
+ ✓ src/core/core.test.ts > stateless seek vs continuous playback > preset "vertical" — identical poses regardless of visit order 4ms
+ ✓ src/core/core.test.ts > stateless seek vs continuous playback > preset "closed" — identical poses regardless of visit order 5ms
+ ✓ src/core/core.test.ts > stateless seek vs continuous playback > seeking after visiting other times changes nothing (no hidden state) 5ms
+ ✓ src/core/core.test.ts > target look mode > holds the last valid orientation while target coincides, resumes after 9ms
+ ✓ src/core/core.test.ts > target look mode > view direction points at the target everywhere outside coincidence 2ms
+ ✓ src/core/core.test.ts > closed loop seam and looping playback > export end pose equals start pose on the loop preset 2ms
+ ✓ src/core/core.test.ts > closed loop seam and looping playback > quaternion signs never force a half-turn between adjacent samples 2ms
+ ✓ src/core/core.test.ts > exporter > "ordinary" export includes endpoints and matches live evaluation 3ms
+ ✓ src/core/core.test.ts > exporter > "vertical" export includes endpoints and matches live evaluation 2ms
+ ✓ src/core/core.test.ts > exporter > "closed" export includes endpoints and matches live evaluation 2ms
+ ✓ src/core/core.test.ts > full verification suite on every preset > all checks pass for "ordinary" 8ms
+ ✓ src/core/core.test.ts > full verification suite on every preset > all checks pass for "vertical" 8ms
+ ✓ src/core/core.test.ts > full verification suite on every preset > all checks pass for "closed" 8ms
+ ✓ src/test/app.test.ts > App headless integration > mounts both panels and drives both viewports with the same sample 20ms
+ ✓ src/test/app.test.ts > App headless integration > seek is stateless: direct seek matches sequential playback to the same time 16ms
+ ✓ src/test/app.test.ts > App headless integration > speed/look mode toggles rebuild the rig; target mode shows the marker 12ms
+ ✓ src/test/app.test.ts > App headless integration > closed toggle closes the path and gives a seamless loop (t=0 == t=duration) 9ms
+ ✓ src/test/app.test.ts > App headless integration > time input clamps to [0, duration] and updates the playhead 10ms
+ ✓ src/test/app.test.ts > App headless integration > editing time-curve knots keeps time order and non-decreasing progress 16ms
+ ✓ src/test/app.test.ts > App headless integration > verification panel shows per-check measurements and an overall pass 16ms
+ ✓ src/test/app.test.ts > App headless integration > export is endpoint-inclusive and matches live evaluation, with axis conventions 6ms
+ ✓ src/test/app.test.ts > App headless integration > control-point and target drag callbacks mutate state and re-evaluate 12ms
+ ✓ src/test/app.test.ts > App headless integration > preset switching loads all three generated presets and they stay valid 12ms
+
+ Test Files  2 passed (2)
+      Tests  32 passed (32)
+   Start at  04:52:09
+   Duration  263ms (tests 76%, import 16%, transform 7%, worker 1%)
+
