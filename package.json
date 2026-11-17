@@ -1,0 +1,25 @@
+{
+  "name": "cubemap-seam-reflection-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "立方体环境贴图接缝与反射方向预览工具",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "validate": "vite-node src/validate-node.ts"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/three": "^0.170.0",
+    "playwright": "^1.65.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-node": "^2.1.9"
+  }
+}

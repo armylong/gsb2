@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>立方体环境贴图 · 接缝与反射方向预览</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <h1>立方体环境贴图 · 接缝与反射方向预览</h1>
+  <div class="conv">
+    <strong>统一约定:</strong>
+    右手世界系 <b>X→ 右</b>、<b>Y↑ 上</b>、<b>Z⊙ 朝观察者</b>;
+    六面以法线命名(+X/-X/+Y/-Y/+Z/-Z),纹理原点在左上角、u 向右 v 向下;
+    各面规范上方向:+X/-X/+Z/-Z 为 <b>+Y</b>,+Y 为 <b>-Z</b>,-Y 为 <b>+Z</b>。
+    与 WebGL 立方体贴图规范一致,three.js 直接使用同一套纹理做真实反射。
+  </div>
+</header>
+
+<main class="layout">
+  <!-- 左:3D 环境内观察 -->
+  <section class="panel panel-3d">
+    <div class="panel-head">
+      <h2>环境内观察(环境固定,相机/物体独立旋转)</h2>
+      <div class="row">
+        <div class="btn-group" id="axis-views"></div>
+        <button id="btn-reset-camera" class="btn">恢复默认相机</button>
+      </div>
+    </div>
+    <div id="viewport" class="viewport"></div>
+    <div class="panel-foot">
+      <div class="row wrap">
+        <span class="lbl">选择物体:</span>
+        <div class="btn-group" id="object-select">
+          <button class="btn active" data-obj="chamfer">斜面非对称物体</button>
+          <button class="btn" data-obj="mirror">镜面球</button>
+        </div>
+        <span class="lbl">物体旋转(度):</span>
+        <label>X <input type="range" id="rot-x" min="-180" max="180" value="0" /></label>
+        <label>Y <input type="range" id="rot-y" min="-180" max="180" value="0" /></label>
+        <label>Z <input type="range" id="rot-z" min="-180" max="180" value="0" /></label>
+        <button id="btn-reset-object" class="btn">物体回正</button>
+        <button id="btn-clear-cp" class="btn warn">清空检查点</button>
+      </div>
+      <p class="hint">
+        左键拖拽转相机,选中斜面物体时显示旋转手柄;点击物体表面即放置检查点(黄点=检查点,
+        绿线=表面法线,白线=入射,红线=反射射线,红环=环境命中处)。
+      </p>
+    </div>
+  </section>
+
+  <!-- 右:控制与读数 -->
+  <aside class="panel panel-side">
+    <h2>固定核对姿态</h2>
+    <div id="poses" class="poses"></div>
+
+    <h2>单面错误注入(制造接缝错误)</h2>
+    <div class="row wrap">
+      <label>面
+        <select id="err-face"></select>
+      </label>
+      <label>旋转
+        <select id="err-rot">
+          <option value="0">0°</option><option value="1">90°</option>
+          <option value="2">180°</option><option value="3">270°</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="err-flip" /> 水平翻转</label>
+      <button id="btn-apply-err" class="btn">应用</button>
+      <button id="btn-reset-err" class="btn warn">一键恢复全部面</button>
+    </div>
+    <div id="err-status" class="err-status">所有面均为规范朝向,接缝正确。</div>
+
+    <h2>检查点读数</h2>
+    <div id="readouts" class="readouts"><p class="dim">尚未放置检查点。点击 3D 视图中的物体表面,或切换到"跨面边缘反射"姿态。</p></div>
+
+    <h2>关键验证(页面实跑)</h2>
+    <button id="btn-validate" class="btn primary">运行验证 V1–V9</button>
+    <div id="validation" class="validation"></div>
+  </aside>
+
+  <!-- 下:六面展开图与接缝信息 -->
+  <section class="panel panel-unfold">
+    <div class="panel-head">
+      <h2>六面展开图(十字展开;虚线弧连接折叠到外层的共享边,点击任意边高亮配对)</h2>
+    </div>
+    <div class="unfold-wrap">
+      <canvas id="unfold"></canvas>
+      <div id="edge-info" class="edge-info">
+        <p class="dim">点击展开图中的一条面边,这里会给出它与相邻面的配对边、刻度对应次序与 3D 方向。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 测试截图(本地核对产物) ----
+tests/shot-*.png
+test-results/
+playwright-report/
