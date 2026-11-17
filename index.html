@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三维半透明物体合成演示 · 逐像素深度排序对照</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>三维半透明物体合成演示</h1>
+      <div class="sub">
+        正确模式 = 逐像素深度排序 + source-over ｜ 对照 = 物体级排序 / 手动绘制顺序
+      </div>
+    </header>
+    <main id="layout">
+      <section id="viewport-column">
+        <div id="canvas-wrap">
+          <canvas id="gl"></canvas>
+          <div id="hud"></div>
+          <div id="hint">左键旋转 · 右键平移 · 滚轮缩放 · 单击画面添加临时检查点</div>
+        </div>
+      </section>
+      <aside id="panel"></aside>
+    </main>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
