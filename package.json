@@ -1,0 +1,27 @@
+{
+  "name": "robot-arm-ik-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Draggable-target robot arm IK demo (three.js + TypeScript, fully procedural)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "vite-node tests/e2e/app.e2e.ts"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.169.0",
+    "playwright-core": "^1.65.1",
+    "typescript": "~5.5.4",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.2"
+  }
+}
