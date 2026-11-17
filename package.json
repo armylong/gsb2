@@ -1,0 +1,23 @@
+{
+  "name": "lowpoly-cloth-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "本地浏览器低多边形布料模拟演示 (three.js + TypeScript, Verlet/PBD)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "tsx scripts/verify.ts"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>低多边形布料模拟演示</title>
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <h1>低多边形布料模拟 <span class="sub">Verlet + PBD · three.js</span></h1>
+        <div id="status-bar">
+          <span class="stat">状态 <b id="stat-state" class="badge">已暂停</b></span>
+          <span class="stat">模拟时间 <b id="stat-time">0.000 s</b></span>
+          <span class="stat">模拟步长 <b id="stat-dt">1/120 s</b></span>
+          <span class="stat">显示节奏 <b id="stat-fps">60 fps</b></span>
+        </div>
+      </header>
+
+      <main id="main">
+        <section id="viewport">
+          <div id="canvas-host"></div>
+          <div id="legend">
+            <span><i class="dot pin"></i>红色八面体 = 固定点 (钉在当前位置)</span>
+            <span><i class="dot cloth"></i>蓝色面片 = 布</span>
+            <span><i class="dot sphere"></i>橙色多面体 = 碰撞球</span>
+          </div>
+        </section>
+
+        <aside id="panel">
+          <section class="card">
+            <h2>场景预设</h2>
+            <div id="scenario-btns" class="btn-row"></div>
+            <p id="scenario-desc" class="hint"></p>
+          </section>
+
+          <section class="card">
+            <h2>模拟控制</h2>
+            <div class="btn-row">
+              <button id="btn-play">▶ 运行</button>
+              <button id="btn-pause">⏸ 暂停</button>
+              <button id="btn-step">⏭ 单步</button>
+              <button id="btn-reset">↺ 重置</button>
+            </div>
+            <label class="check"><input type="checkbox" id="chk-wire" /> 线框模式 (显示顶点与边)</label>
+          </section>
+
+          <section class="card">
+            <h2>显示节奏 (仅影响渲染)</h2>
+            <div class="btn-row">
+              <button id="btn-fps30">30 帧/秒</button>
+              <button id="btn-fps60" class="active">60 帧/秒</button>
+            </div>
+            <p class="hint">物理以固定步长推进, 切帧率不改变模拟结果</p>
+          </section>
+
+          <section class="card">
+            <h2>物理参数</h2>
+            <label class="slider">
+              重力 <output id="val-gravity">9.80</output> m/s²
+              <input type="range" id="sld-gravity" min="0" max="25" step="0.1" value="9.8" />
+            </label>
+            <label class="slider">
+              抗拉程度 <output id="val-stiffness">0.90</output>
+              <input type="range" id="sld-stiffness" min="0.05" max="1" step="0.01" value="0.9" />
+            </label>
+            <label class="slider">
+              模拟步长 1/<output id="val-step">120</output> s
+              <input type="range" id="sld-step" min="30" max="240" step="1" value="120" />
+            </label>
+            <p class="hint">步长改小后单步推进更短, 不会缩放布片或改变重力</p>
+          </section>
+
+          <section class="card">
+            <h2>碰撞球</h2>
+            <label class="check">
+              <input type="checkbox" id="chk-sphere" /> 球体参与碰撞
+            </label>
+            <label class="slider">
+              半径 <output id="val-radius">1.10</output>
+              <input type="range" id="sld-radius" min="0.3" max="2" step="0.05" value="1.1" />
+            </label>
+            <label class="slider">
+              位置 X <output id="val-sx">0.00</output>
+              <input type="range" id="sld-sx" min="-3" max="3" step="0.05" value="0" />
+            </label>
+            <label class="slider">
+              位置 Y <output id="val-sy">0.35</output>
+              <input type="range" id="sld-sy" min="-3" max="3" step="0.05" value="0.35" />
+            </label>
+            <label class="slider">
+              位置 Z <output id="val-sz">0.00</output>
+              <input type="range" id="sld-sz" min="-3" max="3" step="0.05" value="0" />
+            </label>
+            <p class="hint">球在布下方移动可观察托起与周围下垂; 位移同样参与碰撞</p>
+          </section>
+
+          <section class="card">
+            <h2>固定点 (仅暂停时可改, 至少保留 1 个)</h2>
+            <div id="pin-area" class="pin-grid"></div>
+          </section>
+
+          <section class="card">
+            <h2>量化指标</h2>
+            <table id="metrics">
+              <tbody>
+                <tr><td>固定点最大偏移</td><td id="m-pin">—</td></tr>
+                <tr><td>最大边长变化率</td><td id="m-strain">—</td></tr>
+                <tr><td>当前最大边长</td><td id="m-edge">—</td></tr>
+                <tr><td>球内穿入深度 / 顶点数</td><td id="m-pen">—</td></tr>
+              </tbody>
+            </table>
+            <p class="hint">
+              验证依据见 <code>VERIFICATION.md</code> (<code>npm run verify</code> 可复现 30/60 帧对比)
+            </p>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
