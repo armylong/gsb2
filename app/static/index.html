@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>局部隐私遮挡工具</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>局部隐私遮挡工具</h1>
+  <div id="loadbar">
+    <input id="vpath" placeholder="视频路径(≤15s, ≤720p, CFR mp4)" size="46">
+    <button id="btnLoad">加载</button>
+    <button id="btnSample">生成并加载样例</button>
+    <span id="vinfo"></span>
+  </div>
+</header>
+
+<main>
+  <section id="stage">
+    <canvas id="cv" width="960" height="540"></canvas>
+    <div id="hint">未加载视频</div>
+  </section>
+
+  <section id="controls">
+    <div class="row">
+      <button id="btnPlay">▶ 播放</button>
+      <button id="btnPrev">◀ 上一帧</button>
+      <button id="btnNext">下一帧 ▶</button>
+      <span id="pos">帧 - / -</span>
+      <label><input type="checkbox" id="chkMask"> 遮挡预览</label>
+    </div>
+    <div class="row">
+      <input type="range" id="slider" min="0" max="0" value="0" style="flex:1">
+    </div>
+    <canvas id="timeline" height="26"></canvas>
+    <div class="row">
+      遮挡区间: 起 <input id="inStart" type="number" min="0" style="width:70px">
+      止 <input id="inEnd" type="number" min="0" style="width:70px">
+      <button id="btnSetRegion">以当前框设置遮挡区域</button>
+      <button id="btnReset">清除区域</button>
+    </div>
+    <div class="row">
+      <button id="btnDelKf">删除当前帧修正</button>
+      <span id="kfinfo"></span>
+    </div>
+    <div class="row">
+      <button id="btnExport">导出遮挡 mp4</button>
+      <span id="exportinfo"></span>
+    </div>
+    <div id="lowlist"></div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
