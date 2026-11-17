@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UV 贴图坐标检查工具</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="toolbar">
+  <div class="brand">🧭 UV 检查工具</div>
+
+  <div class="tool-group">
+    <button id="btn-sample-box" type="button">载入规则样例</button>
+    <button id="btn-sample-broken" type="button">载入损坏样例</button>
+    <label class="file-btn">
+      导入 OBJ
+      <input id="file-obj" type="file" accept=".obj,.txt,text/plain" hidden>
+    </label>
+    <label class="file-btn">
+      导入贴图
+      <input id="file-tex" type="file" accept="image/png,image/jpeg,image/*" hidden>
+    </label>
+  </div>
+
+  <div class="tool-group">
+    <label class="inline">拉伸阈值
+      <input id="threshold" type="number" min="1.1" max="100" step="0.1" value="3" class="num-input">
+    </label>
+    <button id="btn-reanalyze" type="button">重新检查</button>
+  </div>
+
+  <div class="tool-group">
+    <label class="chk"><input id="chk-labels" type="checkbox" checked> 面编号</label>
+    <label class="chk"><input id="chk-grid" type="checkbox" checked> 坐标网格</label>
+    <label class="chk"><input id="chk-texbounds" type="checkbox" checked> 贴图边界</label>
+    <label class="chk"><input id="chk-issues" type="checkbox" checked> 问题标注</label>
+  </div>
+
+  <div class="tool-group">
+    <button id="btn-fit" type="button">复位视角</button>
+    <button id="btn-export-png" type="button">导出检查图</button>
+    <button id="btn-export-csv" type="button">导出问题清单</button>
+    <button id="btn-export-json" type="button">导出 JSON 报告</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="view-pane">
+    <div class="pane-head">
+      <h2>三维模型视图</h2>
+      <span id="hud-3d" class="hud">拖动旋转 · 滚轮缩放 · 右键平移 · 点击选面</span>
+    </div>
+    <canvas id="view-3d"></canvas>
+    <div id="legend-3d" class="legend"></div>
+  </section>
+
+  <section class="view-pane">
+    <div class="pane-head">
+      <h2>二维贴图 / UV 视图</h2>
+      <span id="hud-2d" class="hud">拖动平移 · 滚轮缩放 · 点击 UV 区域选面 · 按住 Shift 多选</span>
+    </div>
+    <canvas id="view-2d"></canvas>
+    <div id="legend-2d" class="legend"></div>
+  </section>
+
+  <aside class="side-panel">
+    <div class="panel-block">
+      <h3>解析消息</h3>
+      <div id="messages" class="message-list">
+        <p class="placeholder">尚未载入模型</p>
+      </div>
+    </div>
+    <div class="panel-block">
+      <h3>问题清单 <span id="issue-summary" class="summary"></span></h3>
+      <div id="issues" class="issue-list">
+        <p class="placeholder">尚未载入模型</p>
+      </div>
+    </div>
+    <div class="panel-block">
+      <h3>当前选中</h3>
+      <div id="selection" class="selection-box">
+        <p class="placeholder">未选中任何面</p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer class="statusbar">
+  <span id="status-text">就绪</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -20,6 +20,9 @@ data.json
 *.sqlite3
 tmp/
 
+# ---- 本工具运行时生成的程序样例（启动时自动重建）----
+samples/
+
 # ---- 依赖与构建产物 ----
 node_modules/
 __pycache__/
