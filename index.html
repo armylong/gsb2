@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>骨骼动画混合演示 · 交叉淡入 / 逐关节遮罩 / 根位移</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="viewport">
+        <canvas id="canvas"></canvas>
+        <div id="hud">
+          <div class="hud-row"><span>动作 A 相位</span><b id="hud-phase-a">0.000</b><span class="muted" id="hud-loop-a">循环 0</span></div>
+          <div class="hud-row"><span>动作 B 相位</span><b id="hud-phase-b">0.000</b><span class="muted" id="hud-loop-b">循环 0</span></div>
+          <div class="hud-row"><span>淡入权重 α</span><b id="hud-weight">0.000</b><span class="muted" id="hud-fade-dir">空闲</span></div>
+          <div class="hud-row"><span>根位移 z</span><b id="hud-root">0.000 m</b><span class="muted" id="hud-loop-total">累计循环 0</span></div>
+        </div>
+      </div>
+
+      <aside id="panel">
+        <h1>骨骼动画混合演示</h1>
+        <p class="subtitle">程序化骨架 · 单网格蒙皮 · 无外部素材</p>
+
+        <section>
+          <h2>可重复演示状态</h2>
+          <div id="demo-buttons" class="btn-group"></div>
+          <p id="demo-desc" class="hint">点击按钮载入一个确定性演示状态。</p>
+        </section>
+
+        <section>
+          <h2>播放控制</h2>
+          <div class="btn-group">
+            <button id="btn-play">暂停</button>
+            <button id="btn-step">单步 +1/60s</button>
+            <button id="btn-reset">恢复默认</button>
+          </div>
+          <label class="ctl">
+            <span>慢放倍率 <b id="val-timescale">1.00×</b></span>
+            <input id="inp-timescale" type="range" min="0.1" max="1" step="0.05" value="1" />
+          </label>
+          <label class="ctl">
+            <span>时间拖动（动作 A 秒数）<b id="val-scrub">0.00s</b></span>
+            <input id="inp-scrub" type="range" min="0" max="4.5" step="0.01" value="0" />
+          </label>
+        </section>
+
+        <section>
+          <h2>交叉淡入</h2>
+          <div class="btn-group">
+            <button id="btn-fade-b">淡入 → 动作 B（潜行）</button>
+            <button id="btn-fade-a">淡入 → 动作 A（行走）</button>
+          </div>
+          <label class="ctl">
+            <span>淡入时长 <b id="val-fade">0.60s</b></span>
+            <input id="inp-fade" type="range" min="0.1" max="2" step="0.05" value="0.6" />
+          </label>
+        </section>
+
+        <section>
+          <h2>逐关节遮罩</h2>
+          <div class="btn-group" id="mask-presets"></div>
+          <div id="joint-mask-list"></div>
+        </section>
+
+        <section>
+          <h2>根位移与显示</h2>
+          <label class="ctl switch">
+            <span>应用根位移（关闭为原地播放）</span>
+            <input id="chk-root" type="checkbox" checked />
+          </label>
+          <label class="ctl switch">
+            <span>显示骨架叠加</span>
+            <input id="chk-skeleton" type="checkbox" checked />
+          </label>
+          <label class="ctl switch">
+            <span>显示根轨迹</span>
+            <input id="chk-trajectory" type="checkbox" checked />
+          </label>
+        </section>
+
+        <section id="joint-inspector">
+          <h2>关节检视</h2>
+          <p class="hint">点击场景中的关节球，或在下方列表选择：</p>
+          <select id="joint-select"></select>
+          <div id="joint-pose" class="pose-box"><span class="muted">未选择关节</span></div>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
