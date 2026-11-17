@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本地音效循环制作工具</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>本地音效循环制作工具</h1>
+  <div class="hint">全部处理在本机浏览器内完成，不上传任何文件 · 支持短 WAV（PCM 8/16/24/32-bit、float32，单/双声道）</div>
+</header>
+
+<section class="toolbar">
+  <div class="group">
+    <label class="btn">导入 WAV
+      <input type="file" id="fileInput" accept=".wav,audio/wav,audio/x-wav" hidden>
+    </label>
+    <label class="btn">核对导出结果（WAV + 说明 JSON）
+      <input type="file" id="verifyInput" accept=".wav,.json,audio/wav,application/json" multiple hidden>
+    </label>
+  </div>
+  <div class="group meta">
+    <span id="metaText" class="muted">尚未导入文件</span>
+  </div>
+</section>
+
+<section class="canvas-wrap">
+  <canvas id="wave" height="260"></canvas>
+  <div id="canvasHint" class="canvas-hint">导入 WAV 后在此显示波形；在波形上拖拽选择循环区间</div>
+</section>
+
+<section class="panel">
+  <div class="panel-row">
+    <div class="field">
+      <label>起点（帧）</label>
+      <input type="number" id="startFrame" min="0" step="1" disabled>
+    </div>
+    <div class="field">
+      <label>终点（帧，不含）</label>
+      <input type="number" id="endFrame" min="1" step="1" disabled>
+    </div>
+    <div class="field">
+      <label>区间长度（帧）</label>
+      <input type="number" id="lenFrames" disabled>
+    </div>
+    <div class="field">
+      <label>区间时长（ms）</label>
+      <input type="text" id="lenMs" disabled>
+    </div>
+  </div>
+  <div class="panel-row">
+    <div class="field">
+      <label>接缝淡化（ms）</label>
+      <input type="number" id="fadeMs" min="0" step="0.5" value="5" disabled>
+    </div>
+    <div class="field">
+      <label>淡化帧数（自动换算）</label>
+      <input type="text" id="fadeFrames" disabled>
+    </div>
+    <div class="field">
+      <label>导出循环长度（帧 / ms）</label>
+      <input type="text" id="exportLen" disabled>
+    </div>
+    <div class="field presets">
+      <label>淡化快捷</label>
+      <div class="btn-row">
+        <button class="btn small" data-fade="0" disabled>无</button>
+        <button class="btn small" data-fade="2" disabled>2ms</button>
+        <button class="btn small" data-fade="5" disabled>5ms</button>
+        <button class="btn small" data-fade="10" disabled>10ms</button>
+        <button class="btn small" data-fade="20" disabled>20ms</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel-row">
+    <div class="field seam">
+      <label>原始接缝跳变（左右声道）</label>
+      <div id="rawSeam" class="value-box muted">—</div>
+    </div>
+    <div class="field seam">
+      <label>淡化后接缝跳变（左右声道）</label>
+      <div id="loopSeam" class="value-box muted">—</div>
+    </div>
+    <div class="field">
+      <label>试听轮数（0 = 持续）</label>
+      <input type="number" id="rounds" min="0" step="1" value="4">
+    </div>
+  </div>
+  <div class="panel-row transport">
+    <button class="btn primary" id="playOriginal" disabled>▶ 播放原始</button>
+    <button class="btn primary" id="playLoop" disabled>▶ 循环试听</button>
+    <button class="btn warn" id="stopBtn" disabled>■ 停止</button>
+    <span id="playState" class="muted">已停止</span>
+    <span class="spacer"></span>
+    <button class="btn ok" id="exportBtn" disabled>导出循环 WAV + 区间说明</button>
+  </div>
+</section>
+
+<section class="panel verify" id="verifyPanel" hidden>
+  <h2>导出结果核对</h2>
+  <div id="verifyContent"></div>
+</section>
+
+<div id="messageBar" class="message" hidden></div>
+
+<footer>
+  <span>快捷键：波形区滚轮缩放 · Shift+拖拽平移 · 双击区间边缘微调 · ←/→ 移动 1 帧，Shift+←/→ 移动 10 帧</span>
+</footer>
+
+<script src="js/wav-codec.js"></script>
+<script src="js/loop-core.js"></script>
+<script src="js/geometry.js"></script>
+<script src="js/player.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
