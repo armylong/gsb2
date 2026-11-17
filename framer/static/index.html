@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>竖屏取景工具 · 本地运行</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1d2026; --panel2: #252932;
+    --line: #343945; --text: #e6e8ec; --muted: #9aa2b1;
+    --accent: #4c8dff; --accent2: #2f6fe0; --warn: #ffb020; --err: #ff5c5c;
+    --ok: #37c978;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  header {
+    padding: 10px 16px; background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  input[type=text] {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 6px; padding: 6px 10px; min-width: 280px;
+  }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 12px; cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: var(--accent2); }
+  button.danger { color: var(--err); }
+  select {
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px;
+  }
+  main { padding: 14px 16px 30px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px;
+  }
+  .card h2 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  canvas { display: block; background: #000; border-radius: 6px; max-width: 100%; }
+  #mainCanvas { cursor: grab; }
+  #mainCanvas.dragging { cursor: grabbing; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .badge {
+    display: inline-block; padding: 1px 8px; border-radius: 10px;
+    background: var(--panel2); border: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); margin-left: 6px;
+  }
+  .badge.rot { color: var(--warn); border-color: var(--warn); }
+  .transport { display: flex; gap: 10px; align-items: center; margin: 14px 0 8px; flex-wrap: wrap; }
+  .timeline {
+    position: relative; height: 42px; background: var(--panel2);
+    border: 1px solid var(--line); border-radius: 8px; margin: 6px 0 10px;
+    cursor: pointer; overflow: hidden;
+  }
+  .timeline .track { position: absolute; left: 0; right: 0; top: 19px; height: 4px; background: var(--line); }
+  .timeline .played { position: absolute; left: 0; top: 19px; height: 4px; background: var(--accent); }
+  .timeline .playhead {
+    position: absolute; top: 8px; width: 2px; height: 26px; background: #fff;
+  }
+  .timeline .kf {
+    position: absolute; top: 4px; width: 12px; height: 12px;
+    transform: translateX(-50%); border-radius: 2px; background: var(--warn);
+    border: 1px solid #000;
+  }
+  .timeline .kf.selected { background: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { color: var(--muted); font-weight: 600; }
+  td button { padding: 2px 8px; font-size: 12px; }
+  tr.selected td { background: rgba(76,141,255,.12); }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; }
+  @media (max-width: 1100px) { .grid2 { grid-template-columns: 1fr; } }
+  .status {
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+    background: var(--panel2); border: 1px solid var(--line);
+    min-height: 20px; font-size: 13px; white-space: pre-wrap;
+  }
+  .status.err { border-color: var(--err); color: var(--err); }
+  .status.ok { border-color: var(--ok); color: var(--ok); }
+  .progress {
+    height: 8px; background: var(--line); border-radius: 4px; overflow: hidden;
+    margin-top: 8px; display: none;
+  }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .hint { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+  .verify { font-size: 12px; color: var(--muted); }
+  .verify b { color: var(--text); }
+  label.inline { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+  .section-title { margin: 18px 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>竖屏取景工具</h1>
+  <input id="videoPath" type="text" placeholder="横屏视频的本机绝对路径，如 /Users/me/movie.mp4">
+  <button id="btnOpen" class="primary">打开视频</button>
+  <button id="btnSample">生成样例视频</button>
+  <select id="sampleKind" title="样例类型">
+    <option value="normal">普通横屏样例</option>
+    <option value="rot90">带 90° 旋转元数据样例</option>
+    <option value="rot180">带 180° 旋转元数据样例</option>
+    <option value="rot270">带 270° 旋转元数据样例</option>
+  </select>
+  <input id="projectPath" type="text" placeholder="工程文件路径（可选，.json）">
+  <button id="btnSaveProject">保存工程</button>
+  <button id="btnLoadProject">加载工程</button>
+</header>
+
+<main>
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <h2>原视频与取景框
+          <span id="dimBadge" class="badge">未加载</span>
+          <span id="rotBadge" class="badge" style="display:none"></span>
+        </h2>
+        <canvas id="mainCanvas" width="960" height="540"></canvas>
+        <p class="hint">在画面内按住取景框拖动即可调整位置；点击画面其他位置可把取景框移到该处（自动夹紧在画面内）。</p>
+        <div class="meta" id="mainMeta"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>时间线（黄色方块为关键点，点击跳转）</h2>
+        <div class="transport">
+          <button id="btnPlay">▶ 播放</button>
+          <button id="btnPause">⏸ 暂停</button>
+          <button id="btnStop">⏹ 回到开头</button>
+          <label class="inline">跳转
+            <input id="seekTime" type="number" min="0" step="0.1" style="width:90px;min-width:0"> 秒
+          </label>
+          <button id="btnSeek">跳转</button>
+          <span class="meta" id="timeLabel">0.000 / 0.000 s</span>
+        </div>
+        <div class="timeline" id="timeline">
+          <div class="track"></div>
+          <div class="played" id="playedBar"></div>
+          <div class="playhead" id="playhead" style="left:0"></div>
+        </div>
+        <div class="transport" style="margin-top:4px">
+          <button id="btnAddKf" class="primary">＋ 在当前时刻添加/更新关键点</button>
+          <button id="btnDelKf" class="danger">－ 删除选中关键点</button>
+          <button id="btnReset">恢复默认取景</button>
+          <label class="inline">插值方式
+            <select id="easing">
+              <option value="smoothstep" selected>平滑（smoothstep）</option>
+              <option value="linear">线性（linear）</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">关键点之外的时间段保持端点取景；相邻关键点之间平滑过渡，不会跳变。</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>竖屏预览（9:16）</h2>
+        <canvas id="previewCanvas" width="304" height="540"></canvas>
+        <div class="meta" id="previewMeta"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>关键点列表</h2>
+        <table>
+          <thead><tr><th>#</th><th>时间 (s)</th><th>x (px)</th><th>操作</th></tr></thead>
+          <tbody id="kfTable"></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h2>导出与核对</h2>
+        <input id="outputPath" type="text" placeholder="导出路径，如 /Users/me/vertical.mp4" style="width:100%;min-width:0">
+        <div class="transport" style="margin-bottom:0">
+          <button id="btnExport" class="primary" style="width:100%">导出竖屏视频（保留原声）</button>
+        </div>
+        <div class="progress" id="exportProgress"><div id="exportProgressBar"></div></div>
+        <div class="transport" style="margin-bottom:0;margin-top:10px">
+          <button id="btnVerify" style="width:100%">重新打开导出结果并核对</button>
+        </div>
+        <div class="verify" id="verifyBox" style="margin-top:8px"></div>
+      </div>
+
+      <div class="status" id="statusBox">就绪。先打开一个横屏视频，或点击“生成样例视频”。</div>
+    </div>
+  </div>
+</main>
+
+<script src="/static/keyframes.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
