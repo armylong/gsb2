@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>短视频分段码率对比</title>
+<style>
+ body{font-family:-apple-system,"PingFang SC",sans-serif;margin:24px;color:#222;max-width:1120px}
+ h1{font-size:20px}
+ h2{font-size:15px;margin-top:26px;border-left:4px solid #4a90d9;padding-left:8px}
+ fieldset{border:1px solid #ccc;border-radius:6px;display:inline-block;margin:6px 12px 6px 0;vertical-align:top}
+ label{font-size:13px;display:block;margin:4px 0}
+ input,select{font-size:13px;padding:2px 4px}
+ button{font-size:13px;padding:4px 12px;cursor:pointer}
+ table{border-collapse:collapse;font-size:13px;margin:8px 0}
+ td,th{border:1px solid #ddd;padding:3px 12px;text-align:right}
+ th{background:#f4f6f8}
+ .warn{color:#c0392b;font-weight:bold}
+ .ok{color:#27ae60}
+ #err{color:#c0392b;white-space:pre-wrap;margin:8px 0;font-size:13px}
+ canvas{border:1px solid #ddd;cursor:crosshair}
+ .frames{display:flex;gap:10px;margin-top:8px}
+ .frames figure{margin:0;text-align:center;font-size:12px}
+ .frames img{width:340px;border:1px solid #ccc;background:#000;min-height:190px}
+ video{width:480px;background:#000}
+ .muted{color:#777;font-size:12px}
+ .videos{display:flex;gap:12px}
+</style>
+</head>
+<body>
+<h1>短视频分段码率 · 关键帧 · 画面对比(ffmpeg 真实转码,统计全部来自输出文件)</h1>
+
+<h2>1. 输入(≤20s、≤720p、带音频的 mp4)</h2>
+<input type="file" id="file" accept="video/mp4">
+<button onclick="upload()">上传</button>
+<button onclick="makeSample()">生成测试样片(静态+纹理运动+硬切+测试音)</button>
+<span id="inputInfo" class="muted"></span>
+<div id="inputErr" class="warn"></div>
+
+<h2>2. 目标体积与两套转码配置(分辨率/帧率/音频两套一致)</h2>
+<div>
+<label style="display:inline-block;margin-right:16px">目标成品体积 <input id="target" type="number" step="0.1" value="1.5" style="width:70px"> MB</label>
+<label style="display:inline-block;margin-right:16px">统计时间窗
+ <select id="window"><option value="1">1 秒</option><option value="2">2 秒</option></select></label>
+<label style="display:inline-block">音频(两套相同) AAC <input id="akbps" type="number" value="96" style="width:56px"> kbps</label>
+</div>
+<fieldset><legend>配置 A</legend>
+ <label>视频码率 <input id="a_v" type="number" value="800" style="width:70px"> kbps</label>
+ <label>关键帧间隔 -g <input id="a_g" type="number" value="120" style="width:60px"> 帧</label>
+ <label>maxrate <input id="a_m" type="number" placeholder="可选" style="width:70px"> kbps(留空不限)</label>
+ <label>preset <select id="a_p"><option>ultrafast</option><option>fast</option><option selected>medium</option><option>slow</option><option>veryslow</option></select></label>
+</fieldset>
+<fieldset><legend>配置 B</legend>
+ <label>视频码率 <input id="b_v" type="number" value="300" style="width:70px"> kbps</label>
+ <label>关键帧间隔 -g <input id="b_g" type="number" value="30" style="width:60px"> 帧</label>
+ <label>maxrate <input id="b_m" type="number" placeholder="可选" style="width:70px"> kbps(留空不限)</label>
+ <label>preset <select id="b_p"><option>ultrafast</option><option>fast</option><option selected>medium</option><option>slow</option><option>veryslow</option></select></label>
+</fieldset>
+<div style="margin-top:8px">
+ <button onclick="runAll()" style="font-size:15px;padding:6px 18px">转码并分析</button>
+ <span id="running" class="muted"></span>
+</div>
+<div id="err"></div>
+
+<h2>3. 实际输出与目标偏差</h2>
+<div id="stats" class="muted">尚未转码。</div>
+
+<h2>4. 分段视频码率(点击窗口柱或关键帧▲定位画面)</h2>
+<canvas id="chart" width="1080" height="320"></canvas>
+<div id="winInfo" class="muted"></div>
+<div id="kfInfo" class="muted"></div>
+
+<h2>5. 同一内容时刻画面(原片 / 输出 A / 输出 B)</h2>
+<div>
+ <button onclick="stepFrame(-10)">-10 帧</button>
+ <button onclick="stepFrame(-1)">-1 帧</button>
+ <b id="tLabel">t = —</b>
+ <button onclick="stepFrame(1)">+1 帧</button>
+ <button onclick="stepFrame(10)">+10 帧</button>
+ <span class="muted">标注时间与实际画面相差不超过一个输出帧(按 pts 定位,不受 B 帧重排影响)</span>
+</div>
+<div class="frames">
+ <figure><img id="img_src" alt=""><figcaption>原片 <span id="pts_src"></span></figcaption></figure>
+ <figure><img id="img_a" alt=""><figcaption>输出 A <span id="pts_a"></span></figcaption></figure>
+ <figure><img id="img_b" alt=""><figcaption>输出 B <span id="pts_b"></span></figcaption></figure>
+</div>
+
+<h2>6. 播放对比(同一轮真实输出)</h2>
+<div id="players" class="muted">尚未转码。</div>
+<div style="margin-top:6px"><button onclick="syncPlay()">从当前时刻同步播放</button></div>
+
+<script>
+let S = {run:null, out:null, win:1, fps:30, dur:0, t:0, target:0, regions:[], sel:null};
+const $ = i => document.getElementById(i);
+
+function fmtB(b){ return b>=1048576 ? (b/1048576).toFixed(2)+' MB' : (b/1024).toFixed(1)+' KB'; }
+
+async function upload(){
+  const f = $('file').files[0]; if(!f) return;
+  const fd = new FormData(); fd.append('file', f);
+  const r = await (await fetch('/api/upload', {method:'POST', body:fd})).json();
+  if(!r.ok){
+    $('inputErr').textContent = (r.error ? r.error+'\n' : '') + (r.problems||[]).join('\n');
+    $('inputInfo').textContent = ''; return;
+  }
+  $('inputErr').textContent = ''; showInput(r.info);
+}
+function showInput(i){
+  S.fps = i.fps || 30; S.dur = i.duration;
+  $('inputInfo').textContent = `已载入: ${i.duration.toFixed(2)}s · ${i.width}x${i.height} · ${i.fps.toFixed(2)}fps · 音频 ${i.acodec||'无'}`;
+}
+async function makeSample(){
+  $('inputInfo').textContent = '正在生成样片…';
+  const r = await (await fetch('/api/sample', {method:'POST'})).json();
+  if(r.ok){ $('inputErr').textContent=''; showInput(r.info); }
+  else $('inputErr').textContent = r.error || '生成失败';
+}
+function cfg(p){
+  const c = {vkbps:+$(p+'_v').value, gop:+$(p+'_g').value, preset:$(p+'_p').value};
+  const m = +$(p+'_m').value;
+  if(m > 0){ c.maxrate = m; c.bufsize = Math.max(1, Math.round(m/2)); }
+  return c;
+}
+
+async function runAll(){
+  $('err').textContent = ''; $('running').textContent = '转码中,请稍候…';
+  const body = {target_mb:+$('target').value, window:+$('window').value,
+                audio_kbps:+$('akbps').value, configs:{a:cfg('a'), b:cfg('b')}};
+  let r;
+  try{
+    r = await (await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'},
+                                        body:JSON.stringify(body)})).json();
+  }catch(e){ r = {ok:false, error:String(e)}; }
+  $('running').textContent = '';
+  if(!r.ok){
+    // 本轮失败:清空旧结果,不把旧文件当作本轮成功结果
+    S.run = null; S.out = null; S.sel = null;
+    $('stats').innerHTML = '<span class="muted">本轮失败,无有效结果。</span>';
+    $('players').innerHTML = ''; $('winInfo').textContent=''; $('kfInfo').textContent='';
+    clearChart(); clearFrames();
+    $('err').textContent = '本轮转码失败' + (r.failed ? '(配置 '+r.failed.toUpperCase()+')' : '') + ':\n' + (r.error||'');
+    return;
+  }
+  S.run = r.run; S.out = r.outputs; S.win = r.window; S.target = r.target_bytes; S.sel = null;
+  S.dur = Math.max(r.outputs.a.duration, r.outputs.b.duration);
+  S.fps = r.outputs.a.fps || S.fps;
+  renderStats(r); drawChart(); renderKfInfo(); buildPlayers(r);
+  S.t = 0; updateFrames(); showSel();
+}
+
+function renderStats(r){
+  const A = r.outputs.a, B = r.outputs.b, tgt = r.target_bytes;
+  const rows = [
+    ['文件大小(实测)', o=>fmtB(o.size)],
+    ['时长', o=>o.duration.toFixed(3)+' s'],
+    ['平均视频码率(实测)', o=>o.avg_video_kbps.toFixed(1)+' kbps'],
+    ['视频数据', o=>fmtB(o.video_bytes)],
+    ['音频数据', o=>fmtB(o.audio_bytes)],
+    ['封装开销', o=>fmtB(o.overhead_bytes)],
+    ['窗口视频字节合计', o=>{
+       const s = o.video_window_bytes.reduce((a,b)=>a+b,0);
+       return fmtB(s) + (s===o.video_bytes ? ' ✓=视频包总量' : ' ✗≠视频包总量');}],
+    ['与目标偏差', o=>{
+       if(!tgt) return '—';
+       const d = o.size - tgt;
+       return (d>=0?'+':'-') + fmtB(Math.abs(d)) + ' (' + (100*d/tgt).toFixed(1) + '%)';}],
+  ];
+  let h = '<table><tr><th></th><th>输出 A</th><th>输出 B</th></tr>';
+  for(const [name,f] of rows) h += `<tr><th>${name}</th><td>${f(A)}</td><td>${f(B)}</td></tr>`;
+  h += '</table>';
+  if(tgt > 0) for(const [tag,o] of [['A',A],['B',B]]){
+    const floor = o.audio_bytes + o.overhead_bytes;
+    if(tgt < floor)
+      h += `<div class="warn">输出 ${tag}:目标 ${fmtB(tgt)} 小于实测音频+封装开销 ${fmtB(floor)},无论如何都装不下,请提高目标或降低音频码率。</div>`;
+    else if(o.size > tgt)
+      h += `<div class="warn">输出 ${tag}:超出目标 ${fmtB(o.size-tgt)}。</div>`;
+    else
+      h += `<div class="ok">输出 ${tag}:在目标体积内(余量 ${fmtB(tgt-o.size)})。</div>`;
+  }
+  $('stats').innerHTML = h;
+}
+
+function renderKfInfo(){
+  const A = S.out.a, B = S.out.b;
+  $('kfInfo').textContent =
+    'A 关键帧(s): ' + A.keyframes.map(k=>k.toFixed(2)).join(', ') +
+    ' | 间隔: ' + A.keyframe_intervals.join(', ') +
+    '  ‖  B 关键帧(s): ' + B.keyframes.map(k=>k.toFixed(2)).join(', ') +
+    ' | 间隔: ' + B.keyframe_intervals.join(', ');
+}
+
+const COL_A = '#4a90d9', COL_B = '#e8863a';
+function clearChart(){ const c=$('chart').getContext('2d'); c.clearRect(0,0,$('chart').width,$('chart').height); }
+
+function drawChart(){
+  const cv = $('chart'), ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0,0,W,H); S.regions = [];
+  if(!S.out) return;
+  const A = S.out.a, B = S.out.b;
+  const ml=56, mr=14, mt=54, mb=36;
+  const x0=ml, y0=H-mb, pw=W-ml-mr, ph=y0-mt;
+  const n = A.video_window_bytes.length, dur = S.dur;
+  const maxK = Math.max(1, ...A.video_window_kbps, ...B.video_window_kbps) * 1.15;
+  ctx.font = '11px sans-serif';
+  ctx.strokeStyle = '#bbb';
+  ctx.beginPath(); ctx.moveTo(x0,mt); ctx.lineTo(x0,y0); ctx.lineTo(x0+pw,y0); ctx.stroke();
+  const stepT = dur > 10 ? 2 : 1;
+  for(let t=0; t<=dur+1e-6; t+=stepT){
+    const x = x0 + t/dur*pw;
+    ctx.strokeStyle='#eee'; ctx.beginPath(); ctx.moveTo(x,mt); ctx.lineTo(x,y0); ctx.stroke();
+    ctx.fillStyle='#666'; ctx.fillText(t+'s', x-6, y0+14);
+  }
+  for(let k=0;k<=4;k++){
+    const v = maxK*k/4, y = y0 - ph*k/4;
+    ctx.strokeStyle='#eee'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+pw,y); ctx.stroke();
+    ctx.fillStyle='#666'; ctx.fillText(String(Math.round(v)), 8, y+3);
+  }
+  ctx.fillText('kbps', 8, mt-4);
+  const slot = pw/n, bw = slot*0.32;
+  for(let i=0;i<n;i++){
+    const bx = x0 + i*slot;
+    const hA = A.video_window_kbps[i]/maxK*ph, hB = B.video_window_kbps[i]/maxK*ph;
+    ctx.fillStyle = COL_A; ctx.fillRect(bx+slot*0.12, y0-hA, bw, hA);
+    ctx.fillStyle = COL_B; ctx.fillRect(bx+slot*0.12+bw+2, y0-hB, bw, hB);
+    S.regions.push({x:bx, y:mt, w:slot, h:ph, type:'win', i:i, t:i*S.win});
+  }
+  if(S.sel && S.sel.type==='win'){
+    ctx.strokeStyle='#c0392b'; ctx.lineWidth=2;
+    ctx.strokeRect(x0+S.sel.i*slot, mt, slot, ph); ctx.lineWidth=1;
+  }
+  for(const [o,c] of [[A,COL_A],[B,COL_B]]){
+    const y = y0 - o.avg_audio_kbps/maxK*ph;
+    ctx.strokeStyle=c; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+pw,y); ctx.stroke(); ctx.setLineDash([]);
+  }
+  drawKfs(ctx, A.keyframes, COL_A, mt-26, x0, pw, dur, 'A');
+  drawKfs(ctx, B.keyframes, COL_B, mt-10, x0, pw, dur, 'B');
+  // 图例
+  ctx.fillStyle=COL_A; ctx.fillRect(x0+pw-300, 8, 10, 10);
+  ctx.fillStyle=COL_B; ctx.fillRect(x0+pw-220, 8, 10, 10);
+  ctx.fillStyle='#333';
+  ctx.fillText('A 视频', x0+pw-286, 17); ctx.fillText('B 视频', x0+pw-206, 17);
+  ctx.fillText('▲ 关键帧(上A下B)', x0+pw-140, 17);
+  ctx.strokeStyle='#888'; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(x0+pw-58, 13); ctx.lineTo(x0+pw-38, 13); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillText('音频均值', x0+pw-34, 17);
+}
+
+function drawKfs(ctx, kfs, color, y, x0, pw, dur, tag){
+  ctx.fillStyle = color;
+  const xs = kfs.map(k => x0 + k/dur*pw);
+  xs.forEach((x, idx) => {
+    ctx.beginPath(); ctx.moveTo(x, y-5); ctx.lineTo(x-5, y+4); ctx.lineTo(x+5, y+4);
+    ctx.closePath(); ctx.fill();
+    S.regions.push({x:x-7, y:y-8, w:14, h:14, type:'kf', t:kfs[idx], tag:tag, idx:idx});
+  });
+  ctx.fillStyle='#666'; ctx.font='10px sans-serif';
+  for(let i=1;i<xs.length;i++){
+    if(xs[i]-xs[i-1] > 34) ctx.fillText((kfs[i]-kfs[i-1]).toFixed(1)+'s', (xs[i-1]+xs[i])/2-10, y-8);
+  }
+  ctx.fillText(tag, x0-16, y+4);
+  ctx.font='11px sans-serif';
+}
+
+$('chart').addEventListener('click', ev => {
+  if(!S.out) return;
+  const r = $('chart').getBoundingClientRect();
+  const x = ev.clientX - r.left, y = ev.clientY - r.top;
+  for(let i=S.regions.length-1; i>=0; i--){
+    const g = S.regions[i];
+    if(x>=g.x && x<=g.x+g.w && y>=g.y && y<=g.y+g.h){
+      S.sel = g; S.t = g.t;
+      drawChart(); showSel(); updateFrames();
+      return;
+    }
+  }
+});
+
+function showSel(){
+  if(!S.out || !S.sel){ $('winInfo').textContent=''; return; }
+  const A = S.out.a, B = S.out.b;
+  if(S.sel.type === 'win'){
+    const i = S.sel.i, t0 = i*S.win, t1 = Math.min(t0+S.win, S.dur);
+    $('winInfo').textContent =
+      `窗口 [${t0.toFixed(1)}s, ${t1.toFixed(1)}s): ` +
+      `A 视频 ${fmtB(A.video_window_bytes[i])} (${A.video_window_kbps[i].toFixed(0)} kbps) · 音频 ${fmtB(A.audio_window_bytes[i])}  |  ` +
+      `B 视频 ${fmtB(B.video_window_bytes[i])} (${B.video_window_kbps[i].toFixed(0)} kbps) · 音频 ${fmtB(B.audio_window_bytes[i])}`;
+  }else{
+    const o = S.sel.tag==='A' ? A : B, i = S.sel.idx, kfs = o.keyframes;
+    let s = `${S.sel.tag} 关键帧 @ ${kfs[i].toFixed(3)}s`;
+    if(i>0) s += `,距上一个 ${(kfs[i]-kfs[i-1]).toFixed(3)}s`;
+    if(i<kfs.length-1) s += `,距下一个 ${(kfs[i+1]-kfs[i]).toFixed(3)}s`;
+    $('winInfo').textContent = s;
+  }
+}
+
+async function updateFrames(){
+  if(!S.run) return;
+  $('tLabel').textContent = 't = ' + S.t.toFixed(3) + ' s';
+  for(const w of ['src','a','b']){
+    try{
+      const resp = await fetch(`/api/frame?run=${S.run}&which=${w}&t=${S.t.toFixed(4)}`);
+      if(!resp.ok) continue;
+      const pts = resp.headers.get('X-Frame-Pts');
+      const blob = await resp.blob();
+      $('img_'+w).src = URL.createObjectURL(blob);
+      $('pts_'+w).textContent = '实际帧 pts = ' + parseFloat(pts).toFixed(3) + 's';
+    }catch(e){}
+  }
+}
+function stepFrame(df){
+  if(!S.run) return;
+  S.t = Math.min(Math.max(0, S.t + df/S.fps), S.dur - 0.5/S.fps);
+  S.sel = null; drawChart(); updateFrames();
+}
+function clearFrames(){
+  for(const w of ['src','a','b']){ $('img_'+w).src=''; $('pts_'+w).textContent=''; }
+  $('tLabel').textContent = 't = —';
+}
+
+function buildPlayers(r){
+  $('players').innerHTML =
+    `<div class="videos"><div><div>输出 A</div><video id="va" controls src="/media/${r.run}/a.mp4"></video></div>` +
+    `<div><div>输出 B</div><video id="vb" controls src="/media/${r.run}/b.mp4"></video></div></div>`;
+}
+function syncPlay(){
+  const a=$('va'), b=$('vb'); if(!a) return;
+  a.currentTime=S.t; b.currentTime=S.t; a.play(); b.play();
+}
+</script>
+</body>
+</html>
