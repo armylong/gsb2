@@ -1,0 +1,17 @@
+{
+  "name": "hls-vod-lab",
+  "private": true,
+  "version": "0.1.0",
+  "description": "本地 HLS 点播排障实验台：React + hls.js 播放器、可开关的故障模拟服务、FFmpeg 样例素材与自动化验证",
+  "scripts": {
+    "setup": "npm install && npm --prefix web install",
+    "generate:media": "bash scripts/generate-media.sh",
+    "server": "node server/index.js",
+    "web": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "verify": "bash scripts/verify.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.2"
+  }
+}
