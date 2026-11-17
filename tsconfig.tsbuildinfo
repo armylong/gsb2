@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/components/compareview.tsx","./src/lut/applylut.ts","./src/lut/cubeparser.ts","./src/lut/srgb.ts","./src/webgl/renderer.ts","./server/imageio.ts","./server/index.ts","./scripts/generate-samples.ts","./scripts/verify.ts","./vite.config.ts"],"version":"5.9.3"}
