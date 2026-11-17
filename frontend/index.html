@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>本地视频取帧</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>本地视频取帧</h1>
+    <span class="subtitle">ffmpeg 驱动 · 真实帧时间 · 本地运行，不上传服务器之外的任何地方</span>
+  </header>
+
+  <main class="layout">
+    <!-- 左栏：导入与参数 -->
+    <section class="panel panel-left">
+      <h2>1. 导入视频</h2>
+      <div class="import-box">
+        <input type="file" id="fileInput" accept="video/*,.mkv,.mov,.avi,.ts,.flv,.wmv" />
+        <div class="or">或使用本地样例</div>
+        <select id="sampleSelect">
+          <option value="">加载样例视频…</option>
+        </select>
+      </div>
+      <div id="importError" class="error-box hidden"></div>
+
+      <div id="mediaInfo" class="hidden">
+        <h2>2. 媒体信息</h2>
+        <dl class="info-grid">
+          <dt>文件</dt><dd id="infoName">—</dd>
+          <dt>时长</dt><dd id="infoDuration">—</dd>
+          <dt>封装</dt><dd id="infoFormat">—</dd>
+          <dt>帧率特征</dt><dd id="infoVfr">—</dd>
+        </dl>
+        <label class="stream-label" for="streamSelect">处理的视频流</label>
+        <select id="streamSelect"></select>
+        <div id="streamDetail" class="stream-detail"></div>
+      </div>
+
+      <div id="analysisPanel" class="hidden">
+        <h2>3. 取帧参数</h2>
+        <div class="mode-switch">
+          <label><input type="radio" name="mode" value="interval" checked /> 固定间隔</label>
+          <label><input type="radio" name="mode" value="scene" /> 画面变化</label>
+        </div>
+
+        <div class="form-row">
+          <label for="startInput">时间范围 起 (s)</label>
+          <input type="number" id="startInput" min="0" step="0.1" value="0" />
+        </div>
+        <div class="form-row">
+          <label for="endInput">时间范围 止 (s)</label>
+          <input type="number" id="endInput" min="0" step="0.1" />
+        </div>
+
+        <div id="intervalOptions">
+          <div class="form-row">
+            <label for="intervalInput">取帧间隔 (s)</label>
+            <input type="number" id="intervalInput" min="0.05" step="0.1" value="1" />
+          </div>
+        </div>
+
+        <div id="sceneOptions" class="hidden">
+          <div class="form-row">
+            <label for="sensitivityInput">变化灵敏度 <span id="sensitivityValue">3</span></label>
+            <input type="range" id="sensitivityInput" min="1" max="5" step="1" value="3" />
+            <div class="hint">1 = 只找最明显的硬切换，5 = 连轻微变化也报</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="maxFramesInput">最多帧数</label>
+          <input type="number" id="maxFramesInput" min="1" max="500" step="1" value="20" />
+        </div>
+        <div class="form-row">
+          <label for="minGapInput">相邻候选最小间隔 (s)</label>
+          <input type="number" id="minGapInput" min="0" step="0.1" value="0.5" />
+        </div>
+
+        <div class="button-row">
+          <button id="analyzeBtn" class="primary">开始分析</button>
+          <button id="cancelBtn" class="danger hidden">取消</button>
+        </div>
+        <div id="progressBox" class="hidden">
+          <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+          <div id="progressText" class="progress-text">准备中…</div>
+        </div>
+        <div id="analysisMessage" class="message-box hidden"></div>
+
+        <h2>4. 手动补加</h2>
+        <div class="form-row inline">
+          <input type="number" id="manualTime" min="0" step="0.01" placeholder="时间（秒）" />
+          <button id="addFrameBtn">补加该时间</button>
+        </div>
+        <div class="hint">请求时间落在两帧之间时，会选中最接近的真实帧并显示其实际时间；同一真实帧不会重复出图。</div>
+
+        <h2>5. 导出</h2>
+        <div class="button-row">
+          <button id="exportBtn">导出选中截图 (zip)</button>
+          <button id="sheetBtn">总览图</button>
+        </div>
+        <div class="hint">zip 内含截图、带时间标签的总览图和 manifest 清单（请求时间 vs 实际帧时间）。</div>
+      </div>
+    </section>
+
+    <!-- 右栏：预览与候选 -->
+    <section class="panel panel-right">
+      <h2>预览播放器</h2>
+      <div class="player-wrap">
+        <video id="player" controls preload="metadata"></video>
+      </div>
+
+      <div class="candidates-header">
+        <h2>候选帧 <span id="candidateCount" class="count-badge">0</span></h2>
+        <div class="candidate-actions">
+          <button id="selectAllBtn" class="small">全选</button>
+          <button id="selectNoneBtn" class="small">全不选</button>
+        </div>
+      </div>
+      <div id="candidateGrid" class="candidate-grid">
+        <div class="empty-hint">导入视频并开始分析后，候选帧会显示在这里。</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
