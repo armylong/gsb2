@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314171f'/%3E%3Ccircle cx='13' cy='12' r='6' fill='%23ffd23d'/%3E%3Cellipse cx='17' cy='22' rx='9' ry='4' fill='%234da6ff'/%3E%3C/svg%3E" />
+    <title>三维方向光阴影诊断台</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <strong>阴影诊断台</strong>
+        <span class="subtitle">方向光覆盖范围 / 偏移 / 清晰度 · 实时诊断</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="mode-switch" role="group" aria-label="模式切换">
+          <button id="mode-single" class="active">单组诊断</button>
+          <button id="mode-compare">A/B 对比</button>
+        </div>
+        <label class="move-toggle">
+          <input type="checkbox" id="move-toggle" />
+          拖动物体
+        </label>
+        <button id="reset-view" class="btn">重置视角</button>
+        <button id="reset-params" class="btn">重置参数</button>
+        <button id="reset-scene" class="btn btn-primary">恢复初始状态</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="stage-area">
+        <div id="compare-bar" class="compare-bar hidden">
+          <span id="badge-a" class="badge badge-a">A 组</span>
+          <span class="compare-hint">两组共享相机与物体位置，可在下方切换编辑组</span>
+          <span id="badge-b" class="badge badge-b">B 组</span>
+          <div class="side-switch">
+            <label><input type="radio" name="active-side" value="A" checked /> 编辑 A</label>
+            <label><input type="radio" name="active-side" value="B" /> 编辑 B</label>
+          </div>
+        </div>
+        <div class="stages">
+          <div class="stage-wrap">
+            <span class="stage-tag tag-a">A 组场景</span>
+            <div id="stage-a" class="stage"></div>
+          </div>
+          <div class="stage-wrap stage-b-wrap hidden">
+            <span class="stage-tag tag-b">B 组场景</span>
+            <div id="stage-b" class="stage"></div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="legend-box" style="background:#ffd23d"></i>阴影覆盖区/截锥</span>
+          <span><i class="legend-box" style="background:#4da6ff"></i>相机视野区</span>
+          <span><i class="legend-dot" style="background:#3ddc84"></i>覆盖区内</span>
+          <span><i class="legend-dot" style="background:#ff4d4d"></i>超出正交范围</span>
+          <span><i class="legend-dot" style="background:#ff8a3d"></i>超出远平面</span>
+          <span><i class="legend-dot" style="background:#ffd23d"></i>近平面裁剪</span>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="sidebar-scroll">
+          <div id="controls"></div>
+          <div id="diagnosis" class="diagnosis"></div>
+          <div id="diff-panel" class="diff-panel hidden"></div>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
