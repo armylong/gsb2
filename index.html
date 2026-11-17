@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>双目立体相机与视差观察实验室</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <div class="title">双目立体相机与视差观察实验室 <span class="sub">Stereo Camera &amp; Screen Parallax Lab · 纯本地 · 单位:米(m)</span></div>
+        <div id="hud" class="hud"></div>
+      </header>
+
+      <main id="main">
+        <section id="stage">
+          <div id="canvas-wrap">
+            <canvas id="gl"></canvas>
+            <div id="overlay" class="overlay">
+              <div id="vp-left" class="vp-label"><span class="eye-badge eye-L">L 左眼</span><span class="vp-size"></span></div>
+              <div id="vp-right" class="vp-label"><span class="eye-badge eye-R">R 右眼</span><span class="vp-size"></span></div>
+              <div id="crosshair-left" class="crosshair"></div>
+              <div id="crosshair-right" class="crosshair"></div>
+              <canvas id="minimap" width="240" height="200"></canvas>
+              <div id="msg-bar" class="msg-bar"></div>
+            </div>
+          </div>
+
+          <div id="marker-strip" class="marker-strip"></div>
+        </section>
+
+        <aside id="panel">
+          <section class="card">
+            <h3>1. 显示方式</h3>
+            <div class="row" id="view-mode-row">
+              <label><input type="radio" name="viewmode" value="sbs" checked /> 双眼并排</label>
+              <label><input type="radio" name="viewmode" value="left" /> 仅左眼</label>
+              <label><input type="radio" name="viewmode" value="right" /> 仅右眼</label>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="show-helpers" checked /> 显示会聚面 / 视锥 / 眼位</label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>2. 双眼成像参数（两眼共用）</h3>
+            <div class="ctrl" data-param="baseline">
+              <div class="ctrl-head"><label>基线 b（两眼间距）</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="0" max="1" step="0.005" /><input type="number" min="0" max="1" step="0.005" /><em>m</em></div>
+            </div>
+            <div class="ctrl" data-param="convergence">
+              <div class="ctrl-head"><label>会聚距离 zc（零视差面）</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="2" max="40" step="0.1" /><input type="number" min="2" max="40" step="0.1" /><em>m</em></div>
+            </div>
+            <div class="ctrl" data-param="fov">
+              <div class="ctrl-head"><label>水平视角 HFOV</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="20" max="110" step="1" /><input type="number" min="20" max="110" step="1" /><em>°</em></div>
+            </div>
+            <div class="ctrl" data-param="near">
+              <div class="ctrl-head"><label>近裁剪 near</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="0.05" max="5" step="0.05" /><input type="number" min="0.05" max="5" step="0.05" /><em>m</em></div>
+            </div>
+            <div class="ctrl" data-param="far">
+              <div class="ctrl-head"><label>远裁剪 far</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="10" max="120" step="1" /><input type="number" min="10" max="120" step="1" /><em>m</em></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>3. 观察姿态</h3>
+            <div class="row"><button id="btn-pose-reset">恢复固定观察姿态</button><button id="btn-pose-save">保存当前姿态</button><button id="btn-pose-load">加载已存姿态</button></div>
+            <div id="pose-readout" class="readout mono"></div>
+          </section>
+
+          <section class="card">
+            <h3>4. 视差安全范围（单眼画面宽度百分比）</h3>
+            <div class="ctrl" data-param="safePct">
+              <div class="ctrl-head"><label>允许 |归一化视差| ≤</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="0.5" max="10" step="0.1" /><input type="number" min="0.5" max="10" step="0.1" /><em>%</em></div>
+            </div>
+            <p class="hint">
+              符号约定：<b>归一化视差 d = (x<sub>L</sub> − x<sub>R</sub>) / W</b>，x 为屏幕像素坐标(向右为正)，W 为单眼视口宽度。
+              会聚面 d=0；比会聚面<b>近</b>的物体 d &gt; 0（交叉视差）；比会聚面<b>远</b> d &lt; 0（非交叉视差）。
+            </p>
+          </section>
+
+          <section class="card">
+            <h3>5. 可移动物体（紫色球，可在 3D 画面中直接拖动）</h3>
+            <div class="ctrl" data-param="objectZ">
+              <div class="ctrl-head"><label>深度 z（相机局部前方距离）</label><span class="val"></span></div>
+              <div class="input-line"><input type="range" min="0.5" max="60" step="0.1" /><input type="number" min="0.5" max="60" step="0.1" /><em>m</em></div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="depth-lock" /> 暂停在指定深度（锁定，忽略 3D 拖动）</label>
+            </div>
+            <div class="row">
+              <button id="btn-snap-conv">吸附到会聚面</button>
+              <button id="btn-snap-near">移到近裁剪面</button>
+              <button id="btn-snap-far">移到远裁剪面</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>6. 固定用例</h3>
+            <div class="row wrap">
+              <button data-case="zeroBaseline">用例A：基线=0</button>
+              <button data-case="onConvergence">用例B：物体位于会聚面</button>
+              <button data-case="crossNear">用例C：跨过近裁剪面</button>
+              <button data-case="crossFar">用例D：跨过远裁剪面</button>
+            </div>
+            <div class="row"><button id="btn-restore-defaults">恢复默认参数</button></div>
+          </section>
+
+          <section class="card">
+            <h3>7. 选定标记读数</h3>
+            <div id="selected-readout" class="readout mono">点击场景中的彩色标记或下方列表选择标记。</div>
+          </section>
+
+          <section class="card">
+            <h3>8. 验证与导出</h3>
+            <div class="row wrap">
+              <button id="btn-selftest">运行页面内几何自检</button>
+              <button id="btn-export">导出参数与读数 JSON</button>
+            </div>
+            <pre id="selftest-out" class="selftest mono"></pre>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

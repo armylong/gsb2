@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# 冒烟测试截图产物
+scripts/smoke-screenshot.png
