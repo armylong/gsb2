@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>二维笔画转网格工具</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="panel"></div>
+      <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+        <div style="display:flex;gap:8px;padding:8px 10px;background:#141925;border-bottom:1px solid #242d40;">
+          <button id="fit-btn" style="flex:0 0 auto;">适应视图</button>
+          <button id="compare-btn" style="flex:0 0 auto;">打开对照视图（不同缩放）</button>
+          <span class="muted" style="align-self:center;">
+            几何只在路径或参数变化时重建；缩放/平移仅改变正交相机，不重新分段，比例保持不变。
+          </span>
+        </div>
+        <div id="views" style="flex:1;min-height:0;"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "stroke-mesh-tool",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "二维笔画转三角网格小工具（three.js + TypeScript）",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "earcut": "^2.2.4",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/earcut": "^2.1.4",
+    "@types/three": "^0.170.0",
+    "puppeteer-core": "^23.11.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
