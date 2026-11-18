@@ -1,0 +1,222 @@
+:root {
+  --panel-bg: rgba(18, 22, 28, 0.92);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --text: #e8edf2;
+  --muted: #9aa7b5;
+  --accent: #5ec8ff;
+  --warn: #ffcf6b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0e12;
+  color: var(--text);
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+#panel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 320px;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  backdrop-filter: blur(8px);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#panel h1 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+#panel h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+
+#panel section {
+  border-top: 1px solid var(--panel-border);
+  padding-top: 4px;
+}
+
+#panel section:first-of-type {
+  border-top: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.row.toggle {
+  cursor: pointer;
+}
+
+.row.buttons {
+  flex-wrap: nowrap;
+}
+
+.row.buttons.wrap {
+  flex-wrap: wrap;
+}
+
+button {
+  flex: 1 1 auto;
+  background: rgba(94, 200, 255, 0.14);
+  border: 1px solid rgba(94, 200, 255, 0.45);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgba(94, 200, 255, 0.28);
+}
+
+.slider {
+  margin: 8px 0;
+}
+
+.slider-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.slider-head label {
+  color: var(--text);
+}
+
+output {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.readout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  margin: 0;
+}
+
+.readout dt {
+  color: var(--muted);
+}
+
+.readout dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 8px 0 0;
+}
+
+#range-hint {
+  color: var(--warn);
+}
+
+.view-label {
+  position: absolute;
+  top: 14px;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  display: none;
+}
+
+#label-left {
+  left: 18px;
+}
+
+#label-right {
+  left: calc(50% + 18px);
+}
+
+#split-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.65);
+  transform: translateX(-1px);
+  pointer-events: none;
+  display: none;
+}
+
+body.split #label-left,
+body.split #label-right,
+body.split #split-divider {
+  display: block;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  background: rgba(40, 30, 12, 0.92);
+  border: 1px solid rgba(255, 207, 107, 0.55);
+  color: var(--warn);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  max-width: 70%;
+  text-align: center;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.toast.hidden {
+  opacity: 0;
+}

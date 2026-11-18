@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>景深焦平面与散景预览</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="stage"></canvas>
+
+      <div id="label-left" class="view-label">原画</div>
+      <div id="label-right" class="view-label">景深</div>
+      <div id="split-divider"></div>
+
+      <aside id="panel">
+        <h1>景深焦平面预览</h1>
+
+        <section>
+          <h2>景深开关 / 视图</h2>
+          <label class="row toggle">
+            <input type="checkbox" id="dof-enabled" checked />
+            <span>启用景深（关闭后全场景清晰）</span>
+          </label>
+          <label class="row toggle">
+            <input type="checkbox" id="split-enabled" />
+            <span>分屏对比（左原画 / 右景深）</span>
+          </label>
+          <label class="row toggle">
+            <input type="checkbox" id="helpers-enabled" checked />
+            <span>显示焦平面辅助物</span>
+          </label>
+          <label class="row toggle">
+            <input type="checkbox" id="motion-enabled" checked />
+            <span>自动移动测试物体</span>
+          </label>
+          <div class="row buttons">
+            <button id="btn-reset" type="button">相机复位</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>焦点与模糊参数</h2>
+          <div class="slider">
+            <div class="slider-head">
+              <label for="focus-distance">焦距位置（相机前方距离）</label>
+              <output id="focus-distance-val">—</output>
+            </div>
+            <input type="range" id="focus-distance" min="3" max="34" step="0.1" value="14" />
+          </div>
+          <div class="slider">
+            <div class="slider-head">
+              <label for="focus-range">清晰范围（焦平面两侧全宽）</label>
+              <output id="focus-range-val">—</output>
+            </div>
+            <input type="range" id="focus-range" min="0.4" max="10" step="0.1" value="2.5" />
+          </div>
+          <div class="slider">
+            <div class="slider-head">
+              <label for="max-blur">最大模糊半径</label>
+              <output id="max-blur-val">—</output>
+            </div>
+            <input type="range" id="max-blur" min="0" max="24" step="0.5" value="10" />
+          </div>
+          <p class="hint" id="range-hint"></p>
+        </section>
+
+        <section>
+          <h2>现场预设</h2>
+          <div class="row buttons wrap">
+            <button id="preset-near" type="button">对焦近排</button>
+            <button id="preset-far" type="button">对焦远排</button>
+            <button id="preset-slant" type="button">斜看同一焦平面</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>选点读数</h2>
+          <dl class="readout">
+            <dt>选定点深度</dt><dd id="read-depth">—</dd>
+            <dt>当前焦距</dt><dd id="read-focus">—</dd>
+            <dt>离焦程度</dt><dd id="read-defocus">—</dd>
+            <dt>最近清晰 / 最远清晰</dt><dd id="read-limits">—</dd>
+          </dl>
+        </section>
+
+        <p class="hint">操作：左键拖动旋转 · 滚轮缩放 · 右键平移 · 单击可见表面设置焦点</p>
+      </aside>
+
+      <div id="toast" class="toast hidden"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
