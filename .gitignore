@@ -36,6 +36,8 @@ bin/
 coverage/
 .coverage
 .pytest_cache/
+*.so
+*.dylib
 
 # ---- 系统与IDE ----
 .DS_Store
