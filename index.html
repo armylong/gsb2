@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>可移动平面镜反射演示</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1d22;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    #app { position: fixed; inset: 0; }
+    #panel {
+      position: fixed; top: 0; right: 0; width: 320px; max-height: 100%;
+      overflow-y: auto; box-sizing: border-box; padding: 12px 14px;
+      background: rgba(16, 18, 22, 0.88); color: #cfd6de; font-size: 12px;
+      border-left: 1px solid #333a44; backdrop-filter: blur(4px);
+    }
+    #panel h1 { font-size: 14px; margin: 0 0 8px; color: #fff; }
+    #panel h2 { font-size: 12px; margin: 12px 0 4px; color: #8fb8ff; }
+    .ro { font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+      line-height: 1.55; white-space: pre-wrap; word-break: break-all;
+      background: #10141a; border: 1px solid #2a313c; border-radius: 4px; padding: 6px 8px; }
+    .row { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+    .row label { flex: 0 0 64px; color: #9aa6b2; }
+    .row input[type="range"] { flex: 1; }
+    .row input[type="number"] { width: 58px; background: #10141a; color: #cfd6de;
+      border: 1px solid #2a313c; border-radius: 3px; padding: 2px 4px; }
+    .row span.val { width: 52px; text-align: right; font-family: ui-monospace, Menlo, monospace; }
+    button { background: #2b3648; color: #dfe7f0; border: 1px solid #41506b;
+      border-radius: 4px; padding: 5px 9px; margin: 2px 4px 2px 0; cursor: pointer; font-size: 12px; }
+    button:hover { background: #37455e; }
+    button.active { background: #4a6a4f; border-color: #5f8a66; }
+    #log { font-family: ui-monospace, Menlo, monospace; font-size: 11px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all; background: #0c0f13;
+      border: 1px solid #2a313c; border-radius: 4px; padding: 6px 8px;
+      max-height: 180px; overflow-y: auto; color: #a8e6a3; }
+    .hint-text { color: #8b96a2; line-height: 1.5; }
+    #hint {
+      position: fixed; left: 50%; top: 14px; transform: translateX(-50%);
+      background: rgba(120, 40, 40, 0.92); color: #fff; padding: 8px 16px;
+      border-radius: 6px; font-size: 13px; display: none; z-index: 10;
+      border: 1px solid #e08080; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hint"></div>
+  <div id="panel">
+    <h1>平面镜反射演示</h1>
+
+    <h2>实时读数</h2>
+    <div class="ro" id="ro">…</div>
+
+    <h2>参照点（红球）与镜像（绿框球）</h2>
+    <div class="row">
+      <label>参照点 P</label>
+      <input type="number" id="rp-x" step="0.1" value="1" />
+      <input type="number" id="rp-y" step="0.1" value="1" />
+      <input type="number" id="rp-z" step="0.1" value="2" />
+    </div>
+
+    <h2>镜子位姿（也可直接拖拽镜框，Q/E 旋转）</h2>
+    <div class="row"><label>平移 X</label><input type="range" id="m-x" min="-8" max="8" step="0.05" value="0" /><span class="val" id="m-x-v"></span></div>
+    <div class="row"><label>平移 Z</label><input type="range" id="m-z" min="-8" max="8" step="0.05" value="-3" /><span class="val" id="m-z-v"></span></div>
+    <div class="row"><label>绕竖轴°</label><input type="range" id="m-rot" min="-180" max="180" step="1" value="0" /><span class="val" id="m-rot-v"></span></div>
+
+    <h2>现场（一键恢复）</h2>
+    <div class="row">
+      <button id="btn-p1">现场1 正对</button>
+      <button id="btn-p2">现场2 斜置</button>
+      <button id="btn-p3">现场3 前后夹持</button>
+    </div>
+
+    <h2>对照与自检</h2>
+    <div class="row">
+      <button id="btn-toggle">反射：开</button>
+      <button id="btn-check">运行自检</button>
+    </div>
+    <div id="log"></div>
+
+    <h2>操作说明</h2>
+    <div class="hint-text">
+      左键拖动空白处旋转视角，滚轮缩放，右键平移；左键按住镜子可拖动平移，Q/E 绕竖轴旋转。<br/>
+      黄色箭头 = 镜面法线（正面）；青色球 = 反射（虚拟）相机位置；红球 = 参照点；绿框球 = 其镜像。
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
