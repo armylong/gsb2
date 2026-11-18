@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# Vite 依赖预构建缓存
+.vite/

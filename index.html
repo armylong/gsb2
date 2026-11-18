@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voxel Lab · 体素场景检查器</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside class="panel" id="panel">
+        <header class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <h1>Voxel Lab</h1>
+            <p>有限体素场景 · 表面检查器</p>
+          </div>
+        </header>
+
+        <section class="group">
+          <div class="group-title">
+            <h2>材质</h2>
+            <span class="hint">1–8</span>
+          </div>
+          <div class="palette" id="palette" role="listbox" aria-label="选择材质"></div>
+        </section>
+
+        <section class="group">
+          <div class="group-title">
+            <h2>编辑模式</h2>
+            <span class="hint">V / X / C</span>
+          </div>
+          <div class="segmented" id="mode-switch" role="group" aria-label="编辑模式">
+            <button type="button" data-mode="add" class="active">添加</button>
+            <button type="button" data-mode="delete">删除</button>
+            <button type="button" data-mode="select">选择</button>
+          </div>
+        </section>
+
+        <section class="group">
+          <div class="group-title"><h2>辅助显示</h2></div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-wireframe" />
+            <span class="switch" aria-hidden="true"></span>
+            <span class="toggle-label">线框模式 <kbd>B</kbd></span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-boundaries" />
+            <span class="switch" aria-hidden="true"></span>
+            <span class="toggle-label">分块边界 <kbd>G</kbd></span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-selection" checked />
+            <span class="switch" aria-hidden="true"></span>
+            <span class="toggle-label">选中轮廓 <kbd>H</kbd></span>
+          </label>
+        </section>
+
+        <section class="group">
+          <div class="group-title"><h2>操作</h2></div>
+          <div class="button-row">
+            <button type="button" class="btn" id="btn-reset" title="恢复初始样例 (R)">
+              恢复样例
+            </button>
+            <button type="button" class="btn" id="btn-clear" title="清空场景">
+              清空
+            </button>
+          </div>
+          <div class="button-row">
+            <button type="button" class="btn" id="btn-camera" title="重置视角">
+              重置视角
+            </button>
+            <button type="button" class="btn btn-accent" id="btn-check" title="对比分块与整世界可见面">
+              表面自检
+            </button>
+          </div>
+          <p class="status" id="status" role="status">点击方块表面以添加；左键拖拽旋转。</p>
+        </section>
+
+        <section class="group stats-group">
+          <div class="group-title">
+            <h2>统计</h2>
+            <span class="hint" id="stats-version">v0</span>
+          </div>
+          <dl class="stats">
+            <div>
+              <dt>方块总数</dt>
+              <dd id="stat-total">—</dd>
+            </div>
+            <div>
+              <dt>不透明 / 透明</dt>
+              <dd id="stat-split">—</dd>
+            </div>
+            <div>
+              <dt>可见面</dt>
+              <dd id="stat-faces">—</dd>
+            </div>
+            <div>
+              <dt>分块</dt>
+              <dd id="stat-chunks">—</dd>
+            </div>
+            <div class="stat-wide">
+              <dt>编辑位置</dt>
+              <dd id="stat-position">—</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="panel-footer">
+          <p>
+            左键拖拽旋转 · 滚轮缩放 · 右键拖拽平移<br />
+            单击 <b>添加 / 删除 / 选择</b> 方块
+          </p>
+        </footer>
+      </aside>
+
+      <main class="viewport" id="viewport">
+        <canvas id="scene"></canvas>
+        <div class="viewport-badge" id="viewport-badge">
+          <span class="dot"></span>
+          <span id="badge-text">24 × 16 × 24 · 块 6</span>
+        </div>
+        <div class="legend" id="legend">
+          <span><i class="swatch opaque"></i>不透明</span>
+          <span><i class="swatch glass"></i>玻璃</span>
+          <span><i class="swatch water"></i>水</span>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

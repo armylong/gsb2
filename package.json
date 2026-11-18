@@ -1,0 +1,21 @@
+{
+  "name": "voxel-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "有限尺寸体素场景编辑器 · 分块网格化 · 透明材质 · 可检查表面",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
