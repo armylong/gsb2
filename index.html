@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三维屏幕空间环境遮蔽 (SSAO) 对比页</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>SSAO 对比页</h1>
+        <p class="sub">屏幕空间环境遮蔽 · 深度/法线来自当前画面实时渲染</p>
+
+        <section class="group">
+          <h2>1. 场景</h2>
+          <div class="row" id="sceneRow">
+            <button class="seg active" data-scene="corner">墙角</button>
+            <button class="seg" data-scene="sphere">悬空球</button>
+            <button class="seg" data-scene="cubes">密排方块</button>
+          </div>
+          <div class="muted" id="sceneCount"></div>
+        </section>
+
+        <section class="group">
+          <h2>2. 查看方式</h2>
+          <div class="col" id="viewRow">
+            <label class="opt"><input type="radio" name="view" value="off" /><span>单画面 · 关闭遮蔽（原始光照）</span></label>
+            <label class="opt"><input type="radio" name="view" value="on" /><span>单画面 · 开启遮蔽</span></label>
+            <label class="opt"><input type="radio" name="view" value="gray" /><span>单画面 · 遮蔽灰度图</span></label>
+            <label class="opt"><input type="radio" name="view" value="split" checked /><span>左右分屏比较</span></label>
+          </div>
+          <div class="row">
+            <label class="mini">分屏左</label>
+            <select id="leftMode">
+              <option value="off">关闭遮蔽</option>
+              <option value="on" selected>开启遮蔽</option>
+              <option value="gray">灰度图</option>
+            </select>
+            <label class="mini">右</label>
+            <select id="rightMode">
+              <option value="off">关闭遮蔽</option>
+              <option value="on">开启遮蔽</option>
+              <option value="gray" selected>灰度图</option>
+            </select>
+          </div>
+          <label class="slider">
+            <span>分界位置 <b id="splitVal">50%</b></span>
+            <input type="range" id="split" min="15" max="85" value="50" />
+          </label>
+        </section>
+
+        <section class="group">
+          <h2>3. 遮蔽参数（实时生效）</h2>
+          <label class="slider">
+            <span>遮蔽半径 radius <b id="radiusVal">8.0</b></span>
+            <input type="range" id="radius" min="0" max="32" step="0.1" value="8" />
+          </label>
+          <label class="slider">
+            <span>强度 intensity <b id="intensityVal">1.00</b></span>
+            <input type="range" id="intensity" min="0" max="2.5" step="0.01" value="1" />
+          </label>
+          <label class="slider">
+            <span>深度偏移 depthBias <b id="biasVal">0.020</b></span>
+            <input type="range" id="bias" min="0" max="0.3" step="0.001" value="0.02" />
+          </label>
+          <div class="row">
+            <label class="mini">平滑</label>
+            <select id="smooth">
+              <option value="off">关闭（原始颗粒）</option>
+              <option value="standard" selected>标准（5×5 模糊）</option>
+              <option value="high">高档（深度感知双边模糊）</option>
+            </select>
+          </div>
+          <label class="slider">
+            <span>球与地面间距 gap <b id="gapVal">0.10</b>（悬空球场景）</span>
+            <input type="range" id="gap" min="0.02" max="3" step="0.01" value="0.1" />
+          </label>
+        </section>
+
+        <section class="group">
+          <h2>4. 相机</h2>
+          <div class="row">
+            <button id="viewpointBtn" class="btn">恢复验证观察点</button>
+            <button id="resetBtn" class="btn">重置整个现场</button>
+          </div>
+          <div class="muted">左键旋转 · 右键平移 · 滚轮缩放</div>
+        </section>
+
+        <section class="group">
+          <h2>5. 固定观察点验证</h2>
+          <button id="verifyBtn" class="btn primary">运行像素级验证（7 项）</button>
+          <div id="verifyResult" class="verify"></div>
+        </section>
+
+        <section class="group status">
+          <h2>当前状态</h2>
+          <div id="status" class="status-grid"></div>
+        </section>
+      </aside>
+
+      <main id="stage">
+        <canvas id="canvas"></canvas>
+        <div id="divider"><div class="grip"></div><span id="divLabel"></span></div>
+        <div id="tagLeft" class="tag"></div>
+        <div id="tagRight" class="tag"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
