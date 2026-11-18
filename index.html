@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>二维导航网格寻路演示</title>
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <h1>二维导航网格寻路 <span class="sub">矩形空间分解 · A* · 漏斗算法 · 圆形角色体积</span></h1>
+      </header>
+      <main class="layout">
+        <section class="canvas-wrap">
+          <canvas id="stage"></canvas>
+          <div id="canvasHint" class="canvas-hint">
+            点击模式下在房间内点击放置点; 暂停后可拖动灰色障碍
+          </div>
+        </section>
+
+        <aside class="panel">
+          <section class="card">
+            <h2>布局</h2>
+            <div id="layoutButtons" class="btn-group"></div>
+            <p id="layoutDesc" class="desc"></p>
+          </section>
+
+          <section class="card">
+            <h2>交互模式</h2>
+            <div class="btn-group" id="modeButtons">
+              <button data-mode="start" class="mode-btn">设置起点</button>
+              <button data-mode="goal" class="mode-btn">设置终点</button>
+              <button data-mode="none" class="mode-btn active">仅观察/拖障碍</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>播放控制</h2>
+            <div class="btn-group">
+              <button id="btnPlay">播放</button>
+              <button id="btnPause">暂停</button>
+              <button id="btnReset">恢复布局</button>
+            </div>
+            <div class="btn-group" id="doorButtons"></div>
+          </section>
+
+          <section class="card">
+            <h2>角色半径</h2>
+            <div class="radius-row">
+              <input type="range" id="radiusRange" min="0.2" max="0.8" step="0.05" />
+              <span id="radiusValue" class="radius-value"></span>
+            </div>
+            <div class="toggles">
+              <label><input type="checkbox" id="chkCells" checked /> 可行走区域(cell)</label>
+              <label><input type="checkbox" id="chkPortals" checked /> 多边形连接(门户)</label>
+              <label><input type="checkbox" id="chkInflat" /> 障碍膨胀范围(体积)</label>
+            </div>
+          </section>
+
+          <section class="card stats">
+            <h2>状态与统计</h2>
+            <div id="statusPill" class="status-pill">—</div>
+            <dl>
+              <dt>当前位置</dt><dd id="statPos">—</dd>
+              <dt>剩余路程</dt><dd id="statRemain">—</dd>
+              <dt>重新寻路次数</dt><dd id="statRepath">0</dd>
+              <dt>路线校验</dt><dd id="statVerify">—</dd>
+            </dl>
+            <p id="statusDetail" class="desc"></p>
+          </section>
+
+          <section class="card validation">
+            <h2>关键验证入口</h2>
+            <div class="btn-group" id="validationButtons"></div>
+            <div id="validationLog" class="validation-log" aria-live="polite"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
