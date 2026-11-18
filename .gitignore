@@ -42,3 +42,9 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 本项目运行期产物 ----
+# 样例视频可由 make_samples.sh 重新生成, 不入库
+samples/
+# 预渲染帧缓存 (系统临时目录, 这里再兜底一次)
+dlab_frames_*/
