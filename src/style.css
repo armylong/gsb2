@@ -1,0 +1,130 @@
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: #1b2030;
+  color: #e6e9f2;
+  overflow: hidden;
+}
+
+#app { display: flex; flex-direction: column; height: 100%; }
+
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #232a40;
+  border-bottom: 1px solid #313a58;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#topbar h1 { font-size: 16px; margin: 0; font-weight: 600; }
+
+#mode-switch label {
+  margin-left: 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#layout { flex: 1; display: flex; min-height: 0; }
+
+#canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+canvas.dragging { cursor: grabbing; }
+canvas.hover-entity { cursor: pointer; }
+
+#banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #7a2430;
+  border: 1px solid #c45063;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  max-width: 70%;
+  z-index: 5;
+}
+
+#banner.warn { background: #7a5a24; border-color: #c49b50; }
+#banner.info { background: #244a7a; border-color: #5089c4; }
+#banner.hidden { display: none; }
+
+#hint {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-size: 12px;
+  color: #aab2cc;
+  background: rgba(20, 25, 40, 0.75);
+  padding: 6px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+#panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: #232a40;
+  border-left: 1px solid #313a58;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#panel section { margin-bottom: 18px; }
+#panel h2 { font-size: 13px; color: #9fb0e0; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+#order-list, #selfcheck-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+#order-list li.conflict { color: #ff8a9b; font-weight: 700; }
+#order-list li.selected::after { content: " ◄ 选中"; color: #ffd76b; }
+#order-list li.naive-violation { color: #ffb86b; }
+#order-list li .sub { color: #8a93b0; font-size: 11px; }
+
+#selection-info {
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: #1b2030;
+  border-radius: 6px;
+  padding: 8px 10px;
+  border: 1px solid #313a58;
+}
+
+#selection-info .dep { color: #a9c7ff; }
+#selection-info .dep-blocked { color: #ff8a9b; }
+#selection-info .kv { color: #8a93b0; }
+
+.btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+
+button {
+  flex: 1;
+  background: #33406a;
+  color: #e6e9f2;
+  border: 1px solid #46558c;
+  border-radius: 6px;
+  padding: 7px 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+button:hover { background: #3f4f82; }
+
+#selfcheck-list li.pass { color: #86d49a; }
+#selfcheck-list li.fail { color: #ff8a9b; font-weight: 700; }
+#selfcheck-list .detail { color: #aab2cc; font-size: 11.5px; display: block; }
+.hidden { display: none !important; }

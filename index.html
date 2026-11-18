@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>等距正交场景 · 遮挡排序观察台</title>
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <h1>等距正交遮挡排序观察台</h1>
+        <div id="mode-switch">
+          <label><input type="radio" name="mode" value="correct" checked /> 正确模式（拓扑排序）</label>
+          <label><input type="radio" name="mode" value="naive" /> 对照模式（仅按屏幕中心纵坐标）</label>
+        </div>
+      </header>
+      <main id="layout">
+        <div id="canvas-wrap">
+          <canvas id="scene"></canvas>
+          <div id="banner" class="hidden"></div>
+          <div id="hint">
+            左键拖动积木 · 滚轮缩放 · 拖空地平移 · 方向键移动角色 · Q/E 调整选中积木高度 · R 重置 · B 长条物机位
+          </div>
+        </div>
+        <aside id="panel">
+          <section>
+            <h2>当前绘制顺序（后画的在更前）</h2>
+            <ol id="order-list"></ol>
+          </section>
+          <section>
+            <h2>选中对象与前后依赖</h2>
+            <div id="selection-info">未选中</div>
+          </section>
+          <section>
+            <h2>操作</h2>
+            <div class="btn-row">
+              <button id="btn-reset">重置布局/角色</button>
+              <button id="btn-bookmark">长条物固定机位</button>
+            </div>
+            <div class="btn-row">
+              <button id="btn-height-down">高度 −0.5</button>
+              <button id="btn-height-up">高度 +0.5</button>
+            </div>
+            <div class="btn-row">
+              <button id="btn-selfcheck">运行内置自检</button>
+            </div>
+          </section>
+          <section id="selfcheck-section" class="hidden">
+            <h2>自检结果</h2>
+            <ul id="selfcheck-list"></ul>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
