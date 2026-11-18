@@ -20,6 +20,11 @@ data.json
 *.sqlite3
 tmp/
 
+# ---- 本工具运行期产物 ----
+samples_out/
+*.evidence.png
+proxy_check_report*.json
+
 # ---- 依赖与构建产物 ----
 node_modules/
 __pycache__/
