@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='7' fill='%234fc3f7'/%3E%3Ccircle cx='22' cy='16' r='5' fill='%23ffb74d'/%3E%3C/svg%3E" />
+    <title>二维群体局部避障模拟 (ORCA + Canvas)</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>二维群体局部避障模拟</h1>
+        <p class="sub">
+          30×20 世界单位 · 最多 24 个有半径角色 / 6 个静态矩形 ·
+          RVO/ORCA 局部避障 · 固定步长 1/30s · 同种子可复现
+        </p>
+      </header>
+
+      <div class="toolbar">
+        <button id="btn-play" class="primary">播放</button>
+        <button id="btn-step">单步</button>
+        <button id="btn-reset">固定种子重置</button>
+
+        <label>预设
+          <select id="preset-select">
+            <option value="0">P1 双向对穿</option>
+            <option value="1">P2 十字交汇</option>
+            <option value="2">P3 绕柱换位</option>
+            <option value="3">P4 窄口拥堵(对照)</option>
+          </select>
+        </label>
+
+        <label>种子
+          <input id="seed-input" type="number" step="1" style="width:110px" />
+        </label>
+
+        <label class="strength">避障强度
+          <input id="strength" type="range" min="0" max="100" value="70" />
+          <span id="strength-val">70%</span>
+        </label>
+
+        <button id="btn-trails">轨迹:开</button>
+        <button id="btn-overlap" class="danger-btn">加载初始重叠布局</button>
+      </div>
+
+      <div id="banner" class="banner"></div>
+
+      <div class="main">
+        <div class="stage-wrap">
+          <canvas id="stage"></canvas>
+        </div>
+        <aside class="side">
+          <section>
+            <h2>实时统计</h2>
+            <div id="stats" class="stats"></div>
+          </section>
+          <section>
+            <h2>选中角色</h2>
+            <div id="selected-panel"></div>
+          </section>
+          <section>
+            <h2>当前预设</h2>
+            <p id="preset-desc" class="desc"></p>
+            <p id="time-limit-note" class="desc note"></p>
+          </section>
+          <section class="help">
+            <h2>操作与图例</h2>
+            <ul>
+              <li>点击角色选中;白实线=实际速度,黄虚线=目标方向,蓝圈=邻近感知范围</li>
+              <li>运行中拖动目标叉改目标;暂停后拖动角色身体换位,释放后按现场重新避让</li>
+              <li>强度 0% 关闭代理间避障(静态障碍保留),可对照观察对穿冲突</li>
+              <li>绿色=已到达,橙色=持续停滞,蓝色系=行进中;红色描边=布局重叠被暂停</li>
+              <li>空格切换播放/暂停</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

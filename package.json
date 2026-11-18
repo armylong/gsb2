@@ -1,0 +1,19 @@
+{
+  "name": "canvas-crowd-avoidance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "二维小规模群体局部避障模拟 (RVO/ORCA + Canvas),无外部服务依赖",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "tsx scripts/verify.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
