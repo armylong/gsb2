@@ -1,0 +1,27 @@
+{
+  "name": "third-person-camera-collision-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "第三人称相机碰撞跟随演示 (three.js + TypeScript)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "node e2e/verify.mjs",
+    "e2e:frustum": "node e2e/frustum.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/three": "^0.180.0",
+    "playwright": "^1.65.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.0",
+    "vitest": "^2.1.8"
+  }
+}
