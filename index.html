@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='none' stroke='%234aa3ff' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <title>三维对象轮廓描边演示</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>对象轮廓描边</h1>
+
+        <section class="block">
+          <h2>场景布局</h2>
+          <div class="btn-row">
+            <button data-layout="separated">相互分离</button>
+            <button data-layout="occlusion">部分遮挡</button>
+            <button data-layout="touch">选中相接</button>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>描边模式</h2>
+          <div class="btn-row">
+            <button id="btn-visible">仅可见轮廓</button>
+            <button id="btn-hidden" class="primary">可见 + 遮挡轮廓</button>
+          </div>
+          <div id="legend">
+            <div class="legend-item"><span class="swatch solid"></span>可见轮廓（对象本色实线）</div>
+            <div class="legend-item"><span class="swatch dashed"></span>遮挡轮廓（暗色虚线）</div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>描边宽度 <span id="width-label">2 px</span></h2>
+          <input type="range" id="width-slider" min="1" max="6" step="1" value="2" />
+          <div class="hint">按屏幕 CSS 像素设置，缩放与窗口变化后宽度一致</div>
+        </section>
+
+        <section class="block">
+          <h2>挡板</h2>
+          <label class="slider-label">深度位置 <span id="occluder-label">0.0</span>
+            <input type="range" id="occluder-slider" min="-2.5" max="1.5" step="0.05" value="0" />
+          </label>
+        </section>
+
+        <section class="block">
+          <h2>对象列表（点击行可切换选择）</h2>
+          <ul id="object-list"></ul>
+        </section>
+
+        <section class="block">
+          <div class="btn-row">
+            <button id="btn-hide">隐藏所选</button>
+            <button id="btn-restore">恢复全部</button>
+          </div>
+          <div class="btn-row">
+            <button id="btn-clear">清空选择</button>
+            <button id="btn-reset-view">恢复视角</button>
+          </div>
+          <div class="btn-row">
+            <button id="btn-verify" class="primary">固定机位验证</button>
+          </div>
+          <pre id="verify-results"></pre>
+        </section>
+
+        <section class="block hint">
+          操作：单击选择（替换）；Shift / Ctrl + 单击追加或取消；左键拖动旋转，滚轮缩放，右键平移。
+        </section>
+      </aside>
+      <main id="viewport">
+        <canvas id="scene"></canvas>
+        <div id="status-bar"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

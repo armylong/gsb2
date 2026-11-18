@@ -1,0 +1,25 @@
+{
+  "name": "outline-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test:smoke": "node tests/e2e-smoke.mjs",
+    "test:width": "node tests/width-consistency.mjs",
+    "test:resize": "node tests/resize.mjs",
+    "test:shots": "node tests/shots.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/three": "^0.180.0",
+    "playwright": "^1.65.1",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  }
+}

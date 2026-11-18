@@ -37,6 +37,10 @@ coverage/
 .coverage
 .pytest_cache/
 
+# ---- 自动化测试产物 ----
+test-results/
+playwright-report/
+
 # ---- 系统与IDE ----
 .DS_Store
 .idea/
