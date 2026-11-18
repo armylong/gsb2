@@ -19,6 +19,9 @@ data.json
 *.sqlite
 *.sqlite3
 tmp/
+tmp-shots/
+test-results/
+playwright-report/
 
 # ---- 依赖与构建产物 ----
 node_modules/
