@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# 样例与本地设置
+samples/
+.syncplayer/
+*.egg-info/
