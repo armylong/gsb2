@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纸模折叠实验室 · Paper Fold Lab</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">▱</span>
+          <div>
+            <h1>纸模折叠实验室</h1>
+            <p>平面展开 → 立体纸模的刚体铰接折叠</p>
+          </div>
+        </div>
+        <div class="model-switch" id="modelSwitch"></div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel panel-2d">
+          <div class="panel-head">
+            <h2>二维展开图</h2>
+            <div class="legend">
+              <span><i class="lg hinge"></i>折叠边</span>
+              <span><i class="lg cut"></i>裁切边</span>
+              <span><i class="lg root"></i>固定根面</span>
+            </div>
+          </div>
+          <div class="canvas-wrap"><canvas id="netCanvas"></canvas></div>
+        </section>
+
+        <section class="panel panel-3d">
+          <div class="panel-head">
+            <h2>三维纸模</h2>
+            <div class="view-switch" id="viewSwitch">
+              <button data-view="orbit" class="active">整体观察</button>
+              <button data-view="root">根面正视</button>
+              <button data-view="top">展开俯视</button>
+            </div>
+          </div>
+          <div class="canvas-wrap"><canvas id="threeCanvas"></canvas></div>
+        </section>
+      </main>
+
+      <footer class="controlbar">
+        <div class="fold-controls">
+          <button id="playBtn" class="primary">▶ 播放</button>
+          <button id="reverseBtn">⇄ 反向</button>
+          <div class="slider-box">
+            <input type="range" id="progressSlider" min="0" max="100" value="0" step="0.1" />
+            <span class="progress-value"><b id="progressValue">0</b>%</span>
+          </div>
+        </div>
+
+        <div class="hinge-control" id="hingeControl">
+          <label>手动折叠边 <select id="hingeSelect"></select></label>
+          <div class="slider-box">
+            <input type="range" id="hingeSlider" min="-180" max="180" value="0" step="0.1" />
+            <span class="progress-value"><b id="hingeValue">0</b>°</span>
+          </div>
+          <button id="hingeReset">回到统一进度</button>
+        </div>
+      </footer>
+
+      <aside class="sidebar">
+        <div class="card" id="selectionCard">
+          <h3>选中面信息</h3>
+          <div id="selectionInfo"><p class="muted">未选择面，点击展开图或立体模型中的面。</p></div>
+        </div>
+        <div class="card">
+          <h3>几何验证（允许误差 / 实测值）</h3>
+          <div id="validationList"></div>
+        </div>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
