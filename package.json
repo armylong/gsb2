@@ -1,0 +1,18 @@
+{
+  "name": "spatial-audio-preview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地三维空间声音场景预览器：拖动听者与声源，实时试听 Web Audio HRTF 空间化效果",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8137",
+    "serve:node": "npx --yes serve -l 8137 .",
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "playwright test",
+    "vendor:three": "node scripts/vendor-three.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "three": "^0.180.0"
+  }
+}

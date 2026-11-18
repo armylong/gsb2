@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>空间声音场景预览器</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <main class="stage">
+      <div class="topbar">
+        <div>
+          <h1>空间声音场景预览器</h1>
+          <p class="hint">拖动球体调整位置（声源按住 Shift 拖动可改高度）；Q / E 转向听者，R 重置场景</p>
+        </div>
+        <div class="topbar-actions">
+          <button id="enable-audio" type="button" class="primary">启用声音</button>
+          <button id="reset-scene" type="button">重置场景</button>
+        </div>
+      </div>
+
+      <div id="audio-status" class="audio-status" data-kind="disabled" role="status"></div>
+      <div id="solo-hint" class="solo-hint" hidden></div>
+
+      <div id="scene" class="scene-container"></div>
+    </main>
+
+    <aside class="panel" id="panel">
+      <section class="listener-card">
+        <h2>听者</h2>
+        <div class="coord-line" id="listener-coord"></div>
+        <div class="coord-line">朝向（yaw）：<strong id="listener-yaw"></strong></div>
+        <div class="coord-line subtle" id="listener-yaw-note"></div>
+        <div class="numeric-grid">
+          <label>x <input id="listener-x" type="number" step="0.5" data-testid="listener-x" /></label>
+          <label>y <input id="listener-y" type="number" step="0.5" data-testid="listener-y" /></label>
+          <label>z <input id="listener-z" type="number" step="0.5" data-testid="listener-z" /></label>
+          <label>yaw <input id="listener-yaw-input" type="number" step="5" data-testid="listener-yaw-input" /></label>
+        </div>
+        <div class="turn-row">
+          <button id="listener-turn-left" type="button">↺ 左转 15°（Q）</button>
+          <button id="listener-turn-right" type="button">右转 15°（E）↻</button>
+        </div>
+      </section>
+
+      <h2 class="panel-section-title">声源（最多 3 个）</h2>
+      <div id="source-list"></div>
+
+      <section class="legend">
+        <h3>判读说明</h3>
+        <ul>
+          <li>方位标签随听者朝向实时变化：声源在右侧 → 右耳更响，转身后左右互换。</li>
+          <li>距离按反平方规律衰减（1m 参考距离），越远越轻、高频颗粒感越弱。</li>
+          <li>独奏只静音其他声源，不会改动它们的播放与音量设置。</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
