@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二维弹簧车轮悬挂演示</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="view"></canvas>
+    <aside id="panel">
+      <h1>悬挂演示</h1>
+
+      <section>
+        <h2>地形</h2>
+        <div class="row" id="terrainRow">
+          <button data-terrain="flat" class="active">平地落车</button>
+          <button data-terrain="slopes">连续缓坡</button>
+          <button data-terrain="bump">单个凸起</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>仿真控制</h2>
+        <div class="row">
+          <button id="btnRun">运行</button>
+          <button id="btnStep">单步</button>
+          <button id="btnReset">重置</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>参数</h2>
+        <label>弹簧刚度 <span id="vStiff"></span> N/m
+          <input id="sStiff" type="range" min="10000" max="90000" step="1000" />
+        </label>
+        <label>阻尼 <span id="vDamp"></span> N·s/m
+          <input id="sDamp" type="range" min="200" max="12000" step="100" />
+        </label>
+        <label>车身质量 <span id="vMass"></span> kg
+          <input id="sMass" type="range" min="400" max="2000" step="50" />
+        </label>
+      </section>
+
+      <section>
+        <h2>驱动（键盘：→驱动 ←倒车 ↓/空格刹车，松开=滑行）</h2>
+        <div class="row">
+          <button id="btnFwd">驱动</button>
+          <button id="btnRev">倒车</button>
+          <button id="btnBrake">刹车</button>
+          <button id="btnCoast">滑行</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>参数对照</h2>
+        <div class="row">
+          <button id="btnSaveA">保存为对照A</button>
+          <button id="btnLoadA">载入A并重置</button>
+          <button id="btnClearA">清除A</button>
+        </div>
+        <div id="cmpStatus" class="hint">未保存对照。流程：设参数→运行→暂停→保存A→改参数→重置→运行，曲线叠加对比。</div>
+      </section>
+
+      <section>
+        <h2>悬挂压缩曲线（近 8s，蓝=左 橙=右 灰虚线=对照A）</h2>
+        <canvas id="chart"></canvas>
+      </section>
+    </aside>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
