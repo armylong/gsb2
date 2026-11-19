@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+.venv/
+sample_data/
+__pycache__/
+.pytest_cache/
