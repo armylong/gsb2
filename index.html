@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>六角格战术视野沙盒</title>
+    <style>
+      :root {
+        --bg: #070a0f;
+        --panel: #0e141c;
+        --panel-2: #131b25;
+        --line: #1e2a38;
+        --text: #e8eef6;
+        --muted: #8fa3b8;
+        --dim: #5c6f83;
+        --accent: #57c7ff;
+        --accent-2: #c0a6ff;
+        --warn: #ffb86b;
+        --danger: #ff6b6b;
+        --ok: #6ee7a8;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+        overflow: hidden;
+      }
+      #app { display: grid; grid-template-columns: minmax(0, 1fr) 380px; height: 100vh; }
+      #stage { position: relative; min-width: 0; }
+      canvas { display: block; border-radius: 0; }
+      .hud {
+        position: absolute; top: 14px; left: 14px; right: 14px;
+        display: flex; gap: 10px; align-items: flex-start; justify-content: space-between;
+        pointer-events: none;
+      }
+      .hud > * { pointer-events: auto; }
+      .card {
+        background: rgba(11, 16, 22, 0.86);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        backdrop-filter: blur(6px);
+      }
+      .title { padding: 10px 14px; }
+      .title h1 { font-size: 14px; margin: 0 0 2px; letter-spacing: .3px; }
+      .title p { margin: 0; color: var(--muted); font-size: 11.5px; }
+      .modes { display: flex; padding: 4px; gap: 4px; }
+      .modes button {
+        background: transparent; color: var(--muted); border: 0; border-radius: 7px;
+        padding: 7px 12px; font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
+      }
+      .modes button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+      .modes button[data-mode="debug"][aria-pressed="true"] { color: var(--warn); }
+      .hint {
+        position: absolute; bottom: 14px; left: 14px; padding: 8px 12px;
+        color: var(--dim); font-size: 11.5px; max-width: 640px;
+      }
+      .hint b { color: var(--muted); font-weight: 600; }
+
+      #panel {
+        border-left: 1px solid var(--line);
+        background: var(--panel);
+        overflow-y: auto;
+        padding: 14px 16px 40px;
+      }
+      #panel::-webkit-scrollbar { width: 9px; }
+      #panel::-webkit-scrollbar-thumb { background: #1c2734; border-radius: 8px; }
+      section { margin-bottom: 16px; }
+      section > h2 {
+        font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+        color: var(--dim); margin: 0 0 8px; font-weight: 600;
+      }
+      .scenario-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .scenario-list button {
+        text-align: left; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+        background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); font: inherit;
+      }
+      .scenario-list button[aria-pressed="true"] { border-color: #2c4a63; color: var(--text); background: #16202c; }
+      .scenario-list button strong { display: block; font-size: 12px; color: inherit; margin-bottom: 2px; }
+      .scenario-list button span { font-size: 10.5px; color: var(--dim); }
+      .blurb { color: var(--muted); font-size: 11.5px; margin: 8px 0 0; }
+
+      .unit-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+      .unit-row:last-child { border-bottom: 0; }
+      .chip { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 12px; color: #06111a; flex: none; }
+      .chip.a { background: var(--accent); }
+      .chip.b { background: var(--accent-2); }
+      .unit-row .name { flex: 1; min-width: 0; }
+      .unit-row .name small { display: block; color: var(--dim); font-size: 10.5px; }
+      .unit-row input[type="range"] { width: 96px; accent-color: var(--accent); }
+      .unit-row .val { width: 18px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .unit-row button {
+        background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+        border-radius: 6px; font: inherit; font-size: 11px; padding: 3px 7px; cursor: pointer;
+      }
+      .unit-row button[aria-pressed="true"] { color: var(--text); border-color: #375067; }
+
+      .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+      button.action {
+        background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+        border-radius: 8px; padding: 7px 11px; font: inherit; font-size: 12px; cursor: pointer;
+      }
+      button.action:hover { border-color: #2f4557; }
+      button.action.primary { background: #173246; border-color: #24506e; color: #cfeaff; }
+      button.action.danger { color: #ffb4b4; border-color: #4a2626; background: #241416; }
+      button.action:disabled { opacity: .4; cursor: not-allowed; }
+      .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+      .seg button { background: transparent; color: var(--muted); border: 0; padding: 6px 10px; font: inherit; font-size: 11.5px; cursor: pointer; }
+      .seg button[aria-pressed="true"] { background: #1b2836; color: var(--text); }
+
+      .legend { display: grid; gap: 6px; }
+      .legend div { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11.5px; }
+      .swatch { width: 18px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,.12); flex: none; }
+
+      .checklist { display: grid; gap: 5px; }
+      .checklist div { display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--muted); }
+      .checklist .mark { font-family: ui-monospace, Menlo, monospace; font-weight: 700; }
+      .checklist .ok { color: var(--ok); }
+      .checklist .bad { color: var(--danger); }
+      .checklist small { color: var(--dim); }
+
+      #hover {
+        position: absolute; pointer-events: none; z-index: 5; max-width: 300px;
+        background: rgba(9, 13, 19, 0.95); border: 1px solid #26333f; border-radius: 8px;
+        padding: 8px 10px; font-size: 11.5px; color: #c6d4e2; display: none;
+        box-shadow: 0 6px 24px rgba(0,0,0,.45);
+      }
+      #hover .row { display: flex; justify-content: space-between; gap: 12px; }
+      #hover .k { color: var(--dim); }
+      #hover .bad { color: var(--danger); }
+      #hover .good { color: var(--ok); }
+      #hover hr { border: 0; border-top: 1px solid #1d2833; margin: 6px 0; }
+
+      #toast {
+        position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+        background: rgba(16, 24, 33, .96); border: 1px solid #2a3b4c; color: #dbe7f3;
+        padding: 8px 14px; border-radius: 999px; font-size: 12px; opacity: 0; transition: opacity .18s;
+        pointer-events: none; white-space: nowrap;
+      }
+      #toast.show { opacity: 1; }
+
+      @media (max-width: 1080px) {
+        #app { grid-template-columns: minmax(0, 1fr) 320px; }
+        .hint { max-width: 420px; font-size: 11px; }
+      }
+      @media (max-width: 860px) {
+        #app { grid-template-columns: 1fr; grid-template-rows: minmax(420px, 58vh) 1fr; }
+        #panel { border-left: 0; border-top: 1px solid var(--line); }
+        .hud { flex-direction: column; }
+        .title p { display: none; }
+      }
+      .debug-banner {
+        position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+        background: #2a1d0c; border: 1px solid #62451c; color: #ffca85;
+        padding: 6px 14px; border-radius: 999px; font-size: 11.5px; display: none;
+      }
+      .debug-banner.show { display: block; }
+      .kbd { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; background: #16202b; border: 1px solid #24323f; border-radius: 4px; padding: 0 4px; color: var(--muted); }
+      details summary { cursor: pointer; color: var(--muted); font-size: 11.5px; }
+      details p { color: var(--dim); font-size: 11px; margin: 6px 0; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="stage">
+        <canvas id="map" aria-label="六角格战术地图"></canvas>
+        <div class="hud">
+          <div class="card title">
+            <h1>六角格战术视野沙盒</h1>
+            <p>移动斥候 · 开关门 · 暂停编辑地形，看清“当前可见 / 曾经探索 / 未探索”</p>
+          </div>
+          <div class="card modes" id="mode-switch" role="group" aria-label="视图模式">
+            <button data-mode="player" aria-pressed="true">玩家视图</button>
+            <button data-mode="edit" aria-pressed="false">编辑模式</button>
+            <button data-mode="debug" aria-pressed="false">调试视图</button>
+          </div>
+        </div>
+        <div class="debug-banner" id="debug-banner">全知调试视图 — 显示全部敌人与视线辅助线，玩家视图不会看到这些</div>
+        <div class="card hint" id="hint"></div>
+        <div id="hover"></div>
+        <div id="toast"></div>
+      </div>
+      <aside id="panel">
+        <section>
+          <h2>样例</h2>
+          <div class="scenario-list" id="scenarios"></div>
+          <p class="blurb" id="blurb"></p>
+          <p class="blurb" id="sanity" style="color:#ffb86b"></p>
+        </section>
+
+        <section>
+          <h2>斥候</h2>
+          <div id="units"></div>
+        </section>
+
+        <section>
+          <h2>操作</h2>
+          <div class="btn-row" id="actions"></div>
+        </section>
+
+        <section>
+          <h2>图例</h2>
+          <div class="legend">
+            <div><span class="swatch" style="background:#32432f"></span>当前可见（活视野）</div>
+            <div><span class="swatch" style="background:#182029;background-image:repeating-linear-gradient(45deg,#2b3542 0 1px,transparent 1px 4px)"></span>已探索、当前不可见（地形记忆）</div>
+            <div><span class="swatch" style="background:#0a0e14"></span>未探索</div>
+            <div><span class="swatch" style="background:#8a7a5c"></span>高墙（遮挡）</div>
+            <div><span class="swatch" style="background:#a65a3f"></span>关闭的门（遮挡 / 不可进入）</div>
+            <div><span class="swatch" style="background:#3f8c74"></span>打开的门（通透 / 可进入）</div>
+            <div><span style="width:18px;height:14px;display:grid;place-items:center;color:#ff5f5f">◆</span>敌人（仅当前可见时显示）</div>
+          </div>
+        </section>
+
+        <section>
+          <h2>样例核对（真实视野数据）</h2>
+          <div class="checklist" id="checklist"></div>
+        </section>
+
+        <section>
+          <h2>约定</h2>
+          <details>
+            <summary>格心视线规则</summary>
+            <p>
+              视线连接两格格心。只有从格子<strong>内部</strong>穿过的方格才算“经过”；恰好沿格边滑过或只擦到格角
+              （重叠长度 ≈ 0）视为透明，不遮挡。障碍格自身只要在视距内就可见，其后的格子被挡住。
+              该规则由半平面裁剪精确判定，同一条线每次都得到相同结果。
+            </p>
+          </details>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

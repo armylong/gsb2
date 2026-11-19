@@ -1,0 +1,36 @@
+{
+  "name": "hex-recon-sandbox",
+  "version": "1.0.0",
+  "description": "六角格战术视野沙盒 — TypeScript + Canvas",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "tsc --noEmit && vitest run && playwright test",
+    "test:e2e": "playwright test",
+    "verify:scenarios": "vite-node scripts/verify-scenarios.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/armylong/gsb2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/armylong/gsb2/issues"
+  },
+  "homepage": "https://github.com/armylong/gsb2#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-node": "^6.0.0",
+    "vitest": "^5.1.1"
+  },
+  "private": true,
+  "type": "module"
+}

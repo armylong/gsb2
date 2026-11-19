@@ -37,6 +37,12 @@ coverage/
 .coverage
 .pytest_cache/
 
+# ---- 浏览器测试产物 ----
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # ---- 系统与IDE ----
 .DS_Store
 .idea/
