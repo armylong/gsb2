@@ -1,0 +1,173 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  color: #222;
+  background: #f4f4f6;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app header {
+  padding: 8px 14px;
+  background: #2b2f36;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.app header .sub {
+  font-weight: 400;
+  font-size: 12px;
+  color: #aab2c0;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+aside.panel {
+  width: 250px;
+  overflow-y: auto;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel section {
+  border: 1px solid #e3e3e8;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.panel h3 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+button {
+  font: inherit;
+  padding: 5px 10px;
+  border: 1px solid #c8ccd4;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #eef3ff;
+  border-color: #7ba3f0;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button.active {
+  background: #0b5fff;
+  border-color: #0b5fff;
+  color: #fff;
+}
+
+button.danger {
+  color: #b3261e;
+}
+
+label.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+label.field span {
+  width: 62px;
+  color: #555;
+}
+
+label.field input,
+select {
+  font: inherit;
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid #c8ccd4;
+  border-radius: 5px;
+}
+
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-wrap svg {
+  flex: 1;
+  display: block;
+  background: #fff;
+  touch-action: none;
+}
+
+.status {
+  padding: 6px 12px;
+  border-top: 1px solid #ddd;
+  background: #fafafc;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status .msg-error {
+  color: #b3261e;
+}
+
+.status .msg-info {
+  color: #2c5fb3;
+}
+
+.status .meta {
+  margin-left: auto;
+  color: #888;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hint {
+  color: #888;
+  font-size: 12px;
+  line-height: 1.5;
+}
