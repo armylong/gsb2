@@ -1,0 +1,47 @@
+{
+  "name": "sprite-atlas-tool",
+  "version": "1.0.0",
+  "description": "Local sprite sheet / multi-page atlas tool with transparent trimming, rotation, animation reconstruction and pixel verification.",
+  "main": "server/index.ts",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,ui -c blue,green \"npm:dev:api\" \"npm:dev:ui\"",
+    "dev:api": "tsx watch server/index.ts",
+    "dev:ui": "vite",
+    "build": "npm run build:ui",
+    "build:ui": "vite build",
+    "start": "tsx server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "verify": "npm run typecheck && npm run test",
+    "cli": "tsx scripts/atlas-cli.ts",
+    "headless-check": "tsx scripts/headless-check.ts",
+    "samples:write": "tsx scripts/write-samples.ts",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0",
+    "fflate": "^0.8.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  },
+  "private": true,
+  "type": "module"
+}

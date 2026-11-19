@@ -14,6 +14,8 @@ secret*
 
 # ---- 运行期产物 / 本地数据 ----
 data.json
+out/
+sprite-atlas.zip
 *.log
 *.db
 *.sqlite
