@@ -1,0 +1,22 @@
+{
+  "name": "bt-debug-sandbox",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "本地行为树调试沙盒: 巡逻 / 追逐 / 撤退 的中断与重新进入过程可视化",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "smoke": "vite build >/dev/null && node smoke/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  }
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>行为树调试沙盒 · 巡逻 / 追逐 / 撤退</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="title">
+          <strong>行为树调试沙盒</strong>
+          <span class="subtitle">持续动作 · 中断 · 重新进入 过程可视化</span>
+        </div>
+        <div class="controls">
+          <button id="btn-play" class="btn primary">▶ 播放</button>
+          <button id="btn-step" class="btn">⏭ 单步一周期</button>
+          <label class="speed">慢放
+            <select id="sel-speed">
+              <option value="0.25">0.25×</option>
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+          <button id="btn-reset" class="btn warn">⟲ 重置</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="left">
+          <div class="hud" id="hud"></div>
+          <canvas id="scene" width="480" height="360"></canvas>
+          <p class="hint">🖱 直接拖动红色目标; NPC 生命用右侧滑杆调整。场地为有限俯视区域, 无寻路, 直线移动。</p>
+
+          <div class="panel">
+            <h3>判断依据(本周期快照)</h3>
+            <div id="context-panel"></div>
+          </div>
+
+          <div class="panel">
+            <h3>演示场景(自动布置局面 + 定时事件)</h3>
+            <div id="demos"></div>
+          </div>
+        </section>
+
+        <section class="right">
+          <div class="panel">
+            <h3>行为树(与场景同步高亮)</h3>
+            <div class="legend">
+              <span class="dot idle"></span>未执行
+              <span class="dot running"></span>执行中
+              <span class="dot success"></span>成功
+              <span class="dot failure"></span>失败
+              <span class="dot interrupted"></span>被中断
+            </div>
+            <div id="tree-panel"></div>
+            <p class="hint" id="tree-rules"></p>
+          </div>
+
+          <div class="panel">
+            <h3>阈值 / 时长 / 优先级(下一周期生效)</h3>
+            <div id="config-panel"></div>
+          </div>
+
+          <div class="panel grow">
+            <h3>
+              节点进入 / 退出 / 中断记录
+              <button id="btn-clear-log" class="btn small">清空</button>
+            </h3>
+            <div id="log-panel" class="logs"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>

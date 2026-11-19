@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# 冒烟测试截图(本地验证产物)
+smoke/shots/
