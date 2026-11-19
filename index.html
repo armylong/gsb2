@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>可破坏地形沙盒</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>可破坏地形沙盒</h1>
+      <div class="group">
+        <span class="label">现场：</span>
+        <div id="scene-buttons" class="btn-row"></div>
+        <button id="btn-generate" type="button">程序生成新地形</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="canvas-wrap">
+        <div class="toolbar">
+          <div class="group">
+            <span class="label">工具</span>
+            <label><input type="radio" name="tool" value="dig" checked /> 圆形挖除</label>
+            <label><input type="radio" name="tool" value="fill" /> 矩形补土</label>
+            <label>半径 <input id="brush-radius" type="number" min="0" max="12" value="2" /></label>
+          </div>
+          <div class="group">
+            <span class="label">视图</span>
+            <label><input type="radio" name="view" value="component" checked /> 连通块</label>
+            <label><input type="radio" name="view" value="owner" /> 归属</label>
+            <label><input type="radio" name="view" value="solid" /> 纯色</label>
+          </div>
+          <div class="group">
+            <span class="label">仿真</span>
+            <button id="btn-run" type="button">运行</button>
+            <button id="btn-pause" type="button">暂停</button>
+            <button id="btn-step" type="button">单步</button>
+            <button id="btn-settle" type="button">快进落地</button>
+            <button id="btn-reset" type="button">重置</button>
+            <label>速度 <input id="speed" type="range" min="1" max="20" value="6" /> <span id="speed-val">6</span> 格/秒</label>
+          </div>
+          <div class="group">
+            <span class="label">存档</span>
+            <button id="btn-save" type="button">保存静态布局</button>
+            <button id="btn-load" type="button">载入</button>
+            <button id="btn-export" type="button">导出 JSON</button>
+            <button id="btn-import" type="button">导入 JSON</button>
+            <input id="import-file" type="file" accept="application/json,.json" hidden />
+          </div>
+        </div>
+        <div class="canvas-scroll">
+          <canvas id="terrain"></canvas>
+        </div>
+        <p class="hint">
+          鼠标移动预览作用范围（红=挖除，绿=补土，边缘红叉=越界已裁剪）；点击执行。
+          碎片可点击选中查看，不参与挖补。快捷键：空格 运行/暂停，S 单步，R 重置。
+        </p>
+      </section>
+
+      <aside class="panel">
+        <h2>统计</h2>
+        <table class="stats">
+          <tbody>
+            <tr><td>累计挖除</td><td id="stat-removed">0</td></tr>
+            <tr><td>累计补入</td><td id="stat-added">0</td></tr>
+            <tr><td>静态格</td><td id="stat-static">0</td></tr>
+            <tr><td>碎片格</td><td id="stat-fragment">0</td></tr>
+            <tr><td>现存总格</td><td id="stat-total">0</td></tr>
+            <tr><td>仿真步</td><td id="stat-tick">0</td></tr>
+            <tr><td>状态</td><td id="stat-state">暂停</td></tr>
+          </tbody>
+        </table>
+
+        <h2>静态连通块（编号:格数）</h2>
+        <div id="component-list" class="list"></div>
+
+        <h2>独立碎片</h2>
+        <div id="fragment-list" class="list"></div>
+
+        <h2>归属变迁（最近 20 条）</h2>
+        <div id="transition-log" class="list log"></div>
+
+        <h2>格子检查</h2>
+        <p class="hint" id="inspect">在画布上悬停查看该格归属。</p>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

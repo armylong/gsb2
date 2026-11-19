@@ -1,0 +1,20 @@
+{
+  "name": "destructible-terrain-sandbox",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "二维可破坏地形沙盒：挖补编辑、4 邻接连通块判定、碎片竖直下落与并入",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "vite-node e2e.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  }
+}
