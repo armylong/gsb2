@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 生成的样例高度图 (可由 scripts/make_samples.py 重建) ----
+samples/

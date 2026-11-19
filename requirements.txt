@@ -1,0 +1,5 @@
+numpy>=1.26
+opencv-python-headless>=4.9
+PySide6>=6.6
+# optional: only needed if you extend the smoothing beyond Gaussian blur
+# scipy>=1.11

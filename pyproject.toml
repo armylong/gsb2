@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "normalmap-workbench"
+version = "0.1.0"
+description = "Height map -> tangent-space normal map lab with planar lighting checks"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "PySide6>=6.6",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+normalmap-workbench = "normalmap_tool.ui.window:main"
+
+[tool.setuptools]
+packages = ["normalmap_tool", "normalmap_tool.ui"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
