@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>射线弹道检查场景</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene-canvas"></canvas>
+
+      <div id="banner" class="banner hidden"></div>
+
+      <aside id="side-panel" class="side-panel">
+        <section>
+          <h2>弹道线段</h2>
+          <div id="segment-list" class="segment-list">
+            <p class="hint">尚未发射。调整参数后点击右侧 GUI 的「发射」。</p>
+          </div>
+        </section>
+        <section>
+          <h2>线段详情</h2>
+          <div id="segment-detail" class="segment-detail">
+            <p class="hint">点击场景中的弹道线段或上方列表查看起终点、长度与能量前后值。</p>
+          </div>
+        </section>
+        <section>
+          <h2>结束原因</h2>
+          <div id="end-reason" class="end-reason hint">—</div>
+        </section>
+      </aside>
+
+      <div id="hint-bar" class="hint-bar">
+        左键旋转 · 右键平移 · 滚轮缩放 · 点击物体/线段选中 · 材质:
+        <span class="dot dot-penetrable"></span>可穿透
+        <span class="dot dot-reflective"></span>可反弹
+        <span class="dot dot-blocking"></span>完全阻挡
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
