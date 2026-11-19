@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>表面平滑与法线检查工具</title>
+  <link rel="stylesheet" href="src/viewer/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js",
+      "three/addons/": "./vendor/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div>
+        <h1>表面平滑与法线检查工具</h1>
+        <p class="sub">平面 / 平滑显示对比 · 棱边保留 · 反向面与退化面定位 · 导出回读验证</p>
+      </div>
+    </div>
+    <div class="topbar-stats" id="topStats">
+      <span class="stat" id="statMode">显示方式：—</span>
+      <span class="stat" id="statFaces">面数：—</span>
+      <span class="stat" id="statVerts">顶点：—</span>
+      <span class="stat" id="statIssues">问题：—</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>1. 模型导入</h2>
+        <input type="file" id="fileInput" accept=".obj,.stl" hidden />
+        <button class="btn primary" id="btnOpen">打开 OBJ / STL…</button>
+        <div id="dropZone" class="drop-zone">或将文件拖到此处</div>
+        <div class="sample-groups" id="sampleGroups"></div>
+        <div class="meta-box" id="metaBox">
+          <div class="meta-row"><b>文件</b><span id="metaName">—</span></div>
+          <div class="meta-row"><b>格式</b><span id="metaFormat">—</span></div>
+          <div class="meta-row"><b>结构</b><span id="metaStruct">—</span></div>
+        </div>
+        <div class="warnings" id="loadWarnings"></div>
+      </section>
+
+      <section class="panel">
+        <h2>2. 显示方式</h2>
+        <div class="seg" id="modeSeg">
+          <button data-mode="flat" class="seg-btn">平面 flat</button>
+          <button data-mode="smooth" class="seg-btn active">平滑 smooth</button>
+        </div>
+        <label class="slider-label">
+          保留棱边临界角：<b id="angleValue">35°</b>
+        </label>
+        <input type="range" id="angleSlider" min="0" max="180" value="35" step="1" />
+        <div class="angle-hint">相邻面法线夹角大于该值的边判定为硬边，平滑时拆分顶点保留；调至 0° 等价于全平面，180° 等价于全平滑。</div>
+        <div class="checks">
+          <label><input type="checkbox" id="chkHardEdges" checked /> 显示硬边/棱边</label>
+          <label><input type="checkbox" id="chkProblemFaces" checked /> 高亮问题面</label>
+          <label><input type="checkbox" id="chkNormals" /> 顶点法线箭头</label>
+          <label><input type="checkbox" id="chkWire" /> 线框叠加</label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. 导出与回读</h2>
+        <button class="btn" id="btnExportOBJ">导出 OBJ（含法线）</button>
+        <button class="btn" id="btnExportSTL">导出 ASCII STL</button>
+        <button class="btn ghost" id="btnRoundtrip" disabled>导出并重新打开对比</button>
+        <div class="roundtrip" id="roundtripBox" hidden>
+          <h3>导出前后对比</h3>
+          <table id="roundtripTable"></table>
+          <div id="roundtripVerdict"></div>
+          <button class="btn tiny" id="btnBackSource">← 返回原始模型</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="viewports" id="viewports">
+        <div class="viewport-wrap">
+          <div class="vp-label">平面显示（面法线）</div>
+          <div class="viewport" id="vpFlat"></div>
+        </div>
+        <div class="viewport-wrap">
+          <div class="vp-label" id="vpSmoothLabel">平滑显示（临界角 35°）</div>
+          <div class="viewport" id="vpSmooth"></div>
+        </div>
+      </div>
+
+      <section class="issues-panel">
+        <div class="issues-head">
+          <h2>4. 检查结果与问题清单</h2>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="issues-body">
+          <div id="issueSummary" class="issue-summary">尚未加载模型。</div>
+          <ul id="issueList" class="issue-list"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script type="module" src="src/viewer/app.js"></script>
+</body>
+</html>

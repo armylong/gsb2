@@ -1,0 +1,15 @@
+{
+  "name": "mesh-smoothing-normal-inspector",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "三角网格表面平滑与法线检查工具：平面/平滑对比、棱边保留、反向面与退化面定位、导出回读验证",
+  "scripts": {
+    "start": "bash scripts/start.sh",
+    "test": "node --test tests/*.test.js",
+    "gen-samples": "node scripts/generate-sample-files.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
