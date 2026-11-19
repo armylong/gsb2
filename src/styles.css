@@ -1,0 +1,87 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #14161c;
+  color: #dde1e8;
+  font-size: 14px;
+}
+#root { max-width: 1280px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 20px; margin: 0 0 12px; }
+h2 { font-size: 15px; margin: 0 0 8px; color: #9fb4d8; }
+.layout { display: grid; grid-template-columns: 520px 1fr; gap: 16px; align-items: start; }
+.panel {
+  background: #1c1f28;
+  border: 1px solid #2c3140;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+canvas { background: #10121a; border: 1px solid #2c3140; border-radius: 8px; display: block; }
+button {
+  background: #2b3242;
+  color: #dde1e8;
+  border: 1px solid #3a4358;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button:hover { background: #37405a; }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: #2f5fb3; border-color: #2f5fb3; }
+button.danger { background: #6e2f35; border-color: #6e2f35; }
+.row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+table { border-collapse: collapse; width: 100%; }
+td, th { padding: 4px 6px; text-align: left; border-bottom: 1px solid #262b38; }
+.chord {
+  font-family: ui-monospace, monospace;
+  background: #262c3a;
+  border: 1px solid #39415a;
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.chord.unbound { color: #6b7286; border-style: dashed; }
+.warn { color: #f0b45a; }
+.ok { color: #6fd08c; }
+.err { color: #ef6a6a; }
+.muted { color: #8a90a0; }
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #2b3242;
+  margin-right: 6px;
+}
+.badge.on { background: #2f5fb3; }
+.log {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  height: 120px;
+  overflow-y: auto;
+  background: #10121a;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.capture-box {
+  border: 1px dashed #f0b45a;
+  background: #2a2416;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.tabs button.active { background: #2f5fb3; border-color: #2f5fb3; }
+input[type='text'], select {
+  background: #10121a;
+  color: #dde1e8;
+  border: 1px solid #3a4358;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.kbd-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.small { font-size: 12px; }
+.section-gap { margin-top: 10px; }
