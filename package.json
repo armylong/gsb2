@@ -1,0 +1,22 @@
+{
+  "name": "soft-shadow-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "二维面积光源软阴影实验页（TypeScript + WebGL/Canvas，无运行时第三方图形库）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "npm run build && node scripts/e2e.mjs",
+    "verify": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.5"
+  }
+}

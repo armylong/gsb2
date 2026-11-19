@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>二维面积光源软阴影实验</title>
+    <link rel="stylesheet" href="./src/ui/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>二维面积光源软阴影实验</h1>
+        <p class="sub">
+          角度楔形解析模型 · 多挡板按光源可见比例合成 · 半径 0 退化点光源硬阴影
+        </p>
+      </div>
+      <div class="engine-badge" id="engineBadge">引擎初始化中…</div>
+    </header>
+
+    <main class="layout">
+      <section class="stage-wrap">
+        <div class="view-col">
+          <div class="view-title">
+            <span class="dot dot-area"></span>面积光源（可调半径）
+            <span class="view-tag" id="areaTag"></span>
+          </div>
+          <div class="canvas-box" id="areaBox">
+            <canvas class="field" id="areaCanvas"></canvas>
+            <canvas class="overlay" id="areaOverlay"></canvas>
+          </div>
+        </div>
+        <div class="view-col">
+          <div class="view-title">
+            <span class="dot dot-point"></span>点光源同步对照（r = 0）
+            <span class="view-tag">硬阴影 0/1</span>
+          </div>
+          <div class="canvas-box" id="pointBox">
+            <canvas class="field" id="pointCanvas"></canvas>
+            <canvas class="overlay" id="pointOverlay"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <section class="card">
+          <h2>场景样例</h2>
+          <div class="btn-row" id="presetRow"></div>
+          <p class="hint" id="presetDesc"></p>
+        </section>
+
+        <section class="card">
+          <h2>光源参数</h2>
+          <label class="slider">
+            <span>光源半径 <b id="radiusVal"></b></span>
+            <input type="range" id="radiusSlider" min="0" max="90" step="1" />
+          </label>
+          <label class="slider">
+            <span>亮度 <b id="brightnessVal"></b></span>
+            <input type="range" id="brightnessSlider" min="0.2" max="2" step="0.05" />
+          </label>
+          <label class="slider">
+            <span>照射距离 <b id="rangeVal"></b></span>
+            <input type="range" id="rangeSlider" min="150" max="760" step="5" />
+          </label>
+          <div class="btn-row">
+            <button id="autoBtn" class="primary">暂停自动移动</button>
+            <button id="resetBtn">重置样例</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>检查点</h2>
+          <div class="btn-row" id="checkpointRow"></div>
+          <div class="readout" id="readout"></div>
+        </section>
+
+        <section class="card">
+          <h2>状态</h2>
+          <div id="statusMsg" class="status ok">就绪</div>
+        </section>
+
+        <section class="card">
+          <h2>独立核对（解析解 vs 256 条光线）</h2>
+          <button id="verifyBtn" class="primary">运行核对</button>
+          <div class="table-wrap">
+            <table id="verifyTable">
+              <thead>
+                <tr>
+                  <th>场景</th><th>期望</th><th>解析</th><th>采样</th>
+                  <th>实际偏差</th><th>误差界</th><th>结论</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="hint" id="verifySummary"></p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="foot">
+      逻辑场景 900×600 · 单光源平面遮挡 · 全部图形程序化生成 · 详见 README.md
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,280 @@
+:root {
+  --bg: #14171d;
+  --panel: #1d222b;
+  --card: #232a36;
+  --line: #323b4a;
+  --text: #e6e9ef;
+  --muted: #9aa5b5;
+  --accent: #5b8def;
+  --warn: #e11d48;
+  --ok: #2fbf71;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.sub {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.engine-badge {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #2c3e5c;
+  color: #cfe0ff;
+  white-space: nowrap;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 14px;
+  padding: 14px 20px;
+  align-items: start;
+}
+
+.stage-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  min-width: 0;
+}
+
+.view-col {
+  min-width: 0;
+}
+
+.view-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-area {
+  background: #ffd23f;
+}
+.dot-point {
+  background: #ff8a3f;
+}
+
+.view-tag {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.canvas-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: #0f1217;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.canvas-box canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #c6d0df;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+button {
+  background: #2c3646;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 11px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover {
+  background: #354257;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+button.primary:hover {
+  background: #4a7de0;
+}
+button.active {
+  outline: 2px solid #8fb2ff;
+}
+
+.slider {
+  display: block;
+  margin-bottom: 10px;
+}
+.slider span {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.slider b {
+  color: var(--text);
+}
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+
+.status {
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+}
+.status.ok {
+  background: rgba(47, 191, 113, 0.12);
+  color: #88e0a0;
+}
+.status.err {
+  background: rgba(225, 29, 72, 0.14);
+  color: #ff9db4;
+  border-color: rgba(225, 29, 72, 0.45);
+}
+
+.readout {
+  margin-top: 10px;
+  font-size: 12px;
+  background: #1a212c;
+  border-radius: 8px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+}
+.readout .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+.readout .k {
+  color: var(--muted);
+}
+.readout .b {
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap {
+  margin-top: 10px;
+  max-height: 260px;
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+th,
+td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+th:first-child,
+td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+.pass {
+  color: #88e0a0;
+}
+.fail {
+  color: #ff9db4;
+  font-weight: 700;
+}
+
+.foot {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 10px 0 22px;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
