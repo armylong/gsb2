@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>二维声音传播与听觉沙盒</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="left">
+        <canvas id="board" width="780" height="520"></canvas>
+        <div id="tooltip"></div>
+        <div id="legend">
+          <span><i class="sw wall"></i>墙(阻断)</span>
+          <span><i class="sw door-open"></i>门(开)</span>
+          <span><i class="sw door-closed"></i>门(关,额外衰减)</span>
+          <span><i class="sw heat"></i>声音已到达(颜色越深剩余强度越高)</span>
+          <span><i class="sw frontier"></i>当前传播前沿</span>
+          <span><i class="sw src"></i>声源(数字=事件编号)</span>
+        </div>
+      </div>
+      <div id="panel">
+        <h2>二维声音传播与听觉沙盒</h2>
+        <div class="row" id="sim-controls">
+          <button id="btn-play">暂停</button>
+          <button id="btn-step">单步</button>
+          <button id="btn-reset">重置</button>
+          <span id="clock">t = 0</span>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="chk-showtime" /> 格内显示到达时刻(默认显示剩余强度)</label>
+        </div>
+
+        <h3>操作模式</h3>
+        <div class="row" id="mode-row">
+          <label><input type="radio" name="mode" value="emit" checked /> 发声</label>
+          <label><input type="radio" name="mode" value="door" /> 门编辑</label>
+          <label><input type="radio" name="mode" value="wall" /> 墙编辑</label>
+        </div>
+        <div class="row" id="emit-row">
+          <label><input type="radio" name="stype" value="footstep" checked /> 脚步(强度10)</label>
+          <label><input type="radio" name="stype" value="impact" /> 撞击(强度20)</label>
+        </div>
+        <p class="hint" id="mode-hint">点击地图格子,在该格发出声音。</p>
+
+        <h3>预设示例</h3>
+        <div class="row" id="preset-row"></div>
+        <p class="hint" id="preset-desc"></p>
+
+        <h3>事件列表</h3>
+        <div id="event-list" class="box">(暂无事件)</div>
+
+        <h3>NPC 状态</h3>
+        <div id="npc-list" class="box"></div>
+
+        <h3>规则说明</h3>
+        <ul class="notes">
+          <li>声音沿上下左右传播,每格强度 -1、耗时 1 tick;关闭的门额外 -4 强度;墙完全阻断。</li>
+          <li>每格只保留剩余强度最大的路线(同强度取到达更早者),多路线不叠加。</li>
+          <li>NPC 在声音到达时按自身阈值判断,每个事件最多响应一次;估计方向 = 声音进入其所在格的来向,不会暴露真实坐标。</li>
+          <li>NPC 调查最新听到的事件;同时到达比强度,再并列比小编号。</li>
+          <li><b>门和墙的编辑只影响之后发出的声音</b>;已发出的事件按发声瞬间的地图快照传播。重置会清空所有事件,旧事件不会再通知 NPC。</li>
+        </ul>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
