@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 本工具运行期产物 ----
+samples/*.wav
