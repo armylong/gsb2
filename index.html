@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 L28 26 L4 26 Z' fill='none' stroke='%233987e5' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <title>网格简化误差查看器</title>
+    <link rel="stylesheet" href="./src/ui/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <header>
+          <h1>网格简化误差查看器</h1>
+          <p class="muted small">程序化网格 · meshoptimizer 简化 · BVH 真实距离采样</p>
+        </header>
+
+        <section class="control-block">
+          <h2>1. 样例网格</h2>
+          <div id="sample-buttons" class="btn-row"></div>
+          <p id="sample-description" class="muted small"></p>
+          <div class="stat-grid" id="original-stats"></div>
+          <div id="boundary-stats" class="boundary-box"></div>
+          <button id="reset-button" class="secondary" type="button">恢复原状态（不简化参照）</button>
+        </section>
+
+        <section class="control-block">
+          <h2>2. 简化比例</h2>
+          <label class="slider-label">
+            目标保留比例
+            <output id="ratio-output">50%</output>
+          </label>
+          <input id="ratio-slider" type="range" min="25" max="90" step="1" value="50" />
+          <div class="slider-hint muted small">允许范围 25% – 90%；100% 为零误差参照</div>
+          <label class="check-row">
+            <input id="lock-border" type="checkbox" />
+            <span>保留开口边界（LockBorder，边界顶点不移动）</span>
+          </label>
+          <button id="simplify-button" type="button">执行简化</button>
+          <div id="simplify-status" class="status-box"></div>
+        </section>
+
+        <section class="control-block">
+          <h2>3. 显示与误差</h2>
+          <div class="btn-row">
+            <button id="mode-split" class="toggle active" type="button">并排对照</button>
+            <button id="mode-overlay" class="toggle" type="button">半透明叠加</button>
+          </div>
+          <label class="check-row">
+            <input id="wireframe-toggle" type="checkbox" />
+            <span>显示线框</span>
+          </label>
+
+          <div class="metric-box">
+            <div class="metric-title">采样距离读数（简化表面 → 原表面）</div>
+            <div class="metric-readout">
+              <div><span class="metric-label" style="color:#d95926">最大值 max</span><strong id="metric-max">—</strong></div>
+              <div><span class="metric-label" style="color:#3987e5">均方根 RMS</span><strong id="metric-rms">—</strong></div>
+              <div class="muted small">平均值 <span id="metric-mean">—</span> · 采样点 <span id="metric-count">—</span></div>
+            </div>
+            <p class="muted small disclaimer">
+              读数为<strong>固定采样误差</strong>（全部简化顶点 + 全部三角形形心），
+              不是严格全局上界；调整下方颜色范围只改变着色，不改变读数。
+            </p>
+            <label class="slider-label">
+              颜色范围上限
+              <output id="range-output">—</output>
+            </label>
+            <input id="range-slider" type="range" min="0" max="100" step="1" value="100" disabled />
+            <canvas id="colorbar" width="280" height="18"></canvas>
+            <div class="colorbar-labels muted small">
+              <span>0</span><span id="colorbar-max">—</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-block">
+          <h2>4. 点击检查</h2>
+          <p class="muted small">
+            在右侧简化网格（或叠加视图）表面点击：橙点为命中点，蓝点为原表面最近点，
+            虚线长度即距离。点空白背景不会生成检查点。
+          </p>
+          <div id="inspection-readout" class="inspection-box muted">尚无检查点</div>
+          <button id="clear-inspection" class="secondary" type="button">清除检查点</button>
+        </section>
+
+        <section class="control-block">
+          <h2>5. 误差趋势与导出</h2>
+          <div id="trend-container"></div>
+          <button id="export-button" class="secondary" type="button">导出当前结果网格 (OBJ)</button>
+        </section>
+      </aside>
+
+      <main class="viewport">
+        <div id="viewer-container"></div>
+        <div id="viewport-label-left" class="viewport-label">原始网格</div>
+        <div id="viewport-label-right" class="viewport-label right">简化结果</div>
+        <div id="busy-overlay" class="busy hidden">
+          <div class="busy-card">正在计算…<div class="muted small" id="busy-detail"></div></div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
