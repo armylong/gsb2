@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mesh-warp"
+version = "1.0.0"
+description = "Interactive 2D control-mesh image warping desktop tool (PySide6 + OpenCV + NumPy)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python-headless>=4.8",
+    "PySide6>=6.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.gui-scripts]
+mesh-warp = "mesh_warp.app:main"
+
+[tool.setuptools]
+packages = ["mesh_warp", "mesh_warp.gui"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
