@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freeze-detect"
+version = "0.1.0"
+description = "视频卡顿冻结检测：按逐帧真实展示时长定位停住画面（ffmpeg + PySide6）"
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.5"]
+dev = ["pytest>=7.0", "PySide6>=6.5"]
+
+[project.scripts]
+freeze-detect = "freeze_detect.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["freeze_detect*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,7 +1,4 @@
-# 大而全的 .gitignore 模板
-# repo_create.sh 建仓时拷贝为 repo/.gitignore; 新场景有额外运行期产物, 在「运行期产物」一节追加
-
-# ---- 密钥与凭据(甲方红线: 不进仓库) ----
+# ---- 密钥与凭据 ----
 .env
 .env.*
 *.pem
@@ -19,6 +16,13 @@ data.json
 *.sqlite
 *.sqlite3
 tmp/
+freeze_samples/
+*.annotations.json
+*.freeze.csv
+*.freeze.json
+*.freeze.png
+*.frames/
+*.clips/
 
 # ---- 依赖与构建产物 ----
 node_modules/
@@ -36,6 +40,7 @@ bin/
 coverage/
 .coverage
 .pytest_cache/
+*.egg-info/
 
 # ---- 系统与IDE ----
 .DS_Store
