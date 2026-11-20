@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 运行期产物 (本地样例/导出) ----
+sample_data/
+*.timeline.json
+*.timeline.txt
