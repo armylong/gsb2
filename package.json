@@ -1,0 +1,24 @@
+{
+  "name": "mirror-normal-inspector",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "镜像 UV 法线贴图手性检查页：复现亮暗翻转、对照正确/错误切线处理",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsx scripts/verify.ts"
+  },
+  "dependencies": {
+    "lil-gui": "^0.19.2",
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.169.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}

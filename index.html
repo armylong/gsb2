@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>镜像法线贴图手性检查</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #14161a; color: #d7dae0;
+      font: 13px/1.5 -apple-system, "PingFang SC", "Helvetica Neue", monospace, sans-serif; }
+    #app { display: flex; height: 100%; }
+    #viewport { flex: 1; position: relative; }
+    #viewport canvas { display: block; }
+    #panel { width: 380px; overflow-y: auto; padding: 12px 14px; background: #1c1f26;
+      border-left: 1px solid #2c313c; box-sizing: border-box; }
+    h1 { font-size: 15px; margin: 4px 0 10px; }
+    h2 { font-size: 12px; margin: 14px 0 6px; color: #8fa3c8; text-transform: uppercase; letter-spacing: .05em; }
+    pre { background: #12141a; border: 1px solid #2c313c; border-radius: 6px;
+      padding: 8px; margin: 4px 0; white-space: pre-wrap; word-break: break-all; font-size: 12px; }
+    .hint { color: #7c8494; }
+    .ok { color: #6fdc8c; } .bad { color: #ff7a7a; }
+    button { background: #2f6fed; color: #fff; border: 0; border-radius: 5px;
+      padding: 5px 10px; margin: 2px 4px 2px 0; cursor: pointer; font-size: 12px; }
+    button.secondary { background: #3a4150; }
+    .lil-gui { --width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="viewport"></div>
+    <div id="panel">
+      <h1>镜像 UV 法线贴图手性检查</h1>
+      <div class="hint">
+        左半区 UV 正常，右半区 UV 水平镜像（同一张程序纹理）。<br />
+        点击平面查看该点 法线/切线/手性；拖动滑块移动灯光。
+      </div>
+      <div id="gui"></div>
+      <h2>选中点</h2>
+      <pre id="picked">（点击平面任意位置）</pre>
+      <h2>采样记录（修改前 / 后对比）</h2>
+      <button id="recordBtn">记录当前采样</button>
+      <button id="clearBtn" class="secondary">清空</button>
+      <pre id="samples">（在选定点处，切换「手性处理」前后各记录一次）</pre>
+      <h2>内置轴向灯光验证</h2>
+      <button id="axisBtn">运行 ±X/±Y/±Z 验证</button>
+      <pre id="axisResult">（未运行）</pre>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
