@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>深度精度实验台 · 直接深度 vs 反向深度</title>
+    <meta
+      name="description"
+      content="Three.js 深度精度实验台：可调相机近远范围、像素争抢分布、表面深度差，以及可复现的固定相机距离扫描。"
+    />
+    <link rel="stylesheet" href="./src/styles/app.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="app-header">
+        <div class="app-header__title">
+          <h1>深度精度实验台</h1>
+          <p>直接深度 ↔ 反向深度 · 固定相机扫过距离 · 争抢像素与表面深度差</p>
+        </div>
+        <div id="capability-badges" class="capability-badges" aria-live="polite"></div>
+      </header>
+
+      <div class="app-body">
+        <aside class="panel controls-panel" aria-label="实验参数">
+          <section class="control-group">
+            <h2>相机范围</h2>
+            <div id="camera-presets" class="button-row" role="group" aria-label="相机范围预设"></div>
+            <label class="field">
+              <span class="field__label">near <output id="near-value"></output></span>
+              <input id="near-input" type="number" min="0.000001" step="any" />
+            </label>
+            <label class="field">
+              <span class="field__label">far <output id="far-value"></output></span>
+              <input id="far-input" type="number" min="0.0001" step="any" />
+            </label>
+            <p id="range-ratio" class="field__hint"></p>
+          </section>
+
+          <section class="control-group">
+            <h2>距离与参考比例</h2>
+            <label class="field">
+              <span class="field__label">相机距离 z <output id="distance-value"></output></span>
+              <input id="distance-input" type="range" min="0" max="1000" value="420" />
+            </label>
+            <label class="field field--toggle">
+              <input id="keep-ratio" type="checkbox" checked />
+              <span>保持参考物屏幕比例（平面随距离等比缩放）</span>
+            </label>
+            <p class="field__hint">关闭后平面尺寸固定，只有难度在变——开启时屏幕观感恒定，变化仅来自深度精度。</p>
+            <label class="field">
+              <span class="field__label">间距倍率 <output id="gap-scale-value"></output></span>
+              <input id="gap-scale-input" type="range" min="0" max="100" value="50" />
+            </label>
+          </section>
+
+          <section class="control-group">
+            <h2>深度模式</h2>
+            <div id="mode-toggles" class="mode-toggles"></div>
+            <div class="field">
+              <span class="field__label">深度附件</span>
+              <div id="storage-toggles" class="button-row"></div>
+            </div>
+          </section>
+
+          <section class="control-group">
+            <h2>叠加显示</h2>
+            <div id="overlay-toggles" class="button-row"></div>
+          </section>
+
+          <section class="control-group">
+            <h2>视口分辨率</h2>
+            <div id="resolution-toggles" class="button-row"></div>
+            <p class="field__hint">分析分辨率只影响统计精度与性能，不影响视觉效果。</p>
+          </section>
+        </aside>
+
+        <main class="workspace">
+          <section class="viewports" aria-label="两个深度模式的实时对照">
+            <figure class="viewport-card" data-mode="direct">
+              <figcaption>
+                <span class="viewport-card__title">
+                  <span class="swatch swatch--direct"></span>直接深度
+                </span>
+                <span class="viewport-card__meta" data-role="mode-meta"></span>
+              </figcaption>
+              <div class="viewport-slot" data-role="viewport"></div>
+              <div class="viewport-legend" data-role="legend"></div>
+            </figure>
+            <figure class="viewport-card" data-mode="reversed">
+              <figcaption>
+                <span class="viewport-card__title">
+                  <span class="swatch swatch--reversed"></span>反向深度
+                </span>
+                <span class="viewport-card__meta" data-role="mode-meta"></span>
+              </figcaption>
+              <div class="viewport-slot" data-role="viewport"></div>
+              <div class="viewport-legend" data-role="legend"></div>
+            </figure>
+          </section>
+
+          <section class="stats-card" aria-label="实测统计">
+            <header class="stats-card__header">
+              <div>
+                <h2>当前帧实测</h2>
+                <p class="stats-card__note">争抢 = 交换绘制顺序后颜色变化的像素；深度差来自深度纹理读回。</p>
+              </div>
+              <span id="stats-summary" class="stats-card__summary"></span>
+            </header>
+            <p id="frame-summary" class="stats-card__precise"></p>
+            <div class="stats-tables">
+              <div class="stats-table-wrap" data-mode="direct">
+                <h3>直接深度</h3>
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">组 / 相对间距</th>
+                      <th scope="col">争抢像素</th>
+                      <th scope="col">争抢占比</th>
+                      <th scope="col">深度差 中位/最大</th>
+                    </tr>
+                  </thead>
+                  <tbody data-role="stats-body"></tbody>
+                </table>
+              </div>
+              <div class="stats-table-wrap" data-mode="reversed">
+                <h3>反向深度</h3>
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">组 / 相对间距</th>
+                      <th scope="col">争抢像素</th>
+                      <th scope="col">争抢占比</th>
+                      <th scope="col">深度差 中位/最大</th>
+                    </tr>
+                  </thead>
+                  <tbody data-role="stats-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="chart-card" aria-label="精度曲线">
+            <header class="chart-card__header">
+              <div>
+                <h2>每个深度码点对应多少世界距离</h2>
+                <p>纵轴越靠下越精细。定点存储下，反向深度与直接深度完全重合；只有浮点存储才随距离拉开差距。</p>
+              </div>
+              <button type="button" class="ghost-button" data-role="precision-table-toggle">
+                表格视图
+              </button>
+            </header>
+            <div class="chart-host" data-role="precision-chart"></div>
+          </section>
+
+          <section class="scan-card" aria-label="固定相机距离扫描">
+            <header class="scan-card__header">
+              <div>
+                <h2>固定相机扫过距离</h2>
+                <p>
+                  相机沿 z 轴按等比采样固定推进；两组模式使用同一组采样点、同一 fov 与间距规则。
+                  连续 <span data-role="sustain-label">3</span> 个采样点的争抢占比 ≥
+                  <span data-role="threshold-label">0.2%</span> 才判定为“开始不稳定”。
+                </p>
+              </div>
+              <div class="scan-card__actions">
+                <button type="button" id="scan-run" class="primary-button" data-testid="scan-run">
+                  运行扫描
+                </button>
+                <button type="button" id="scan-copy" class="ghost-button" data-testid="scan-copy" disabled>
+                  复制结果
+                </button>
+              </div>
+            </header>
+            <div class="scan-config" id="scan-config"></div>
+            <div class="scan-status" id="scan-status" role="status" aria-live="polite" data-testid="scan-status"></div>
+            <div class="scan-charts">
+              <div class="scan-chart-block" data-mode="direct">
+                <h3><span class="swatch swatch--direct"></span>直接深度 · 争抢随距离</h3>
+                <div class="chart-host chart-host--scan" data-role="scan-chart" data-testid="scan-chart-direct"></div>
+                <div class="scan-summary" data-role="scan-summary" data-testid="scan-summary-direct"></div>
+              </div>
+              <div class="scan-chart-block" data-mode="reversed">
+                <h3><span class="swatch swatch--reversed"></span>反向深度 · 争抢随距离</h3>
+                <div class="chart-host chart-host--scan" data-role="scan-chart" data-testid="scan-chart-reversed"></div>
+                <div class="scan-summary" data-role="scan-summary" data-testid="scan-summary-reversed"></div>
+              </div>
+            </div>
+            <div class="scan-results">
+              <div class="table-host" data-role="scan-table" data-testid="scan-table" hidden></div>
+              <div class="scan-output" data-role="scan-output" data-testid="scan-output"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
