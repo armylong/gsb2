@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>网络延迟 · 客户端预测实验台</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>客户端预测 / 权威校正 延迟实验台</h1>
+      <div class="header-actions">
+        <button id="btn-pause" class="primary">暂停</button>
+        <button id="btn-step">单步</button>
+        <button id="btn-reset">清空重来</button>
+        <button id="btn-test">运行验证</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="canvas-wrap">
+        <canvas id="canvas" width="820" height="580"></canvas>
+        <div id="hud" class="hud"></div>
+        <div id="test-panel" class="test-panel hidden"></div>
+      </section>
+
+      <aside class="panel">
+        <fieldset>
+          <legend>场景 / 输入源</legend>
+          <label>场景
+            <select id="scenario">
+              <option value="manual">手动输入（WASD / 方向键）</option>
+              <option value="corner">① 转角碰墙（确定性输入录像）</option>
+              <option value="reorder">② 快照乱序</option>
+              <option value="loss">③ 短暂丢包（之后必须全部确认）</option>
+            </select>
+          </label>
+          <label>随机种子（抖动/丢包）
+            <input id="seed" type="number" value="20261120" step="1" />
+          </label>
+          <div class="hint">场景切换会自动重置一轮；固定种子 + 同一录像可完全复现延迟过程。</div>
+        </fieldset>
+
+        <fieldset>
+          <legend>客户端 → 权威端（输入通道，可靠）</legend>
+          <label>基础延迟 ms <input id="up-delay" type="number" value="120" min="0" step="10" /></label>
+          <label>抖动 ±ms <input id="up-jitter" type="number" value="40" min="0" step="5" /></label>
+          <label>丢包率 % <input id="up-loss" type="number" value="0" min="0" max="100" step="1" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>权威端 → 客户端（快照通道，可丢）</legend>
+          <label>基础延迟 ms <input id="down-delay" type="number" value="120" min="0" step="10" /></label>
+          <label>抖动 ±ms <input id="down-jitter" type="number" value="40" min="0" step="5" /></label>
+          <label>丢包率 % <input id="down-loss" type="number" value="0" min="0" max="100" step="1" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>显示 / 平滑</legend>
+          <label><input id="show-trail" type="checkbox" checked /> 叠加轨迹（蓝=预测，橙=权威）</label>
+          <label><input id="smooth" type="checkbox" checked /> 视觉平滑回正</label>
+          <label><input id="push-zone" type="checkbox" checked /> 权威推挤区（制造真实纠正）</label>
+          <label>视觉回正时间 τ (ms) <input id="tau" type="number" value="180" min="0" step="20" /></label>
+          <div class="hint">逻辑纠正立即发生；平滑只移动渲染点。关闭平滑可直接看到位置修正。</div>
+        </fieldset>
+
+        <fieldset>
+          <legend>实时统计</legend>
+          <div id="stats" class="stats"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>待发送 / 在途消息</legend>
+          <div id="queues" class="queues"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>事件日志（实际消息与状态）</legend>
+          <div id="events" class="events"></div>
+        </fieldset>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>

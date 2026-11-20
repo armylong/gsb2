@@ -22,6 +22,8 @@ tmp/
 
 # ---- 依赖与构建产物 ----
 node_modules/
+dist/
+dist-tests/
 __pycache__/
 *.pyc
 .venv/
