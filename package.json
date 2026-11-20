@@ -1,0 +1,15 @@
+{
+  "name": "mesh-observer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "手绘凹多边形(带孔)三角网格观察页",
+  "scripts": {
+    "build": "tsc",
+    "verify": "tsc && node dist/verify.js",
+    "start": "tsc && node serve.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

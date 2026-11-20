@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>凹轮廓带孔三角网格观察页</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; display: flex; gap: 16px; }
+    canvas { border: 1px solid #ccc; background: #fafafa; }
+    #side { width: 320px; }
+    button { margin: 0 6px 6px 0; padding: 6px 10px; cursor: pointer; }
+    #panel { font-size: 13px; line-height: 1.5; }
+    #panel h3 { margin: 4px 0; }
+    .dim { color: #888; font-size: 12px; }
+    ul { margin: 4px 0; padding-left: 20px; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <canvas id="view" width="960" height="640"></canvas>
+  <div id="side">
+    <div>
+      <button id="btn-groove">细窄凹槽</button>
+      <button id="btn-holes">双孔</button>
+      <button id="btn-combo">凹槽+双孔</button>
+    </div>
+    <div>
+      <button id="btn-rev-outer">交换外环点序</button>
+      <button id="btn-rev-hole">交换内环1点序</button>
+    </div>
+    <p class="dim">拖动顶点改变形状;把边拖成交叉、或把洞拖出外环,可观察冲突标注与网格清除。</p>
+    <div id="panel"></div>
+  </div>
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>
