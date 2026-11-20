@@ -1,0 +1,5 @@
+numpy>=1.26
+opencv-python>=4.8
+# Essentials 只含 QtCore/QtGui/QtWidgets 等核心模块，体积远小于全量 PySide6
+# （全量包附带 QtWebEngine，本工具用不到）
+PySide6-Essentials>=6.6
