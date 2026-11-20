@@ -1,0 +1,24 @@
+{
+  "name": "skinning-weight-debugger",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Three.js + TypeScript 蒙皮权重调试场景:三骨骼带状网格、权重热力图、笔刷、锁定归一、绑定姿态、预设与存档",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "smoke:runtime": "node scripts/runtime-smoke.mjs"
+  },
+  "dependencies": {
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.171.0",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}

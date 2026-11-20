@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>蒙皮权重调试场景 · Three.js</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="viewport"></div>
+
+      <aside id="panel">
+        <header>
+          <h1>蒙皮权重调试</h1>
+          <p class="sub">三骨骼带状网格 · 点击关节选骨骼，点击顶点查权重</p>
+        </header>
+
+        <section>
+          <h2>① 骨骼与姿态</h2>
+          <div id="bone-controls"></div>
+        </section>
+
+        <section>
+          <h2>② 视图</h2>
+          <label class="check"><input type="checkbox" id="show-heatmap" checked /> 顶点权重热力图</label>
+          <label class="check"><input type="checkbox" id="show-skeleton" checked /> 骨架与关节</label>
+          <label class="check"><input type="checkbox" id="wireframe" /> 网格线框</label>
+          <div class="legend" id="heatmap-legend"></div>
+        </section>
+
+        <section>
+          <h2>③ 权重笔刷</h2>
+          <div class="seg" id="brush-mode">
+            <button data-mode="select" class="active">选择/查看</button>
+            <button data-mode="add">加权重</button>
+            <button data-mode="subtract">减权重</button>
+          </div>
+          <label class="slider">
+            笔刷半径 <span id="radius-val">0.60</span>
+            <input type="range" id="brush-radius" min="0.15" max="1.5" step="0.05" value="0.6" />
+          </label>
+          <label class="slider">
+            单笔强度 <span id="strength-val">0.15</span>
+            <input type="range" id="brush-strength" min="0.02" max="0.5" step="0.01" value="0.15" />
+          </label>
+          <p class="hint">加/减模式下在网格上按住拖动；锁定骨骼不参与再分配。</p>
+        </section>
+
+        <section>
+          <h2>④ 过渡示例（权重预设）</h2>
+          <div class="btn-row">
+            <button data-preset="default">默认</button>
+            <button data-preset="elbow">肘部·尖锐</button>
+            <button data-preset="tail">尾部·柔和</button>
+          </div>
+          <div class="btn-row">
+            <button id="demo-pose">载入弯曲演示姿态</button>
+            <button id="reset-pose">回到绑定姿态</button>
+          </div>
+          <p class="hint">绑定姿态 = 全部旋转归零，网格回到初始位置；权重编辑保留。</p>
+        </section>
+
+        <section>
+          <h2>⑤ 存档</h2>
+          <div class="btn-row">
+            <button id="save" class="primary">保存权重+姿态</button>
+            <button id="restore">恢复存档</button>
+          </div>
+          <div class="btn-row">
+            <button id="reset-weights">恢复默认权重</button>
+          </div>
+          <div id="storage-state" class="storage-state">尚无本地存档</div>
+        </section>
+
+        <section>
+          <h2>⑥ 顶点权重详情</h2>
+          <div id="vertex-info" class="vertex-info">未选中顶点（选择模式下点击网格顶点）</div>
+        </section>
+
+        <footer id="status">就绪</footer>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

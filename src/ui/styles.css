@@ -1,0 +1,290 @@
+:root {
+  --bg: #14181f;
+  --panel: #1c222c;
+  --panel-2: #232b38;
+  --border: #313b4a;
+  --text: #e6ebf2;
+  --muted: #93a0b0;
+  --accent: #4f9cf0;
+  --accent-2: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+#viewport {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+#viewport canvas {
+  display: block;
+}
+
+#panel {
+  width: 340px;
+  flex: 0 0 340px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 14px 16px 24px;
+}
+
+header h1 {
+  font-size: 17px;
+  margin: 0 0 4px;
+}
+
+.sub {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+section {
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+section h2 {
+  font-size: 13px;
+  margin: 0 0 10px;
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.bone-card {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.bone-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+
+.bone-card.locked {
+  opacity: 0.75;
+}
+
+.bone-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bone-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+}
+
+.bone-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.lock-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.lock-btn.on {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #1b1b1b;
+  font-weight: 700;
+}
+
+.bone-rot {
+  margin-top: 6px;
+}
+
+.bone-rot label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.bone-rot input[type='range'] {
+  width: 100%;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.legend-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2b3a9e, #16a6c9, #35c24b, #e8c820, #d9342b);
+}
+
+.seg {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.seg button,
+.btn-row button {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.seg button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+button.primary {
+  background: #2f7d46;
+  border-color: #2f7d46;
+  font-weight: 600;
+}
+
+.slider {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.slider span {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.slider input {
+  width: 100%;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 6px 0 0;
+}
+
+.vertex-info {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.vrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.vrow .bone-dot {
+  width: 8px;
+  height: 8px;
+}
+
+.vrow .vlabel {
+  width: 64px;
+}
+
+.vrow .bar {
+  flex: 1;
+  height: 8px;
+  background: #12161d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.vrow .bar i {
+  display: block;
+  height: 100%;
+}
+
+.vrow .vnum {
+  width: 46px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.vmeta {
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.storage-state {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.storage-state.ok {
+  color: #6fd08a;
+}
+
+footer#status {
+  position: sticky;
+  bottom: -24px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 8px;
+  color: var(--accent-2);
+  font-size: 12px;
+  min-height: 20px;
+}
