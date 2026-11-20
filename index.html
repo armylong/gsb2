@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>道路交叉口网格预览</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>交叉口网格预览</h1>
+        <div id="status" class="status"></div>
+
+        <div class="group">
+          <div class="group-title">预设</div>
+          <div class="row" id="preset-row"></div>
+          <div class="row">
+            <button id="btn-reset" class="secondary">恢复默认</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">分支参数</div>
+          <div id="branch-list"></div>
+          <button id="btn-add" class="secondary">添加分支</button>
+        </div>
+
+        <div class="group">
+          <div class="group-title">路缘转角半径 <span id="radius-val" class="mono"></span></div>
+          <input type="range" id="radius" min="0" max="3" step="0.1" />
+        </div>
+
+        <div class="group">
+          <div class="group-title">视图</div>
+          <div class="row">
+            <label><input type="radio" name="view" value="solid" checked /> 实体</label>
+            <label><input type="radio" name="view" value="wire" /> 线框</label>
+            <label><input type="radio" name="view" value="boundary" /> 边界</label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">统计</div>
+          <div id="stats" class="mono small"></div>
+        </div>
+
+        <div class="group" id="messages-group" style="display: none">
+          <div class="group-title">信息</div>
+          <div id="messages" class="small"></div>
+        </div>
+
+        <div class="group">
+          <div class="row">
+            <button id="btn-export">导出网格与参数</button>
+            <button id="btn-verify" class="secondary">运行验证</button>
+          </div>
+        </div>
+
+        <div class="group" id="verify-group" style="display: none">
+          <div class="group-title">验证结果</div>
+          <div id="verify" class="small"></div>
+        </div>
+      </aside>
+      <div id="canvas-wrap"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
