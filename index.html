@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>封闭网格截面观察</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #14161a;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: #e6e8ec;
+      }
+      #app { position: fixed; inset: 0; }
+      .panel {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        width: 330px;
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        background: rgba(22, 25, 31, 0.92);
+        border: 1px solid #2c313a;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.55;
+        backdrop-filter: blur(6px);
+        z-index: 10;
+      }
+      .panel h2 { margin: 0 0 6px; font-size: 15px; }
+      .panel h3 {
+        margin: 14px 0 6px;
+        font-size: 13px;
+        color: #9fb4d8;
+        border-bottom: 1px solid #2c313a;
+        padding-bottom: 4px;
+      }
+      .row { display: flex; justify-content: space-between; gap: 8px; }
+      .row .k { color: #9aa3b2; }
+      .row .v { font-variant-numeric: tabular-nums; text-align: right; }
+      .muted { color: #7d8794; font-size: 12px; }
+      .ok { color: #54d18c; }
+      .bad { color: #ff7a7a; }
+      .warn { color: #f0b454; }
+      .legend span { display: inline-block; margin-right: 10px; }
+      .swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: -1px;
+      }
+      button {
+        background: #2d6cdf;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        margin: 3px 4px 3px 0;
+      }
+      button:hover { background: #3d7cf0; }
+      button.gray { background: #3a414d; }
+      button.gray:hover { background: #4a5361; }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      td, th {
+        border-bottom: 1px solid #2c313a;
+        padding: 4px 3px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      th:first-child, td:first-child { text-align: left; }
+      #hud {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: #8a94a3;
+        background: rgba(22, 25, 31, 0.8);
+        padding: 5px 12px;
+        border-radius: 999px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .lil-gui { --background-color: rgba(22,25,31,0.92); --title-background-color: #1c2027; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="panel" id="panel">
+      <h2>封闭网格截面观察</h2>
+      <div class="muted">
+        拖动平面本体平移截面；按住 <b>Shift</b> 拖动平面旋转；空白处拖动旋转视角，滚轮缩放。
+      </div>
+
+      <h3>截面结果</h3>
+      <div class="row"><span class="k">截交环数量（外/内）</span><span class="v" id="stat-loops">-</span></div>
+      <div class="row"><span class="k">截面面积（含孔扣除）</span><span class="v" id="stat-area">-</span></div>
+      <div class="row"><span class="k">轮廓总周长（外+内）</span><span class="v" id="stat-perimeter">-</span></div>
+      <div class="row"><span class="k">截交线段数</span><span class="v" id="stat-segments">-</span></div>
+      <div class="row legend" style="margin-top:6px">
+        <span><i class="swatch" style="background:#4dd0e1"></i>外环</span>
+        <span><i class="swatch" style="background:#ffb74d"></i>内环(孔洞)</span>
+        <span><i class="swatch" style="background:#ff5252"></i>未闭合边</span>
+      </div>
+
+      <h3>破面检测</h3>
+      <div class="row"><span class="k">边界边（仅属 1 个三角面）</span><span class="v" id="stat-boundary">-</span></div>
+      <div class="row"><span class="k">未闭合截交链</span><span class="v" id="stat-open">-</span></div>
+      <div id="open-detail" class="muted"></div>
+
+      <h3>内置验证（已知尺寸解析解）</h3>
+      <button id="run-verify">运行全部验证用例</button>
+      <div id="verify-summary" class="muted"></div>
+      <table id="verify-table" hidden>
+        <thead>
+          <tr><th>用例</th><th>指标</th><th>计算值</th><th>期望值</th><th>结果</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="hud">左键拖平面移动 · Shift+左键旋转平面 · 拖空白处转视角</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
