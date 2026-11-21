@@ -1,0 +1,23 @@
+{
+  "name": "narrow-bridge-reservation-debug",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "多车过窄桥的预约式冲突避让俯视调试页 (TypeScript + Canvas)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "smoke": "vite-node scripts/smoke.ts"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

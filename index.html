@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>窄桥多车预约调度 · 俯视调试页</title>
+  </head>
+  <body>
+    <header>
+      <h1>窄桥多车预约调度 <small>时间窗预约表 · 顶点/边冲突 · 临界区一次性预约</small></h1>
+    </header>
+    <main>
+      <section class="panel canvas-panel">
+        <div class="canvas-wrap">
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="hint" class="hint"></div>
+      </section>
+
+      <aside class="panel side-panel">
+        <div class="control-group">
+          <label>内置场景
+            <select id="scenario"></select>
+          </label>
+          <p id="scenarioDesc" class="desc"></p>
+        </div>
+
+        <div class="control-group">
+          <label>等待策略
+            <select id="strategy">
+              <option value="strict">严格优先级（高优先级先预约）</option>
+              <option value="aging">优先级老化（等待越久有效优先级越高）</option>
+              <option value="fcfs">先到先得（按累计等待排队）</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label>预约视野 H = <b id="horizonVal">7</b> 步
+            <input id="horizon" type="range" min="1" max="12" value="7" />
+          </label>
+          <label>饥饿阈值 maxWait = <b id="maxWaitVal">8</b> 步
+            <input id="maxWait" type="range" min="2" max="20" value="8" />
+          </label>
+          <label class="check">
+            <input id="showRes" type="checkbox" checked /> 显示未来预约幽灵（t+1…t+H）
+          </label>
+        </div>
+
+        <div class="control-group btn-row">
+          <button id="stepBtn">推进一步</button>
+          <button id="autoBtn">自动推进</button>
+          <button id="resetBtn" class="ghost">重置场景</button>
+        </div>
+        <div class="tick-line">当前步数：<b id="tickVal">0</b></div>
+
+        <div class="control-group">
+          <h3>车辆状态（可改优先级）</h3>
+          <div id="carTable"></div>
+        </div>
+
+        <div class="control-group log-group">
+          <h3>事件日志</h3>
+          <div id="log"></div>
+        </div>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
