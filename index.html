@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>争夺区控制权观察页</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", sans-serif; margin: 16px; background: #eceae2; color: #333; }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  .bar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  button { padding: 6px 12px; border: 1px solid #999; border-radius: 6px; background: #fff; cursor: pointer; }
+  button:hover { background: #f0efe8; }
+  #desc { font-size: 13px; color: #666; margin-bottom: 10px; max-width: 900px; }
+  .layout { display: flex; gap: 16px; align-items: flex-start; }
+  canvas { background: #fff; border: 1px solid #bbb; }
+  .panels { display: flex; gap: 12px; }
+  .panel { width: 340px; max-height: 640px; overflow: auto; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 12px; }
+  .panel h2 { font-size: 14px; margin: 0 0 8px; }
+  .rec { border-top: 1px dashed #ccc; padding: 6px 0; }
+  .rec-h { font-weight: 600; margin-bottom: 4px; }
+  .rec.stale { opacity: 0.55; background: #faf7ec; }
+  .zone { margin: 4px 0; }
+  .cols { display: flex; gap: 10px; }
+  .cols > div { flex: 1; }
+  ul { margin: 2px 0; padding-left: 16px; }
+  .evt { color: #8a5a00; }
+  .legend { font-size: 12px; color: #555; margin-top: 6px; line-height: 1.7; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 3px 0 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+  <h1>争夺区控制权观察页 <span id="turn" style="font-size:13px;color:#666"></span></h1>
+  <div class="bar">
+    <button id="btn-sc1">载入场景一:前哨被切断</button>
+    <button id="btn-sc2">载入场景二:同时进入争夺区</button>
+    <button id="btn-next">结算下一回合(按脚本)</button>
+    <button id="btn-undo">撤回一轮</button>
+  </div>
+  <div id="desc"></div>
+  <div class="layout">
+    <div>
+      <canvas id="map"></canvas>
+      <div class="legend">
+        <span class="sw" style="background:#2b6cb0"></span>A方
+        <span class="sw" style="background:#c53030"></span>B方
+        <span class="sw" style="background:#fff3cd"></span>争夺区(右上角角色标)
+        <span class="sw" style="background:#4a4a4a"></span>阻断区
+        <br>淡色底 = 该方连通补给范围 · 圆点 = 已标记格子 · 绿框前哨 = 在补给网,灰框 = 断供
+        <br>操作:点击单位选中 → 点击空格移动(自由微调)→「结算下一回合」;「撤回一轮」后旧结果保留在右侧归档栏。
+      </div>
+    </div>
+    <div class="panels">
+      <div class="panel"><h2>回合追溯(新→旧)</h2><div id="history"></div></div>
+      <div class="panel"><h2>归档对照(撤回前的旧结果)</h2><div id="archive"></div></div>
+    </div>
+  </div>
+  <script type="module" src="./dist/ui.js"></script>
+</body>
+</html>
