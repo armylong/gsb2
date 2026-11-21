@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>跳跃落点预测调试</title>
+<style>
+  body { margin: 0; font: 13px/1.5 -apple-system, "PingFang SC", sans-serif; background: #1e1f24; color: #ddd; display: flex; }
+  #cv { background: #26272e; display: block; margin: 12px 0 12px 12px; border-radius: 6px; cursor: crosshair; }
+  #panel { width: 320px; padding: 12px; box-sizing: border-box; }
+  fieldset { border: 1px solid #3a3b44; border-radius: 6px; margin: 0 0 10px; padding: 8px 10px; }
+  legend { color: #9ab; padding: 0 4px; }
+  label.slider { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+  label.slider span:first-child { width: 64px; color: #9ab; }
+  label.slider input { flex: 1; }
+  label.slider b { width: 48px; text-align: right; font-weight: normal; color: #7fd4ff; }
+  button { background: #3a3f4b; color: #eee; border: 1px solid #555a68; border-radius: 4px; padding: 5px 10px; margin: 2px 4px 2px 0; cursor: pointer; }
+  button:hover { background: #484e5c; }
+  button.primary { background: #2f6db3; border-color: #4a86c8; }
+  button.warn { background: #8a5a2b; border-color: #a97a3f; }
+  select, input[type=number] { background: #2b2c33; color: #eee; border: 1px solid #555a68; border-radius: 4px; padding: 3px 4px; }
+  .plan-row { display: flex; gap: 4px; align-items: center; margin: 3px 0; }
+  .plan-row input[type=number] { width: 52px; }
+  #status, #diff { white-space: pre-wrap; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  #status.stale { color: #e0a040; }
+  #status.fresh { color: #6fd08a; }
+  #diff { background: #26272e; border-radius: 6px; padding: 8px; min-height: 60px; }
+  .hint { color: #778; font-size: 12px; }
+  .legend span { display: inline-block; margin-right: 10px; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+  <canvas id="cv" width="960" height="540"></canvas>
+  <div id="panel">
+    <fieldset>
+      <legend>场景</legend>
+      <select id="scenario" style="width:100%"></select>
+      <div class="hint" id="scenDesc"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>物理参数</legend>
+      <label class="slider"><span>起跳速度</span><input id="jumpVel" type="range" min="300" max="1000" step="10"><b></b></label>
+      <label class="slider"><span>重力</span><input id="gravity" type="range" min="400" max="3000" step="20"><b></b></label>
+      <label class="slider"><span>空中加速</span><input id="airAccel" type="range" min="200" max="4000" step="50"><b></b></label>
+      <label class="slider"><span>速度上限</span><input id="maxAirSpeed" type="range" min="60" max="500" step="10"><b></b></label>
+      <label class="slider"><span>模拟频率</span><select id="hz"><option>30</option><option selected>60</option><option>120</option><option>240</option></select><b>Hz</b></label>
+      <div class="hint">障碍(灰块)可用鼠标直接拖动。任何修改都会使旧预测失效。</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>输入计划(逐段:时长 tick / 方向 / 跳)</legend>
+      <div id="planRows"></div>
+      <button id="addRow">+ 添加段</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>预测与执行</legend>
+      <button id="predict" class="primary">生成预测</button>
+      <button id="run" class="primary">确认执行</button>
+      <button id="step">单步</button>
+      <button id="reset" class="warn">重置</button>
+      <div id="status" class="hint" style="margin-top:6px">尚未生成预测</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>预测 vs 实际</legend>
+      <div id="diff">执行后在此显示差值与归因。</div>
+    </fieldset>
+
+    <fieldset class="legend">
+      <legend>图例</legend>
+      <span><i class="sw" style="background:#57c7ff"></i>预测轨迹</span>
+      <span><i class="sw" style="background:#ff5f56"></i>实际轨迹</span>
+      <span><i class="sw" style="background:#6fd08a"></i>首次触地</span>
+      <span><i class="sw" style="background:#f0a04b"></i>撞墙</span>
+      <span><i class="sw" style="background:#c792ea"></i>撞顶</span>
+      <span><i class="sw" style="background:#888"></i>已失效预测</span>
+    </fieldset>
+  </div>
+  <script src="dist/main.js"></script>
+</body>
+</html>
