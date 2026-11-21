@@ -1,0 +1,25 @@
+{
+  "name": "frustum-culling-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Three.js 视锥剔除验证台：镜头外摆件是否真的不提交绘制",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsx verify/runVerify.ts",
+    "verify:update": "tsx verify/runVerify.ts --update"
+  },
+  "dependencies": {
+    "three": "^0.160.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/three": "^0.160.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.10"
+  }
+}
