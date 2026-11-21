@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纹理采样实验室 — 远处变糊 vs 采样不稳</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header id="toolbar">
+        <div class="brand">纹理采样实验室</div>
+
+        <div class="group">
+          <label>相机
+            <button id="btn-grazing" class="cam-preset">贴地斜视</button>
+            <button id="btn-top" class="cam-preset">正俯视</button>
+          </label>
+        </div>
+
+        <div class="group">
+          <label>播放
+            <button id="btn-dolly">▶ 固定速度推镜</button>
+            <button id="btn-replay">⟲ 重播</button>
+            <div id="dolly-progress"><div id="dolly-fill"></div></div>
+          </label>
+        </div>
+
+        <div class="group">
+          <label>帧
+            <button id="btn-pause">⏸ 暂停</button>
+            <button id="btn-step" title="暂停状态下推进 1/30 秒">⏭ 一帧</button>
+            <button id="btn-subpx">跳到不足一像素对照位</button>
+            <button id="btn-nudge-plus" title="在观察点上制造约 0.5 个屏幕像素的世界位移">+0.5px</button>
+            <button id="btn-nudge-minus">−0.5px</button>
+            <button id="btn-clear-nudge">复位偏移</button>
+          </label>
+        </div>
+
+        <div class="group">
+          <label>最大各向异性
+            <input id="aniso-slider" type="range" min="1" max="16" step="1" value="1" disabled />
+            <span id="aniso-value">1×</span>
+            <span id="aniso-cap" class="muted"></span>
+          </label>
+        </div>
+
+        <div class="group">
+          <label><input id="lod-debug" type="checkbox" /> LOD 伪色</label>
+        </div>
+
+        <div class="group muted" id="device-info">检测设备能力…</div>
+      </header>
+
+      <div id="stage">
+        <section class="pane" id="pane-left">
+          <canvas class="gl"></canvas>
+          <div class="pane-head">
+            <select class="mode-select" data-pane="0">
+              <option value="0">A · 无缩小层（仅 LINEAR）</option>
+              <option value="1" selected>B · 带缩小层（三线性）</option>
+              <option value="2">C · 沿倾斜方向改善（各向异性）</option>
+            </select>
+          </div>
+          <div class="hud"></div>
+          <canvas class="magnifier hidden" width="260" height="260"></canvas>
+          <div class="probe-crosshair hidden">+</div>
+          <div class="pane-tag">对照窗 1</div>
+        </section>
+
+        <div id="divider"></div>
+
+        <section class="pane" id="pane-right">
+          <canvas class="gl"></canvas>
+          <div class="pane-head">
+            <select class="mode-select" data-pane="1">
+              <option value="0">A · 无缩小层（仅 LINEAR）</option>
+              <option value="1">B · 带缩小层（三线性）</option>
+              <option value="2" selected>C · 沿倾斜方向改善（各向异性）</option>
+            </select>
+          </div>
+          <div class="hud"></div>
+          <canvas class="magnifier hidden" width="260" height="260"></canvas>
+          <div class="probe-crosshair hidden">+</div>
+          <div class="pane-tag">对照窗 2</div>
+        </section>
+
+        <div id="magnifier-bar" class="hidden">
+          放大查看中（已暂停，采样相机不变）— 放大倍数
+          <input id="mag-zoom" type="range" min="2" max="24" step="1" value="8" />
+          <span id="mag-zoom-value">8×</span>
+          <span id="mag-crop-info" class="muted"></span>
+          <button id="mag-close">关闭放大</button>
+        </div>
+      </div>
+
+      <footer id="notes">
+        <p>
+          <b>怎么看：</b>拖动旋转 / 滚轮缩放 / 右键平移，两个窗共用同一相机与运动。
+          点击任意位置放置观察点；<b>暂停</b>后点观察点可放大看原始渲染像素（不改变采样相机）。
+        </p>
+        <p>
+          <b>两种现象的区别：</b>A 窗在斜视远处出现闪烁/爬行纹（采样不稳，细节其实还在但逐帧跳）；
+          B 窗稳定但远处一片糊（细节被缩小层平均掉）；C 窗沿视线倾斜方向拉长采样，
+          稳定且保留更多线条锐度。推镜与「不足一像素对照位」用于复现：A↔B 是稳定性改善，B↔C 是细节保留差异。
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
