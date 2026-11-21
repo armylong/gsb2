@@ -1,0 +1,122 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0e1116;
+}
+
+#app,
+#app canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#help {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  max-width: 460px;
+  padding: 10px 14px;
+  background: rgba(14, 17, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #d6dde8;
+  font-size: 12.5px;
+  line-height: 1.7;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+
+#mode-line {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  background: rgba(14, 17, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #9fc8e8;
+  font-size: 12.5px;
+  pointer-events: none;
+}
+
+#phase-line {
+  position: fixed;
+  bottom: 14px;
+  left: 12px;
+  max-width: 380px;
+  padding: 6px 12px;
+  background: rgba(14, 17, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #cdd6e3;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+#pick-panel {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  width: 300px;
+  padding: 12px 14px;
+  background: rgba(14, 17, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #d6dde8;
+  font-size: 12.5px;
+  line-height: 1.55;
+  backdrop-filter: blur(8px);
+}
+
+#pick-panel b {
+  display: block;
+  margin-bottom: 6px;
+  color: #ffffff;
+  font-size: 13.5px;
+}
+
+#pick-panel .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+#pick-panel .row span:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#pick-panel .row.highlight span {
+  color: #ffd24a;
+  font-weight: 700;
+}
+
+#pick-panel .row.ok span {
+  color: #45e08a;
+}
+
+#pick-panel .muted {
+  color: #8a94a3;
+}
+
+/* lil-gui 位置在 gui.ts 里用行内样式指定（right:326px），避让读数面板 */
+.lil-gui {
+  --width: 290px;
+}
