@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>软质容器混合变形实验台</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>软质容器 · 混合变形实验台</h1>
+        <div id="controls"></div>
+      </aside>
+      <main id="viewport">
+        <div id="hud"></div>
+        <div id="tooltip" class="hidden"></div>
+      </main>
+      <aside id="inspector">
+        <h2>测点检查器</h2>
+        <p class="hint">在网格上点击拾取顶点，可钉住多个点对比。</p>
+        <div id="pins"></div>
+      </aside>
+      <input type="file" id="config-file" accept=".json,application/json" hidden />
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
