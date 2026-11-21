@@ -1,0 +1,23 @@
+{
+  "name": "logic-circuit-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "开关 / 压力板 / 延时 / 门 的步进逻辑沙盒 (TypeScript + Canvas)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsx src/verify.ts",
+    "check": "npm run typecheck && npm run test && npm run verify"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  }
+}
