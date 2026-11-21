@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>闭合曲线偏移实验</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { display: flex; font: 13px/1.5 -apple-system, "PingFang SC", sans-serif; background: #1e1f24; color: #ddd; }
+  #panel { width: 290px; flex: none; padding: 14px; overflow-y: auto; background: #26272e; box-sizing: border-box; }
+  #panel h1 { font-size: 15px; margin: 0 0 10px; }
+  #panel .row { margin: 10px 0; }
+  #panel label { display: flex; justify-content: space-between; gap: 8px; }
+  #panel input[type=range] { width: 100%; }
+  #panel .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
+  #panel .checks label { display: flex; justify-content: flex-start; gap: 6px; }
+  #panel button { margin-right: 8px; padding: 4px 12px; background: #3a3d47; color: #ddd; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
+  #panel button:hover { background: #484b57; }
+  #stats { white-space: pre-wrap; background: #1a1b20; border-radius: 6px; padding: 10px; font: 12px/1.6 ui-monospace, monospace; }
+  .hint { color: #999; font-size: 12px; }
+  .legend span { display: inline-block; margin-right: 10px; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  #cv { flex: 1; height: 100%; cursor: crosshair; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>闭合曲线偏移实验</h1>
+  <div class="row">
+    <button id="presetCircle">圆形</button>
+    <button id="presetHour">窄腰</button>
+  </div>
+  <div class="row">
+    <label>偏移距离（+外扩 / −内缩） <span id="offsetVal"></span></label>
+    <input id="offset" type="range" min="-160" max="160" step="1" value="40">
+  </div>
+  <div class="row">
+    <label>近似精度（弦高容差，越小越精确） <span id="tolVal"></span></label>
+    <input id="tol" type="range" min="0.05" max="2" step="0.05" value="0.25">
+  </div>
+  <div class="row">
+    <label>抽查法线数量 <span id="normalsVal"></span></label>
+    <input id="normals" type="range" min="0" max="64" step="1" value="24">
+  </div>
+  <div class="row checks">
+    <label><input id="cbOriginal" type="checkbox" checked>原轮廓</label>
+    <label><input id="cbCtrl" type="checkbox" checked>控制点</label>
+    <label><input id="cbRaw" type="checkbox" checked>原始偏移</label>
+    <label><input id="cbClean" type="checkbox" checked>有效轮廓</label>
+    <label><input id="cbInts" type="checkbox" checked>自交点</label>
+    <label><input id="cbNormals" type="checkbox" checked>抽查法线</label>
+  </div>
+  <div class="row legend hint">
+    <span><i class="sw" style="background:#9ecbff"></i>原轮廓</span>
+    <span><i class="sw" style="background:#ff5a5a"></i>原始偏移(虚线)/自交点</span>
+    <span><i class="sw" style="background:#7dff9a"></i>清理后有效轮廓</span>
+  </div>
+  <div id="stats"></div>
+  <p class="hint">拖拽橙色锚点与黄色控制柄可编辑曲线；法线上的数字是到有效轮廓的实测距离，红色“已裁剪”表示该处偏移被清理掉。</p>
+</div>
+<canvas id="cv"></canvas>
+<script type="module" src="./dist/app.js"></script>
+</body>
+</html>
