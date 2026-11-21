@@ -1,0 +1,18 @@
+{
+  "name": "water-oil-grid",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "格子水油流动模型：固定步长、确定性更新顺序、容量守恒、排水口累计统计",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "verify": "node --experimental-strip-types tests/verify.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

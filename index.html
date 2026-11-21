@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>格子水油流动模型</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>格子里的水与油</h1>
+      <p class="sub">
+        固定步长仿真 · 更新顺序每步反转 · 渲染频率与步数解耦 · 单格容量 1，永不超容
+      </p>
+    </header>
+
+    <main>
+      <div class="board">
+        <canvas id="canvas" width="672" height="512"></canvas>
+        <div id="hover" class="hover-info">悬停格子查看储量</div>
+      </div>
+
+      <aside class="panel">
+        <section>
+          <h2>预设场景（样例自动生成）</h2>
+          <div class="btn-row" id="presets"></div>
+          <p class="hint" id="preset-hint"></p>
+          <button id="remove-divider" class="wide">移开所有内部隔板</button>
+          <button id="reset" class="wide secondary">重置当前预设</button>
+        </section>
+
+        <section>
+          <h2>工具（点击/拖动画布）</h2>
+          <div class="btn-row" id="tools">
+            <button data-tool="water" class="tool active">加水</button>
+            <button data-tool="oil" class="tool">加油</button>
+            <button data-tool="wall" class="tool">挡板</button>
+            <button data-tool="erase" class="tool">擦挡板</button>
+            <button data-tool="port" class="tool">排水口</button>
+          </div>
+          <label class="dose">
+            每次加液量
+            <select id="dose">
+              <option value="0.25">0.25</option>
+              <option value="0.5" selected>0.5</option>
+              <option value="1">1.0</option>
+            </select>
+          </label>
+          <p class="hint">排水口工具：在非墙格放置/移除口；点中已有口则切换开关。</p>
+        </section>
+
+        <section>
+          <h2>播放控制</h2>
+          <div class="btn-row">
+            <button id="play">暂停</button>
+            <button id="step">单步</button>
+          </div>
+          <label class="dose">
+            仿真速度（步/秒，仅影响播放，不影响同一步数结果）
+            <input id="rate" type="range" min="1" max="60" value="20" />
+            <span id="rate-val">20</span>
+          </label>
+          <p class="hint">
+            快捷键：空格 暂停/继续，→ 单步。切换浏览器标签限帧也不会改变结果。
+          </p>
+        </section>
+
+        <section>
+          <h2>总量统计</h2>
+          <table class="stats">
+            <tbody>
+              <tr><td>步数</td><td id="stat-step">0</td></tr>
+              <tr><td>水总量</td><td id="stat-water">0.00</td></tr>
+              <tr><td>油总量</td><td id="stat-oil">0.00</td></tr>
+              <tr><td>可用容量</td><td id="stat-cap">0</td></tr>
+              <tr><td>本步扫描方向</td><td id="stat-dir">顺时针</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>守恒校验（初始总量 + 口净注入 = 当前总量）</h2>
+          <table class="stats">
+            <tbody>
+              <tr><td>水</td><td id="cons-w">—</td></tr>
+              <tr><td>油</td><td id="cons-o">—</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>每个口的累计变化</h2>
+          <div class="table-wrap">
+            <table class="ports" id="port-table">
+              <thead>
+                <tr>
+                  <th>口</th><th>状态</th><th>水注入</th><th>水排出</th><th>油注入</th><th>油排出</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="hint" id="no-port">暂无口：用排水口工具在格子上放置。</p>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
