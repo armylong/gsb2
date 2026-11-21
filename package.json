@@ -1,0 +1,19 @@
+{
+  "name": "belt-push-debug-scene",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "连锁推动 + 输送带稳定结算调试场景 (TypeScript + Canvas)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsx src/engine/verify.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
