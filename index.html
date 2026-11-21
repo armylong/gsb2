@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>计时规则试验台 · Timing Gate Testbench</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e131b;
+        --panel: #171f2c;
+        --border: #2a3547;
+        --text: #e6ecf5;
+        --muted: #8b95a7;
+        --accent: #5aa9ff;
+        --ok: #37d67a;
+        --bad: #ff5d5d;
+        --warn: #f0b429;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      header {
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+      header h1 { font-size: 17px; margin: 0; }
+      header span { color: var(--muted); font-size: 12px; }
+      .layout {
+        display: flex;
+        gap: 16px;
+        padding: 16px 20px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .stage {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      canvas { display: block; border-radius: 6px; }
+      .side {
+        width: 340px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .card h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+      .hud {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      .hud .metric { font-size: 18px; font-weight: 600; }
+      .hud .label { font-size: 11px; color: var(--muted); }
+      .mode-idle { color: var(--muted); }
+      .mode-running { color: var(--ok); }
+      .mode-invalid { color: var(--bad); }
+      button, select {
+        background: #1f2937;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 7px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover { border-color: var(--accent); }
+      button.primary { background: #1d3a5f; border-color: #2f5f99; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+      .btn-grid .wide { grid-column: 1 / -1; }
+      label.row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 8px 0;
+        font-size: 13px;
+      }
+      .sample-desc {
+        font-size: 12px;
+        color: var(--muted);
+        min-height: 36px;
+        margin: 8px 0 4px;
+      }
+      #log {
+        max-height: 260px;
+        overflow-y: auto;
+        font: 11.5px/1.5 ui-monospace, monospace;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .log-item {
+        border-left: 3px solid var(--border);
+        padding: 4px 8px;
+        background: #121a26;
+        border-radius: 0 6px 6px 0;
+      }
+      .log-item.ok { border-left-color: var(--ok); }
+      .log-item.bad { border-left-color: var(--bad); }
+      .log-item.warn { border-left-color: var(--warn); }
+      .log-item .meta { color: var(--muted); }
+      #laps {
+        font-variant-numeric: tabular-nums;
+        font-size: 12.5px;
+      }
+      #laps table { width: 100%; border-collapse: collapse; }
+      #laps th, #laps td { padding: 3px 6px; text-align: right; border-bottom: 1px solid var(--border); }
+      #laps th:first-child, #laps td:first-child { text-align: left; }
+      .keys { font-size: 12px; color: var(--muted); line-height: 1.8; }
+      kbd {
+        background: #1f2937;
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: ui-monospace, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>计时规则试验台</h1>
+      <span>扫掠线段 sub-frame 计时 · 判定与显示帧率解耦 · TypeScript + Canvas</span>
+    </header>
+
+    <div class="layout">
+      <div class="stage">
+        <canvas id="canvas" width="900" height="640"></canvas>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h2>计时 HUD</h2>
+          <div class="hud">
+            <div>
+              <div class="label">模拟时钟（暂停冻结）</div>
+              <div class="metric" id="hud-clock">0.0000 s</div>
+            </div>
+            <div>
+              <div class="label">状态机</div>
+              <div class="metric" id="hud-mode">idle</div>
+            </div>
+            <div>
+              <div class="label">本圈已用</div>
+              <div class="metric" id="hud-lap">—</div>
+            </div>
+            <div>
+              <div class="label">有效圈数</div>
+              <div class="metric" id="hud-laps">0</div>
+            </div>
+            <div>
+              <div class="label">下一期望闸门</div>
+              <div class="metric" id="hud-expected">G0</div>
+            </div>
+            <div>
+              <div class="label">渲染帧率（实测）</div>
+              <div class="metric" id="hud-fps">— fps</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>模拟控制</h2>
+          <div class="btn-grid">
+            <button id="btn-play" class="primary wide">▶ 播放样例</button>
+            <button id="btn-pause">⏸ 暂停/继续 (空格)</button>
+            <button id="btn-reset">↺ 重置</button>
+          </div>
+          <label class="row">
+            模拟帧率（时间步长）
+            <select id="sel-fps">
+              <option value="120">120 fps</option>
+              <option value="60" selected>60 fps</option>
+              <option value="24">24 fps</option>
+              <option value="12">12 fps</option>
+              <option value="4">4 fps（极端高速）</option>
+            </select>
+          </label>
+          <label class="row">
+            播放速度
+            <select id="sel-speed">
+              <option value="1">1×</option>
+              <option value="2">2×</option>
+              <option value="4" selected>4×</option>
+            </select>
+          </label>
+          <div class="keys">
+            手动模式：<kbd>↑</kbd>/<kbd>↓</kbd> 加减速 · <kbd>←</kbd>/<kbd>→</kbd> 转向 ·
+            <kbd>空格</kbd> 暂停 · <kbd>R</kbd> 录制开关 · <kbd>G</kbd> 由有效样例生成幻影
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>程序生成样例</h2>
+          <select id="sel-sample" style="width: 100%"></select>
+          <div class="sample-desc" id="sample-desc"></div>
+          <div class="btn-grid">
+            <button id="btn-load" class="wide">载入样例（不播放）</button>
+            <button id="btn-record">● 录制手动路线 (R)</button>
+            <button id="btn-ghost">生成同步幻影 (G)</button>
+            <button id="btn-clear-ghost" class="wide">清除幻影</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>有效圈成绩</h2>
+          <div id="laps">尚无有效圈</div>
+        </div>
+
+        <div class="card">
+          <h2>事件解释（含逆行 / 跳关 / 重叠）</h2>
+          <div id="log"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "timing-gate-testbench",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript + Canvas 计时规则试验台：方向/顺序闸门、高速跨闸 sub-frame 计时、幻影录制与帧率无关验证",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vitest": "^2.1.5"
+  }
+}
