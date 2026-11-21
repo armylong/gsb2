@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230e1116'/%3E%3Cpath d='M5 21c5-9 9-11 12-6s6 4 10-3' stroke='%2357d0a4' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='5' cy='21' r='2.6' fill='%2357d0a4'/%3E%3Ccircle cx='27' cy='12' r='2.6' fill='%23ffd166'/%3E%3C/svg%3E"
+    />
+    <title>曲面路线标注</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="view"></canvas>
+
+      <aside id="panel">
+        <header>
+          <h1>曲面路线标注</h1>
+          <p class="hint">路线点锚定在三角形上，线沿表面铺开；旋转模型后标注仍在原处。</p>
+        </header>
+
+        <section>
+          <div class="row">
+            <label for="sample">样例</label>
+            <select id="sample"></select>
+          </div>
+          <p id="sample-desc" class="hint"></p>
+        </section>
+
+        <section>
+          <div class="segmented" id="mode">
+            <button data-mode="add" class="active" title="在表面上点击添加路线点">加点 <kbd>A</kbd></button>
+            <button data-mode="select" title="选中路线点后直接拖动；点击线段查看测量">选择 <kbd>V</kbd></button>
+            <button data-mode="vertex" title="点击网格顶点，用箭头沿法线拖动">改网格 <kbd>E</kbd></button>
+          </div>
+          <div class="row toggles">
+            <label><input type="checkbox" id="show-empties" checked /> 断开提示</label>
+            <label><input type="checkbox" id="show-labels" checked /> 标签</label>
+            <label><input type="checkbox" id="show-wire" /> 网格线</label>
+          </div>
+          <button id="auto-rotate" class="ghost full" title="让模型绕自身 Y 轴旋转，验证标注跟随表面">
+            自动旋转模型
+          </button>
+        </section>
+
+        <section class="stats" id="stats"></section>
+
+        <section>
+          <div class="section-head">
+            <h2>路线点</h2>
+            <button id="clear" class="ghost danger" title="删除所有标注点">清空</button>
+          </div>
+          <ol id="waypoint-list"></ol>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>存档</h2>
+          </div>
+          <div class="row buttons">
+            <button id="save">保存</button>
+            <button id="load" class="ghost">载入</button>
+          </div>
+          <input id="load-file" type="file" accept="application/json,.json" hidden />
+          <p class="hint" id="io-status">存档包含相机姿态、路线点与网格顶点偏移。</p>
+        </section>
+
+        <footer>
+          <p class="hint">
+            左键拖拽旋转 · 右键平移 · 滚轮缩放<br />
+            加点：单击表面；拖点：先切到“选择”；改网格：先切到“改网格”。
+          </p>
+        </footer>
+      </aside>
+
+      <div id="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
