@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>雾与热 · 回合制沙盒</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>雾与热 · 回合制沙盒</h1>
+          <p>在网格地图上逐轮观察来源注入、扩散与风口释放，所有量以整数刻度结算。</p>
+        </div>
+        <div class="top-actions">
+          <label class="field">
+            <span>示例</span>
+            <select id="example-select"></select>
+          </label>
+          <button id="btn-fork" type="button" class="ghost">从当前轮分叉</button>
+          <button id="btn-reset" type="button" class="ghost">重置本分支演算</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="stage" aria-label="地图">
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas id="grid" aria-label="雾与热传播地图"></canvas>
+          </div>
+          <div class="legend" id="legend">
+            <span class="legend-item"><i class="swatch heat"></i>热量 HU（橙色，格内右带）</span>
+            <span class="legend-item"><i class="swatch fog"></i>雾 FU（蓝色，格内左带）</span>
+            <span class="legend-item"><i class="swatch wall"></i>墙</span>
+            <span class="legend-item"><i class="glyph vent"></i>风口（红叉 = 关闭）</span>
+            <span class="legend-item"><i class="glyph valve"></i>单向阀（箭头 = 允许方向）</span>
+            <label class="legend-item toggle">
+              <input type="checkbox" id="show-focus" checked />坐标注释
+            </label>
+          </div>
+          <div class="transport">
+            <button id="btn-first" type="button" title="回到本轮起点">⏮</button>
+            <button id="btn-prev" type="button" title="上一轮">◀</button>
+            <div class="round-readout">
+              <strong id="round-label">第 0 轮</strong>
+              <span id="round-tip" class="muted"></span>
+            </div>
+            <button id="btn-next" type="button" title="下一轮">▶</button>
+            <button id="btn-step" type="button" class="primary" title="演算一轮">演算一轮</button>
+            <button id="btn-run" type="button" title="连续演算 5 轮">连演 5 轮</button>
+          </div>
+          <div class="scrub">
+            <input type="range" id="round-scrub" min="0" max="0" value="0" step="1" aria-label="轮次时间轴" />
+            <span class="muted small" id="scrub-label">0 / 0</span>
+          </div>
+          <p class="hint" id="hint">
+            提示：在「查看」工具下点选任意格子，右侧会列出该格上一轮与本轮的账目；
+            在历史轮次上修改布局会自动分叉，原分支保持不变。
+          </p>
+        </section>
+
+        <aside class="side">
+          <section class="panel">
+            <h2>编辑工具</h2>
+            <div class="tool-grid" id="tool-grid" role="toolbar" aria-label="编辑工具"></div>
+            <div class="tool-options">
+              <label class="check"><input type="checkbox" id="valve-reverse" /> 单向阀反向放置（第二次点击为目标端）</label>
+              <p class="muted small" id="tool-hint">选择工具后点击地图；右键或「擦除」清除。</p>
+            </div>
+          </section>
+
+          <section class="panel" id="example-panel">
+            <h2>示例说明</h2>
+            <p class="example-summary" id="example-summary"></p>
+            <ul class="expect-list" id="example-expects"></ul>
+          </section>
+
+          <section class="panel" id="round-panel">
+            <div class="panel-head">
+              <h2>本轮结算</h2>
+              <span class="pill" id="round-pill">第 0 轮</span>
+            </div>
+            <div id="round-summary" class="summary"></div>
+            <div class="spark-wrap">
+              <h3>历轮释放</h3>
+              <canvas id="spark" height="96"></canvas>
+            </div>
+          </section>
+
+          <section class="panel" id="cell-panel">
+            <div class="panel-head">
+              <h2>格子账目</h2>
+              <span class="pill" id="cell-pill">未选择</span>
+            </div>
+            <div id="cell-detail" class="cell-detail"></div>
+          </section>
+
+          <section class="panel" id="branch-panel">
+            <h2>分支</h2>
+            <div id="branch-list" class="branch-list"></div>
+          </section>
+
+          <section class="panel" id="check-panel">
+            <div class="panel-head">
+              <h2>验证</h2>
+              <button id="btn-checks" type="button" class="ghost small">运行验证</button>
+            </div>
+            <div id="check-results" class="check-results">
+              <p class="muted small">验证密封房、阀门反向、双源计量与编辑顺序一致性。</p>
+            </div>
+            <div class="panel-head sub">
+              <h3>当前布局 · 编辑顺序自检</h3>
+              <button id="btn-order-check" type="button" class="ghost small">运行</button>
+            </div>
+            <div id="order-results" class="check-results"></div>
+          </section>
+        </aside>
+      </main>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
