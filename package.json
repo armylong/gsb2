@@ -1,0 +1,16 @@
+{
+  "name": "climb-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "二维攀爬试验场: 抓边、翻身、贴墙滑落的状态机验证",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && node tools/serve.mjs",
+    "verify": "npm run build && node dist/test/verify.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.6.0"
+  }
+}
