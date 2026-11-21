@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>三向平铺投影权重调参台</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="viewport"></canvas>
+
+      <aside id="panel">
+        <h1>三向平铺 · Triplanar 调参台</h1>
+
+        <section>
+          <h2>网格（程序生成）</h2>
+          <div class="row">
+            <label>模型</label>
+            <select id="geoSelect">
+              <option value="ramp">斜坡台（水平/45°斜面/竖直）</option>
+              <option value="corner">凹转角（三轴交线）</option>
+              <option value="bend">圆弧弯面（平滑过渡）</option>
+              <option value="box">立方体（凸转角）</option>
+            </select>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="backfaceDemo" /> 反向法线演示面</label>
+          </div>
+        </section>
+
+        <section>
+          <h2>显示模式</h2>
+          <div class="grid4">
+            <button class="mode active" data-mode="0">混合</button>
+            <button class="mode" data-mode="1">仅 X</button>
+            <button class="mode" data-mode="2">仅 Y</button>
+            <button class="mode" data-mode="3">仅 Z</button>
+            <button class="mode" data-mode="4">权重可视化</button>
+            <button class="mode" data-mode="5">法线可视化</button>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="showBand" checked /> 高亮轴界面混合区（品红斜纹）</label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="showBackface" checked /> 高亮反向法线面（红色斜纹）</label>
+          </div>
+        </section>
+
+        <section>
+          <h2>权重</h2>
+          <div class="row">
+            <label>过渡陡度 sharpness <span id="sharpnessVal">1.0</span></label>
+            <input type="range" id="sharpness" min="1" max="16" step="0.1" value="1" />
+          </div>
+          <div class="row">
+            <label>X 偏置 <span id="biasXVal">1.00</span></label>
+            <input type="range" id="biasX" min="0" max="2" step="0.05" value="1" />
+          </div>
+          <div class="row">
+            <label>Y 偏置 <span id="biasYVal">1.00</span></label>
+            <input type="range" id="biasY" min="0" max="2" step="0.05" value="1" />
+          </div>
+          <div class="row">
+            <label>Z 偏置 <span id="biasZVal">1.00</span></label>
+            <input type="range" id="biasZ" min="0" max="2" step="0.05" value="1" />
+          </div>
+          <div class="row">
+            <label>混合区阈值 <span id="bandVal">0.80</span></label>
+            <input type="range" id="bandThreshold" min="0.34" max="0.99" step="0.01" value="0.8" />
+          </div>
+        </section>
+
+        <section>
+          <h2>纹理坐标</h2>
+          <div class="row">
+            <label>缩放 uvScale <span id="scaleVal">1.00</span></label>
+            <input type="range" id="uvScale" min="0.1" max="4" step="0.05" value="1" />
+          </div>
+          <div class="row">
+            <label>偏移 U <span id="offsetUVal">0.00</span></label>
+            <input type="range" id="offsetU" min="-2" max="2" step="0.05" value="0" />
+          </div>
+          <div class="row">
+            <label>偏移 V <span id="offsetVVal">0.00</span></label>
+            <input type="range" id="offsetV" min="-2" max="2" step="0.05" value="0" />
+          </div>
+        </section>
+
+        <section>
+          <h2>空间与变换</h2>
+          <div class="row">
+            <label>纹理附着</label>
+            <div class="seg" id="spaceSeg">
+              <button class="active" data-space="0">世界固定</button>
+              <button data-space="1">物体固定</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>变换工具</label>
+            <div class="seg" id="transformSeg">
+              <button class="active" data-tmode="translate">平移</button>
+              <button data-tmode="rotate">旋转</button>
+              <button data-tmode="none">关闭</button>
+            </div>
+          </div>
+          <div class="row">
+            <button id="resetBtn">重置模型变换与参数</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>点选诊断（点击表面）</h2>
+          <div id="readout" class="readout">
+            <p class="hint">在网格表面点击，读取该处使用的轴、权重与采样坐标。</p>
+          </div>
+        </section>
+
+        <footer>
+          <span class="dot x"></span>X 轴投影
+          <span class="dot y"></span>Y 轴投影
+          <span class="dot z"></span>Z 轴投影
+          &nbsp;|&nbsp; 斜纹：品红=轴界面混合区，红=反向法线
+        </footer>
+      </aside>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

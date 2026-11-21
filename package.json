@@ -1,0 +1,30 @@
+{
+  "name": "triplanar-weight-workbench",
+  "version": "1.0.0",
+  "description": "三向平铺投影权重本地调参台（TypeScript + three.js，程序生成网格与纹理）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "tsx --test tests/weights.test.ts"
+  },
+  "keywords": [
+    "triplanar",
+    "threejs",
+    "typescript",
+    "shader"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

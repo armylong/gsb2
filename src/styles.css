@@ -1,0 +1,191 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #0b0e12;
+  color: #d7e0ea;
+  font-size: 13px;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+#viewport {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  cursor: crosshair;
+}
+
+#panel {
+  width: 340px;
+  min-width: 340px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #12171e;
+  border-left: 1px solid #232b36;
+  padding: 14px 16px 24px;
+}
+
+h1 {
+  font-size: 15px;
+  margin: 0 0 12px;
+  color: #8fc7ff;
+}
+
+h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7c8a99;
+  margin: 14px 0 8px;
+  border-bottom: 1px solid #232b36;
+  padding-bottom: 4px;
+}
+
+section {
+  margin-bottom: 4px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.row > label {
+  display: flex;
+  justify-content: space-between;
+  color: #b6c2cf;
+}
+
+.row input[type='range'] {
+  width: 100%;
+}
+
+select,
+button {
+  background: #1b232d;
+  color: #d7e0ea;
+  border: 1px solid #2e3a48;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #243040;
+}
+
+button.active {
+  background: #2d6cb3;
+  border-color: #4d9fff;
+  color: #fff;
+}
+
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.grid4 .mode[data-mode='4'],
+.grid4 .mode[data-mode='5'] {
+  grid-column: span 3;
+}
+
+.seg {
+  display: flex;
+  gap: 6px;
+}
+
+.seg button {
+  flex: 1;
+}
+
+input[type='checkbox'] {
+  accent-color: #4d9fff;
+}
+
+.readout {
+  background: #0e1217;
+  border: 1px solid #232b36;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+.readout .hint {
+  color: #7c8a99;
+  margin: 0;
+}
+
+.readout table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.readout td {
+  padding: 1px 4px;
+  border-bottom: 1px solid #1c242e;
+}
+
+.readout td:first-child {
+  color: #8fa3b8;
+}
+
+.readout tr.dominant td {
+  color: #ffe14d;
+  font-weight: bold;
+}
+
+.readout .backface-warning {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.readout .band-warning {
+  color: #ff7dff;
+}
+
+footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #232b36;
+  color: #7c8a99;
+  font-size: 11px;
+  line-height: 2;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin: 0 4px 0 10px;
+}
+
+.dot.x {
+  background: #ff8a5c;
+}
+.dot.y {
+  background: #8ee6a0;
+}
+.dot.z {
+  background: #5cd6ff;
+}
