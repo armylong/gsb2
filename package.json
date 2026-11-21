@@ -1,0 +1,20 @@
+{
+  "name": "lockdown-dungeon-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "程序化房间布局检查页:带锁门与钥匙的小地图生成、实际格子连通性与锁钥可达性检查",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}

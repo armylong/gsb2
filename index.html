@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锁钥房间布局检查器</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <strong>锁钥房间布局检查器</strong>
+        <span class="sub">程序化生成 · 格子级连通 · 锁钥可达分析</span>
+      </div>
+      <div class="controls">
+        <label>种子 <input id="seedInput" type="text" value="demo-seed" /></label>
+        <label>房间数 <input id="roomCountInput" type="number" min="8" max="20" value="12" /></label>
+        <label>锁色数
+          <select id="colorCountInput">
+            <option value="0">0(无锁)</option>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+        <button id="generateBtn" class="primary">生成布局</button>
+        <span class="divider"></span>
+        <button data-scene="roundtrip" class="scene">现场一:返程开门</button>
+        <button data-scene="selflock" class="scene warn">现场二:钥匙自锁</button>
+        <button data-scene="broken" class="scene danger">现场三:通道断裂</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="map-pane">
+        <div class="canvas-wrap">
+          <canvas id="mapCanvas" width="1080" height="720"></canvas>
+          <div id="hoverTip" class="hover-tip hidden"></div>
+        </div>
+        <div class="map-footer">
+          <div class="tools">
+            <span class="tool-label">编辑工具:</span>
+            <button data-tool="inspect" class="tool active">查看</button>
+            <button data-tool="moveKey" class="tool">移动钥匙(先点钥匙再点房间)</button>
+            <button data-tool="door" class="tool">门改色(点击门循环:红→蓝→绿→无锁)</button>
+            <button data-tool="corridor" class="tool danger">移除通道(点击通道格)</button>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </section>
+
+      <aside class="side-pane">
+        <div class="card" id="statusCard">
+          <h3>检查结果</h3>
+          <div id="statusBody"></div>
+        </div>
+
+        <div class="card">
+          <h3>路线核查</h3>
+          <div class="row">
+            <button id="routePlayBtn">▶ 逐步走路线</button>
+            <button id="routeStepBtn">单步</button>
+            <button id="routeResetBtn">重置标记</button>
+          </div>
+          <div class="row manual">
+            <span>手动控制:</span>
+            <div class="dpad">
+              <button data-dir="up">↑</button>
+              <button data-dir="left">←</button>
+              <button data-dir="down">↓</button>
+              <button data-dir="right">→</button>
+            </div>
+            <span class="hint">键盘方向键 / WASD 同样有效</span>
+          </div>
+          <div id="playerState" class="player-state"></div>
+          <div id="routeEvents" class="events"></div>
+        </div>
+
+        <div class="card">
+          <h3>人工修改记录</h3>
+          <div class="row">
+            <button id="undoEditBtn">撤销上次修改</button>
+            <button id="saveBtn">保存存档</button>
+            <button id="loadBtn">恢复存档</button>
+            <input id="loadFile" type="file" accept="application/json" hidden />
+          </div>
+          <ul id="editLog" class="edit-log"></ul>
+        </div>
+      </aside>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>

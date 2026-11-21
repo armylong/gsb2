@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 本机 node 包装脚本(绕过 homebrew simdjson 版本错配) ----
+.toolbin/
