@@ -1,0 +1,24 @@
+{
+  "name": "scene-pick-probe",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "可视化空间分组加速拾取：固定种子场景、分组边界、单次点选候选/命中对照、逐件求交基线",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsx scripts/verify.ts"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/three": "0.187.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.3.8"
+  }
+}

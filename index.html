@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>一次点选为什么扫过这么多对象 · Scene Pick Probe</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141616'/%3E%3Cpath d='M8 9h16v14H8z' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23199e70'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="eyebrow">Scene Pick Probe</span>
+          <h1>一次点选为什么扫过这么多对象</h1>
+          <p class="subtitle">
+            固定种子场景 · 空间分组边界 · 候选与命中对照 · 加速路径与逐件求交互证
+          </p>
+        </div>
+        <div class="topbar-controls">
+          <label class="field">
+            <span>种子</span>
+            <input id="seed-input" type="number" step="1" value="20260422" />
+          </label>
+          <button id="regenerate" class="btn">重建场景</button>
+          <button id="reset-view" class="btn ghost">复位相机</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="viewport">
+          <canvas id="view"></canvas>
+
+          <div class="hud hud-legend" aria-label="图例">
+            <div class="legend-row"><i class="swatch swatch-group-all"></i>全部分组边界</div>
+            <div class="legend-row"><i class="swatch swatch-group-hit"></i>本次射线访问的组</div>
+            <div class="legend-row"><i class="swatch swatch-candidate"></i>候选（进入精确求交）</div>
+            <div class="legend-row"><i class="swatch swatch-hit"></i>实际命中</div>
+            <div class="legend-row"><i class="swatch swatch-selected"></i>最终选中</div>
+            <div class="legend-row"><i class="swatch swatch-origin"></i>射线起点 / 射线</div>
+          </div>
+
+          <div class="hud hud-hint">
+            <kbd>拖拽</kbd> 旋转视角 · <kbd>滚轮</kbd> 缩放 ·
+            <span id="mode-hint">点选核查模式：单击场景发射射线</span>
+          </div>
+
+          <div id="dirty-banner" class="hud hud-warning hidden" role="status">
+            分组边界已过期：物件变换后尚未重建。当前射线仍会用旧分组求交，可与逐件结果对照。
+            <button id="dirty-rebuild" class="btn small">立即更新分组</button>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <section class="card" id="card-pick">
+            <div class="card-head">
+              <h2>一次点选</h2>
+              <div class="segmented" role="group" aria-label="交互模式">
+                <button class="seg-btn active" data-mode="inspect">点选核查</button>
+                <button class="seg-btn" data-mode="edit">编辑物件</button>
+              </div>
+            </div>
+
+            <div class="ray-picker">
+              <span class="ray-picker-label">射线来源</span>
+              <div id="ray-buttons" class="chips"></div>
+            </div>
+
+            <div id="ray-meta" class="ray-meta muted">还没有发射射线。单击 3D 场景，或选择上方演示射线。</div>
+
+            <div class="kpi-grid">
+              <div class="kpi">
+                <span class="kpi-label">加速候选</span>
+                <span class="kpi-value" id="kpi-candidates">—</span>
+                <span class="kpi-foot" id="kpi-candidates-foot">进入精确求交</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label">逐件候选</span>
+                <span class="kpi-value" id="kpi-brute">—</span>
+                <span class="kpi-foot">不做任何剪枝</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label">实际命中</span>
+                <span class="kpi-value" id="kpi-hits">—</span>
+                <span class="kpi-foot" id="kpi-hits-foot">t ≥ 0 的交点</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label">访问组</span>
+                <span class="kpi-value" id="kpi-groups">—</span>
+                <span class="kpi-foot" id="kpi-groups-foot">命中包围盒的叶组</span>
+              </div>
+              <div class="kpi kpi-wide">
+                <span class="kpi-label">选中结果</span>
+                <span class="kpi-value kpi-value-sm" id="kpi-selected">—</span>
+                <span class="kpi-foot" id="kpi-selected-foot">按统一裁决规则</span>
+              </div>
+            </div>
+
+            <div class="agree-row" id="agree-row">
+              <span class="status status-neutral" id="agree-badge">等待射线</span>
+              <span class="muted" id="agree-detail">加速路径与逐件求交将逐条对照</span>
+            </div>
+
+            <div class="subhead">
+              <h3>访问的组</h3>
+              <span class="muted" id="group-note">—</span>
+            </div>
+            <div class="group-list" id="group-list"></div>
+
+            <details class="rules" open>
+              <summary>裁决规则（两条路径共用）</summary>
+              <ol>
+                <li>只接受 <code>t ≥ 0</code> 的命中。</li>
+                <li>射线起点在该物件内部时，该物件记为 <code>t = 0</code> 且标记 inside。</li>
+                <li>按 <code>t</code> 升序；距离差 <code>≤ 1e-4</code> 视为并列。</li>
+                <li>并列时按物件 id 升序，id 小者胜出；与遍历顺序、分组方式、分组上限无关。</li>
+              </ol>
+            </details>
+
+            <div class="subhead">
+              <h3>候选明细</h3>
+              <span class="muted" id="candidate-note">—</span>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" id="candidate-table">
+                <thead>
+                  <tr>
+                    <th>物件</th>
+                    <th>组</th>
+                    <th class="num">t</th>
+                    <th>状态</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card" id="card-edit">
+            <div class="card-head">
+              <h2>编辑与重建分组</h2>
+              <span class="status status-neutral" id="edit-status">未选中</span>
+            </div>
+            <p class="card-copy">
+              在「编辑物件」模式下点选一个物件，用下方手柄旋转或缩放它。变换会让分组包围盒过期，
+              此时仍可发射射线，看看旧分组会漏掉什么，再点「更新分组」。
+            </p>
+            <div class="edit-controls">
+              <div class="segmented" role="group" aria-label="手柄模式">
+                <button class="seg-btn" data-gizmo="translate">平移</button>
+                <button class="seg-btn active" data-gizmo="rotate">旋转</button>
+                <button class="seg-btn" data-gizmo="scale">缩放</button>
+              </div>
+              <button id="update-groups" class="btn">更新分组</button>
+            </div>
+            <div class="edit-meta" id="edit-meta">
+              <span class="muted">尚未选择编辑对象。</span>
+            </div>
+            <div class="edit-actions">
+              <button id="reset-object" class="btn ghost small" disabled>复位该物件</button>
+              <button id="reset-all" class="btn ghost small">复位全部物件</button>
+            </div>
+            <div class="edit-actions">
+              <button id="demo-stale" class="btn ghost small">演示：旧分组漏检</button>
+            </div>
+            <p class="card-copy tight" style="margin-top: 7px">
+              这个按钮会把一件「不在本次访问组里」的物件搬到当前射线上。分组不更新时，
+              加速路径会漏掉它，逐件路径不会 —— 对照结果立刻变成「不一致」。
+            </p>
+          </section>
+
+          <section class="card" id="card-groups">
+            <div class="card-head">
+              <h2>空间分组</h2>
+              <label class="toggle">
+                <input id="show-groups" type="checkbox" />
+                <span>显示全部分组边界（默认只画本次访问的组）</span>
+              </label>
+            </div>
+            <div class="capacity-row">
+              <span class="muted">分组上限</span>
+              <div class="chips" id="capacity-chips"></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat"><span>组数</span><strong id="stat-groups">—</strong></div>
+              <div class="stat"><span>最大进深</span><strong id="stat-depth">—</strong></div>
+              <div class="stat"><span>物件数</span><strong id="stat-objects">—</strong></div>
+              <div class="stat"><span>状态</span><strong id="stat-state">—</strong></div>
+            </div>
+            <p class="card-copy tight">
+              分组上限 = 每个叶组最多装多少件物件。上限越小分组越细，候选越少，
+              但需要测试的节点和分组更多；上限越大则相反。
+            </p>
+          </section>
+
+          <section class="card" id="card-batch">
+            <div class="card-head">
+              <h2>同一批射线核查</h2>
+              <button id="run-batch" class="btn">运行核查</button>
+            </div>
+            <p class="card-copy">
+              固定一批射线（4 条演示射线 + 200 条确定性随机射线，含空中起点、物件内部起点、
+              瞄准中心的射线），在每个分组上限下分别用加速路径与逐件求交，逐条比对选中结果。
+              射线批次在场景重建时固定，变换物件后仍复用同一批。
+            </p>
+            <div class="agree-row">
+              <span class="status status-neutral" id="batch-badge">尚未运行</span>
+              <span class="muted" id="batch-detail">—</span>
+            </div>
+            <div class="batch-legend hidden" id="batch-legend">
+              <span><i class="swatch swatch-candidate"></i>平均候选</span>
+              <span class="muted" id="batch-scale">横轴 0 — 物件总数</span>
+            </div>
+            <div class="chart-block" id="batch-chart-block">
+              <div class="chart-title" id="batch-chart-title">
+                平均候选数（进入精确求交的件数）
+              </div>
+              <div class="bar-chart" id="batch-chart"></div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" id="batch-table">
+                <thead>
+                  <tr>
+                    <th class="num">上限</th>
+                    <th class="num">组数</th>
+                    <th class="num">进深</th>
+                    <th class="num">平均候选</th>
+                    <th class="num">最大</th>
+                    <th class="num">访问组</th>
+                    <th class="num">加速/逐件 ms</th>
+                    <th>一致</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card" id="card-specials">
+            <div class="card-head"><h2>场景中的固定演示</h2></div>
+            <ul class="spec-list" id="spec-list"></ul>
+            <div class="agree-row">
+              <span class="status status-neutral" id="specials-badge">—</span>
+              <span class="muted" id="specials-detail">对象 id 固定，位置由种子内的演示布局决定</span>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
