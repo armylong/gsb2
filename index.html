@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>可解释植被生成器</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; background: #1e1e1e; color: #ddd; }
+    h1 { font-size: 18px; }
+    .layout { display: flex; gap: 16px; align-items: flex-start; }
+    .panel { background: #2a2a2a; border-radius: 8px; padding: 12px; min-width: 260px; }
+    .panel h2 { font-size: 14px; margin: 8px 0 4px; }
+    label { display: inline-block; margin: 4px 8px 4px 0; font-size: 13px; }
+    input, select, button { font-size: 13px; margin: 2px 0; }
+    input[type=number] { width: 48px; }
+    input[type=text] { width: 110px; }
+    button { cursor: pointer; border-radius: 4px; border: 1px solid #555; background: #3a3a3a; color: #ddd; padding: 4px 10px; }
+    button:hover { background: #4a4a4a; }
+    canvas { border: 1px solid #444; image-rendering: pixelated; cursor: crosshair; }
+    pre { font-size: 12px; white-space: pre-wrap; max-width: 300px; max-height: 320px; overflow: auto; margin: 4px 0; }
+    .hint { font-size: 12px; color: #999; }
+  </style>
+</head>
+<body>
+  <h1>可解释的小块地图植被生成器</h1>
+  <div class="layout">
+    <canvas id="map" width="864" height="576"></canvas>
+    <div>
+      <div class="panel">
+        <h2>输入</h2>
+        <div>
+          <label>种子 <input type="text" id="seed" value="demo-42" /></label>
+          <label>地形
+            <select id="terrainStyle">
+              <option value="hills">丘陵</option>
+              <option value="riverbank">狭窄河岸</option>
+              <option value="wetland">湿地</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>预设
+            <select id="preset">
+              <option value="default">默认</option>
+              <option value="riverbank">狭窄河岸</option>
+              <option value="crowded">拥挤植被</option>
+            </select>
+          </label>
+          <button id="applyPreset">应用预设</button>
+        </div>
+        <h2>最低间隔（格）</h2>
+        <div>
+          <label>树 <input type="number" id="sp-tree" min="1" max="8" /></label>
+          <label>灌木 <input type="number" id="sp-shrub" min="1" max="8" /></label>
+          <label>花 <input type="number" id="sp-flower" min="1" max="8" /></label>
+          <label>芦苇 <input type="number" id="sp-reed" min="1" max="8" /></label>
+        </div>
+        <div>
+          <button id="regen">重新生成</button>
+          <button id="save">保存</button>
+          <button id="load">加载</button>
+          <input type="file" id="file" accept=".json" style="display:none" />
+        </div>
+        <h2>交互模式</h2>
+        <div>
+          <label><input type="radio" name="mode" value="inspect" checked /> 查看格子</label>
+          <label><input type="radio" name="mode" value="pin" /> 固定/取消</label>
+          <label><input type="radio" name="mode" value="region" /> 框选局部重算</label>
+        </div>
+        <div>
+          <label>固定种类
+            <select id="pinType">
+              <option value="tree">树</option>
+              <option value="shrub">灌木</option>
+              <option value="flower">花</option>
+              <option value="reed">芦苇</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">查看模式：点击格子看接受/拒绝原因。<br/>固定模式：点击放置/移除固定点（白圈）。<br/>框选模式：拖拽后自动局部重算，区域外不变。</p>
+      </div>
+      <div class="panel">
+        <h2>格子检查</h2>
+        <pre id="inspect">（点击地图上的格子）</pre>
+      </div>
+      <div class="panel">
+        <h2>缺口报告</h2>
+        <pre id="report"></pre>
+      </div>
+    </div>
+  </div>
+  <script src="dist/bundle.js"></script>
+</body>
+</html>
