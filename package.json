@@ -1,0 +1,26 @@
+{
+  "name": "drop-pity-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地掉落表保底模拟器: 真实分布、分段命中率、共享保底组、断点续跑与对照实验",
+  "type": "module",
+  "bin": {
+    "drop-pity-lab": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "node src/cli.ts demo",
+    "demo": "node src/cli.ts demo",
+    "run": "node src/cli.ts run",
+    "step": "node src/cli.ts step",
+    "verify": "node scripts/verify.ts",
+    "test": "node --test test/rng.test.ts test/config.test.ts test/engine.test.ts test/stats.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}
