@@ -1,0 +1,18 @@
+{
+  "name": "camera-pan-zoom-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "双活动角色镜头缩放/平移取舍实验台 (TypeScript + Canvas)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "node --experimental-strip-types scripts/verify.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>双角色镜头缩放 / 平移实验台</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="stage-wrap">
+        <canvas id="stage"></canvas>
+        <div id="hud" class="hud"></div>
+      </div>
+
+      <aside class="panel">
+        <div class="tabs">
+          <button class="tab active" data-mode="live">实时镜头</button>
+          <button class="tab" data-mode="replay">回放 / 多帧率</button>
+        </div>
+
+        <div id="livePanel">
+          <div class="row">
+            <button id="play">播放</button>
+            <button id="step">单步</button>
+            <button id="reset">重置</button>
+          </div>
+          <div class="row">
+            <label>仿真帧率
+              <select id="fps">
+                <option value="15">15 fps</option>
+                <option value="30" selected>30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
+            <label>平滑模式
+              <select id="smoothingMode">
+                <option value="per-tick" selected>per-tick (帧率相关)</option>
+                <option value="exp">exp (帧率无关)</option>
+              </select>
+            </label>
+          </div>
+
+          <h4>跟随名单 (可拖动画面中的角色, 松手后回路径)</h4>
+          <div id="roster"></div>
+
+          <h4>镜头参数</h4>
+          <div id="controls"></div>
+        </div>
+
+        <div id="replayPanel" class="hidden">
+          <div class="row">
+            <button id="replayPlay">播放回放</button>
+          </div>
+          <div class="row">
+            <label>回放时间
+              <input type="range" id="replayTime" min="0" step="0.01" value="0" />
+            </label>
+          </div>
+          <h4>叠加显示</h4>
+          <div id="replayToggles"></div>
+          <p class="hint">
+            虚线框为各帧率下同一时刻的镜头视口, 实线为镜头中心轨迹,
+            十字为理想(未平滑)镜头中心。边框加粗变红即该帧触发了限制。
+          </p>
+        </div>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

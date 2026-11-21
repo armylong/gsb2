@@ -1,0 +1,153 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0b0d12;
+  color: #dee2e6;
+}
+
+.app {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.stage-wrap {
+  position: relative;
+}
+
+canvas {
+  display: block;
+  border: 1px solid #343a40;
+  border-radius: 8px;
+  background: #10131a;
+  touch-action: none;
+  cursor: grab;
+}
+
+canvas:active {
+  cursor: grabbing;
+}
+
+.hud {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font: 12px/1.6 ui-monospace, monospace;
+  background: rgba(8, 10, 15, 0.82);
+  padding: 6px 10px;
+  border-radius: 6px;
+  max-width: 940px;
+  white-space: pre-wrap;
+}
+
+.panel {
+  width: 340px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #151922;
+  border: 1px solid #2b303b;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #3b4150;
+  background: #1c212c;
+  color: #adb5bd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #2b5fd9;
+  color: #fff;
+  border-color: #2b5fd9;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button {
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid #3b4150;
+  background: #232a38;
+  color: #e9ecef;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2d3547;
+}
+
+select,
+input[type='range'] {
+  accent-color: #4f8cff;
+}
+
+h4 {
+  margin: 16px 0 8px;
+  font-size: 13px;
+  color: #868e96;
+  text-transform: none;
+}
+
+.ctl {
+  margin-bottom: 10px;
+}
+
+.ctl label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.ctl .val {
+  color: #74c0fc;
+  font-family: ui-monospace, monospace;
+}
+
+.ctl input {
+  width: 100%;
+}
+
+.roster {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.hint {
+  font-size: 12px;
+  color: #868e96;
+  line-height: 1.6;
+}
+
+.hidden {
+  display: none;
+}
