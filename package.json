@@ -1,0 +1,16 @@
+{
+  "name": "sandbox-replay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "规则小沙盒: 操作录像、确定性回放、历史分支 (TypeScript + Canvas)",
+  "scripts": {
+    "verify": "node src/cli/verify.ts",
+    "build": "tsc",
+    "start": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}

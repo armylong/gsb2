@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>规则沙盒 · 操作录像与分支回放</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; color: #222; }
+    h1 { font-size: 20px; }
+    .layout { display: flex; gap: 24px; align-items: flex-start; }
+    canvas { border: 2px solid #888; }
+    .panel { width: 380px; display: flex; flex-direction: column; gap: 10px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    button { padding: 4px 10px; cursor: pointer; }
+    select { max-width: 260px; }
+    input[type="range"] { width: 100%; }
+    #status { background: #f6f8fa; border: 1px solid #ddd; padding: 8px; border-radius: 6px; line-height: 1.7; }
+    #log { background: #1d1f21; color: #c5c8c6; padding: 8px; border-radius: 6px; height: 160px;
+           overflow: auto; white-space: pre-wrap; font-size: 12px; margin: 0; }
+    .hint { color: #666; font-size: 13px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <h1>规则沙盒 — 操作录像 · 确定性回放 · 历史分支</h1>
+  <div class="layout">
+    <canvas id="cv" width="600" height="480"></canvas>
+    <div class="panel">
+      <div class="row">
+        <label>分支 <select id="branchSel"></select></label>
+        <button id="forkBtn">在当前位置新建分支</button>
+      </div>
+      <div class="row">
+        <button id="backBtn">◀ 后退一步</button>
+        <button id="playBtn">▶ 播放</button>
+        <button id="fwdBtn">前进一步 ▶</button>
+      </div>
+      <input id="seek" type="range" min="0" max="0" value="0" step="1" />
+      <div id="status"></div>
+      <div class="row">
+        <button id="exportBtn">导出录像</button>
+        <label>导入录像 <input id="importFile" type="file" accept=".json" /></label>
+        <button id="resetBtn">重置为回归样例</button>
+      </div>
+      <pre id="log"></pre>
+      <div class="hint">
+        操作: 方向键 / WASD 移动并录入, 空格等待一步。推动箱子压住黄色开关即可开门;
+        开关只在箱子压着时保持, 推走箱子门会重新关上。<br>
+        拖动滑块或按「后退/前进」可在录像中回跳快进; 在历史位置「新建分支」后,
+        两条分支互不影响, 可随时切回。导入录像时会校验规则版本与快照完整性,
+        若数据与当前规则重放结果不符, 会指出首个发生分歧的步骤。
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/dist/ui/main.js"></script>
+</body>
+</html>
