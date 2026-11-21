@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- CutLab 本地运行 ----
+.ruff_cache/

@@ -1,0 +1,12 @@
+[project]
+name = "cutlab"
+version = "1.0.0"
+description = "检查短视频能否直接 stream copy 截取：关键帧起点、截取偏差、音轨对齐与帧身份"
+requires-python = ">=3.10"
+dependencies = ["PySide6>=6.5"]
+
+[project.scripts]
+cutlab = "cutlab.__main__:main"
+
+[tool.setuptools]
+packages = ["cutlab"]
