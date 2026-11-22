@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>轨道沙盒 · 俯视小车</title>
+    <link rel="stylesheet" href="/src/app/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="dot"></span>
+          <h1>轨道沙盒</h1>
+          <span class="subtitle">直线 / 圆弧 · 分叉切换 · 故障安全停车</span>
+        </div>
+        <div class="top-actions">
+          <label class="speed">
+            速度
+            <input id="speed" type="range" min="30" max="400" step="5" value="150" />
+            <output id="speed-out">150</output>
+            <span class="unit">单位/秒</span>
+          </label>
+          <button id="btn-start" class="primary">发车</button>
+          <button id="btn-reset">复位</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="stage">
+          <canvas id="canvas"></canvas>
+          <div class="hud" id="hud"></div>
+          <div class="toolbar" id="toolbar">
+            <button data-tool="select" class="active" title="选择 / 拖动 (Esc)">选择</button>
+            <button data-tool="line" title="画直线: 按下起点拖到终点">直线</button>
+            <button data-tool="arc" title="画圆弧: 拖到终点; 从已连接端点起笔时自动相切">圆弧</button>
+            <span class="arc-side" id="arc-side">
+              <button data-side="-1" class="active" title="屏幕上的逆时针弯">左弯</button>
+              <button data-side="1" title="屏幕上的顺时针弯">右弯</button>
+            </span>
+            <label class="snap"><input id="snap" type="checkbox" checked /> 端点吸附</label>
+          </div>
+          <div class="stage-tips">
+            <kbd>空格</kbd> 发车/暂停 · <kbd>T</kbd> 切道岔 · <kbd>R</kbd> 复位 ·
+            滚轮缩放 · 拖动空白平移 · 拖动轨道/节点制造故障
+          </div>
+        </section>
+
+        <aside class="panel">
+          <section class="card">
+            <h2>预设场景</h2>
+            <div id="presets" class="preset-row"></div>
+            <p id="preset-desc" class="muted"></p>
+          </section>
+
+          <section class="card">
+            <h2>车辆</h2>
+            <div id="vehicle" class="kv"></div>
+          </section>
+
+          <section class="card">
+            <h2>道岔</h2>
+            <div id="switches" class="switch-list"></div>
+            <p id="switch-note" class="note"></p>
+          </section>
+
+          <section class="card">
+            <h2>连接校验</h2>
+            <div id="validation" class="issues"></div>
+          </section>
+
+          <section class="card">
+            <h2>实际行程</h2>
+            <div id="travel" class="travel"></div>
+          </section>
+
+          <section class="card">
+            <h2>编辑轨段</h2>
+            <p class="note" style="margin-top:0">
+              选中一段后可在此延伸 (自动相切); 或在画布上用「直线 / 圆弧」工具从任意点起笔,
+              终点靠近已有节点即自动并入, 形成分叉或闭环。
+            </p>
+            <div class="edit-row">
+              <button id="btn-add-line">从选中段延伸直线</button>
+            </div>
+            <div class="edit-row">
+              <button id="btn-add-arc-left">延伸左弯 90°</button>
+              <button id="btn-add-arc-right">延伸右弯 90°</button>
+            </div>
+            <div class="edit-row">
+              <label class="len">直线长度 <input id="new-line-len" type="number" min="20" max="600" step="10" value="160" /></label>
+              <label class="len">弯半径 <input id="new-arc-radius" type="number" min="10" max="300" step="5" value="90" /></label>
+            </div>
+            <div class="edit-row">
+              <button id="btn-delete" class="danger">删除选中段</button>
+              <button id="btn-snapback">端点吸附回节点</button>
+            </div>
+            <p id="selection-info" class="note"></p>
+          </section>
+
+          <section class="card">
+            <h2>事件日志</h2>
+            <div id="events" class="events"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/app/main.ts"></script>
+  </body>
+</html>
