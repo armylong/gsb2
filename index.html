@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>平台角色移动手感调试沙盒</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>二维平台角色移动手感调试沙盒</h1>
+      <div class="header-meta">
+        <span>← → / A D 移动</span>
+        <span>空格 / W / ↑ 跳跃（边沿触发）</span>
+        <span>P / Esc 暂停</span>
+        <span>R 重置</span>
+      </div>
+    </header>
+    <main class="layout">
+      <div class="stage-col">
+        <canvas id="scene"></canvas>
+        <div class="tolerance-note monospace">
+          确定性说明：物理恒为 60Hz 固定步长（1/60s），30/60 仅切换渲染节奏，同一份步号输入重放结果逐位相同（自检容差 1e-9 px，实测 0 偏差）。
+          手动操作下，两种节奏最多相差一个显示帧内的输入采样归属，落点位置差不超过 1 个模拟步帧位移（默认参数约 ≤5 px，≤0.8% 屏宽）。
+        </div>
+      </div>
+      <div id="panel-root" class="panel-col"></div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

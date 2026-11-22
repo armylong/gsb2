@@ -1,0 +1,19 @@
+{
+  "name": "platformer-feel-sandbox",
+  "version": "1.0.0",
+  "private": true,
+  "description": "二维平台角色移动手感本地调试沙盒 (TypeScript + Canvas, 确定性 AABB 物理)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
