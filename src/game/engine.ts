@@ -1,294 +1,534 @@
-import { CATEGORIES, TEAMS, TEAM_IDS } from './constants.ts';
-import { decisionRng, hashSeed } from './rng.ts';
-import { generateSandboxRound, SCENARIOS } from './scenarios.ts';
+import { resolveRound, rotatePriority, validateChoice } from './draft';
+import { createRng, deriveSeed } from './rng';
+import {
+  scoreTeam,
+  computeStandings,
+  collectHoldings,
+  SET_BONUS_PER_ITEM,
+  setTierForCount,
+} from './scoring';
+import type { HeldSpecimen } from './scoring';
+import { buildTeams, getTeam } from './teams';
 import type {
-  CategoryId,
+  Choice,
   GameState,
-  PickLog,
-  RoundState,
-  ScenarioId,
+  Phase,
+  RoundResult,
+  Scenario,
+  Selection,
   Specimen,
-  TeamChoices,
+  TeamControl,
   TeamId,
-} from './types.ts';
+  Viewer,
+} from './types';
+import { TEAM_IDS } from './types';
 
-export const STATE_VERSION = 1;
+const EMPTY_SELECTION: Selection = {
+  primary: null,
+  backup: null,
+  confirmed: false,
+  source: 'manual',
+};
 
-// ---------- 优先顺序轮换：每轮整体左旋一位 ----------
-
-export function priorityForRound(roundIndex: number): TeamId[] {
-  const shift = roundIndex % TEAM_IDS.length;
-  return [...TEAM_IDS.slice(shift), ...TEAM_IDS.slice(0, shift)];
+export function emptySelection(): Selection {
+  return { ...EMPTY_SELECTION };
 }
 
-function emptyChoices(): TeamChoices {
-  return { primaryId: null, backupId: null, confirmed: false };
-}
-
-function makeRound(
-  index: number,
-  specimens: Specimen[],
-  presets?: Partial<Record<TeamId, TeamChoices>>,
-): RoundState {
-  const choices = {
-    A: { ...emptyChoices(), ...(presets?.A ?? {}) },
-    B: { ...emptyChoices(), ...(presets?.B ?? {}) },
-    C: { ...emptyChoices(), ...(presets?.C ?? {}) },
-  } as Record<TeamId, TeamChoices>;
+export function emptySelections(): Record<TeamId, Selection> {
   return {
-    index,
-    specimens,
-    priority: priorityForRound(index),
-    choices,
-    log: null,
-    allocations: null,
+    red: emptySelection(),
+    blue: emptySelection(),
+    gold: emptySelection(),
   };
 }
 
-// ---------- 自动队伍的两种简单偏好（同种子可重复） ----------
-
-/** 截至当前轮之前，各队每个品类已到手的件数 */
-export function ownedCountsBefore(
-  state: Pick<GameState, 'rounds'>,
-  roundIndex: number,
-): Record<TeamId, Record<CategoryId, number>> {
-  const zero = (): Record<CategoryId, number> => ({ rock: 0, insect: 0, plant: 0 });
-  const owned = { A: zero(), B: zero(), C: zero() } as Record<TeamId, Record<CategoryId, number>>;
-  state.rounds.slice(0, roundIndex).forEach((round) => {
-    round.log?.forEach((entry) => {
-      if (!entry.wonSpecimenId) return;
-      const spec = round.specimens.find((s) => s.id === entry.wonSpecimenId);
-      if (spec) owned[entry.teamId][spec.category] += 1;
-    });
-  });
-  return owned;
+function timestamp(): string {
+  return new Date().toISOString();
 }
 
-/**
- * valueFirst（蓝雀队）：单件分值优先，平手交给种子随机数；
- * setSeeker（绿蜥队）：距成套越近越优先（已成套则开启下一套计数），其次分值，再交给随机数。
- * 两种策略都返回两个不同标本：首选与备用。
- */
-export function autoPick(
-  teamId: TeamId,
-  strategy: 'valueFirst' | 'setSeeker',
-  round: RoundState,
-  seed: number,
-  owned: Record<CategoryId, number>,
-): { primaryId: string; backupId: string } {
-  const rng = decisionRng(seed, round.index, teamId, strategy);
-  const setSize = (cat: CategoryId): number => CATEGORIES[cat].setSize;
-  const distanceToSet = (cat: CategoryId): number => setSize(cat) - (owned[cat] % setSize(cat));
-
-  const scored = round.specimens.map((spec) => {
-    const tie = rng();
-    if (strategy === 'valueFirst') {
-      return { spec, key: spec.value * 1000 + tie * 10 };
-    }
-    // setSeeker：距离越小（越接近成套）越靠前；同分看单件分值
-    const distance = distanceToSet(spec.category);
-    return { spec, key: -distance * 100000 + spec.value * 1000 + tie * 10 };
-  });
-  scored.sort((x, y) => y.key - x.key);
-  return { primaryId: scored[0].spec.id, backupId: scored[1].spec.id };
+export function currentRound(state: GameState): Scenario['rounds'][number] {
+  const round = state.rounds[state.roundIndex];
+  if (!round) {
+    throw new Error(`回合索引越界: ${state.roundIndex}`);
+  }
+  return round;
 }
 
-// ---------- 开牌：按本轮优先顺序处理撞选 ----------
-
-/**
- * 规则：
- * 1. 按 priority 逐队处理；首选未被占用即拿走。
- * 2. 首选落空的队再看备用；备用已被占用则记「备选已被别人拿走」。
- * 3. 备用与首选相同视为未交备用；同一件标本最多分给一个队。
- */
-export function resolveRound(round: RoundState): PickLog[] {
-  const takenBy = new Map<string, TeamId>();
-  const log: PickLog[] = [];
-
-  round.priority.forEach((teamId, priorityIndex) => {
-    const choice = round.choices[teamId];
-    const primary = choice.primaryId;
-    // 备用若与首选相同，视作没有有效备用（同一件不可能给两次）
-    const backup = choice.backupId && choice.backupId !== primary ? choice.backupId : null;
-
-    let outcome: PickLog['outcome'];
-    let wonSpecimenId: string | null = null;
-    let missReason: PickLog['missReason'] = null;
-    let primaryTakenBy: TeamId | null = null;
-    let backupTakenBy: TeamId | null = null;
-
-    if (primary && !takenBy.has(primary)) {
-      takenBy.set(primary, teamId);
-      wonSpecimenId = primary;
-      outcome = 'primaryWon';
-    } else {
-      if (primary) primaryTakenBy = takenBy.get(primary) ?? null;
-      if (backup && !takenBy.has(backup)) {
-        takenBy.set(backup, teamId);
-        wonSpecimenId = backup;
-        outcome = 'backupWon';
-      } else if (backup) {
-        backupTakenBy = takenBy.get(backup) ?? null;
-        outcome = 'missedBackupTaken';
-        missReason = 'backupTaken';
-      } else {
-        outcome = 'missedNoBackup';
-        missReason = 'noBackup';
-      }
-    }
-
-    log.push({
-      teamId,
-      priorityIndex,
-      primaryId: primary,
-      backupId: backup,
-      outcome,
-      wonSpecimenId,
-      missReason,
-      primaryTakenBy,
-      backupTakenBy,
-    });
-  });
-
-  return log;
+export function currentPriority(state: GameState): TeamId[] {
+  return rotatePriority(TEAM_IDS, state.roundIndex);
 }
 
-export function allocationsFromLog(log: PickLog[]): Record<TeamId, string | null> {
+export function selectionsAsChoices(
+  selections: Record<TeamId, Selection>,
+): Record<TeamId, Choice> {
   return {
-    A: log.find((e) => e.teamId === 'A')?.wonSpecimenId ?? null,
-    B: log.find((e) => e.teamId === 'B')?.wonSpecimenId ?? null,
-    C: log.find((e) => e.teamId === 'C')?.wonSpecimenId ?? null,
+    red: { primary: selections.red.primary, backup: selections.red.backup },
+    blue: { primary: selections.blue.primary, backup: selections.blue.backup },
+    gold: { primary: selections.gold.primary, backup: selections.gold.backup },
   };
 }
 
-// ---------- 可重复性指纹 ----------
+/**
+ * 自动队的"眼缘"幅度：策略分每差一档为 10 分，眼缘最多 12 分，
+ * 因此只有相邻档位才会被种子偶尔翻转，选择既受策略主导又对种子敏感。
+ */
+const AFFINITY_SPAN = 12;
 
-export function computeFingerprint(
-  seed: number,
-  round: RoundState,
-  log: PickLog[],
-): string {
-  const choiceText = TEAM_IDS.map((id) => {
-    const c = round.choices[id];
-    return `${id}:${c.primaryId ?? '∅'}>${c.backupId ?? '∅'}`;
-  }).join('|');
-  const resultText = log
-    .map((e) => `${e.teamId}=${e.wonSpecimenId ?? '∅'}:${e.outcome}`)
-    .join('|');
-  return hashSeed(`fp|${seed}|r${round.index}|${round.priority.join('>')}|${choiceText}|${resultText}`)
-    .toString(16)
-    .padStart(8, '0');
-}
-
-// ---------- 计分：品类成套，可逐件展开来由 ----------
-
-export interface ScoredItem {
-  specimen: Specimen;
-  roundIndex: number;
-  base: number;
-  setBonus: number;
-  total: number;
-  note: string;
-}
-
-export interface TeamScore {
+/** 自动队按策略给候选打分；分数只由种子、桌面与已持有标本决定。 */
+export function autoPick(args: {
   teamId: TeamId;
-  total: number;
-  items: ScoredItem[];
-  setsCompleted: number;
-  missedRounds: { roundIndex: number; reason: 'noBackup' | 'backupTaken' }[];
-}
+  strategy: 'set' | 'value';
+  table: readonly Specimen[];
+  held: readonly HeldSpecimen[];
+  seed: number;
+  roundIndex: number;
+}): Choice {
+  const { teamId, strategy, table, held, seed, roundIndex } = args;
+  if (table.length === 0) return { primary: null, backup: null };
 
-export function scoreGame(rounds: RoundState[]): Record<TeamId, TeamScore> {
-  const zero = (): Record<CategoryId, number> => ({ rock: 0, insect: 0, plant: 0 });
-  const counts = { A: zero(), B: zero(), C: zero() } as Record<TeamId, Record<CategoryId, number>>;
-  const result: Record<TeamId, TeamScore> = {
-    A: { teamId: 'A', total: 0, items: [] as ScoredItem[], setsCompleted: 0, missedRounds: [] as TeamScore['missedRounds'] },
-    B: { teamId: 'B', total: 0, items: [] as ScoredItem[], setsCompleted: 0, missedRounds: [] as TeamScore['missedRounds'] },
-    C: { teamId: 'C', total: 0, items: [] as ScoredItem[], setsCompleted: 0, missedRounds: [] as TeamScore['missedRounds'] },
-  };
-
-  rounds.forEach((round) => {
-    if (!round.log) return;
-    // log 本身按优先顺序排列，同一轮内谁先成套也由此确定
-    round.log.forEach((entry) => {
-      const score = result[entry.teamId];
-      if (!entry.wonSpecimenId) {
-        if (entry.missReason) {
-          score.missedRounds.push({ roundIndex: round.index, reason: entry.missReason });
-        }
-        return;
-      }
-      const specimen = round.specimens.find((s) => s.id === entry.wonSpecimenId);
-      if (!specimen) return;
-      const cat = specimen.category;
-      counts[entry.teamId][cat] += 1;
-      const catDef = CATEGORIES[cat];
-      let bonus = 0;
-      let note = `单件基础分 ${specimen.value}`;
-      if (counts[entry.teamId][cat] % catDef.setSize === 0) {
-        bonus = catDef.setBonus;
-        score.setsCompleted += 1;
-        note = `单件基础分 ${specimen.value}；凑成第 ${score.setsCompleted} 套「${catDef.label}」+${bonus}`;
-      }
-      const item: ScoredItem = {
-        specimen,
-        roundIndex: round.index,
-        base: specimen.value,
-        setBonus: bonus,
-        total: specimen.value + bonus,
-        note,
-      };
-      score.items.push(item);
-      score.total += item.total;
-    });
-  });
-
-  return result;
-}
-
-export function tiedTeamIds(scores: Record<TeamId, TeamScore>): TeamId[] {
-  const max = Math.max(...TEAM_IDS.map((id) => scores[id].total));
-  const leaders = TEAM_IDS.filter((id) => scores[id].total === max);
-  return leaders.length > 1 ? leaders : [];
-}
-
-// ---------- 开局：内置回合 / 沙盒 ----------
-
-export function buildGame(scenarioId: ScenarioId, seedOverride?: number): GameState {
-  const scenario = SCENARIOS[scenarioId];
-  const seed = seedOverride ?? scenario.seed;
-
-  let rounds: RoundState[];
-  if (scenarioId === 'sandbox') {
-    rounds = Array.from({ length: scenario.totalRounds }, (_, i) =>
-      makeRound(i, generateSandboxRound(seed, i)),
-    );
-    // 自动队在开局即按种子与偏好定选并确认；手动 A 队留空
-    const partial: Pick<GameState, 'rounds'> = { rounds };
-    rounds.forEach((round) => {
-      const owned = ownedCountsBefore(partial, round.index);
-      TEAMS.filter((t) => t.autoStrategy).forEach((team) => {
-        const pick = autoPick(team.id, team.autoStrategy!, round, seed, owned[team.id]);
-        round.choices[team.id] = { ...pick, confirmed: true };
-      });
-    });
-  } else {
-    rounds = scenario.rounds.map((setup, i) => makeRound(i, setup.specimens, setup.presets));
+  const rng = createRng(deriveSeed(seed, roundIndex, teamId, strategy));
+  const affinity = new Map<string, number>();
+  for (const specimen of table) {
+    affinity.set(specimen.id, rng() * AFFINITY_SPAN);
   }
 
-  return {
-    version: STATE_VERSION,
-    scenarioId,
-    seed,
-    teams: TEAMS.map((t) => ({ ...t })),
-    categories: {
-      rock: { ...CATEGORIES.rock },
-      insect: { ...CATEGORIES.insect },
-      plant: { ...CATEGORIES.plant },
-    },
-    rounds,
-    currentRound: 0,
-    fingerprint: null,
+  const heldCounts = new Map<string, number>();
+  for (const item of held) {
+    heldCounts.set(
+      item.specimen.category,
+      (heldCounts.get(item.specimen.category) ?? 0) + 1,
+    );
+  }
+
+  const scoreOf = (specimen: Specimen): number => {
+    const charm = affinity.get(specimen.id) ?? 0;
+    if (strategy === 'value') {
+      return specimen.value * 10 + charm;
+    }
+    const count = heldCounts.get(specimen.category) ?? 0;
+    const currentTier = setTierForCount(count);
+    const nextCount = Math.min(count + 1, 4);
+    const nextTier = setTierForCount(nextCount);
+    const currentPerItem = currentTier === 'none' ? 0 : SET_BONUS_PER_ITEM[currentTier];
+    const nextPerItem = nextTier === 'none' ? 0 : SET_BONUS_PER_ITEM[nextTier];
+    const marginal = nextPerItem * nextCount - currentPerItem * count;
+    // 已持有同品类的件数提供轻微倾向，使成套优先在加成相等时先补已有的套。
+    return marginal * 10 + count * 3 + specimen.value + charm;
   };
+
+  const ranked = [...table].sort((a, b) => {
+    const delta = scoreOf(b) - scoreOf(a);
+    if (delta !== 0) return delta;
+    return a.id.localeCompare(b.id);
+  });
+
+  const primary = ranked[0]?.id ?? null;
+  const backup = ranked[1]?.id ?? null;
+  return { primary, backup };
+}
+
+function withAutoPicks(state: GameState): GameState {
+  const round = currentRound(state);
+  const heldByTeam = {
+    red: collectHoldings(state.history, 'red'),
+    blue: collectHoldings(state.history, 'blue'),
+    gold: collectHoldings(state.history, 'gold'),
+  } satisfies Record<TeamId, HeldSpecimen[]>;
+
+  const selections = { ...state.selections };
+  for (const team of state.teams) {
+    if (team.control !== 'auto') continue;
+    const pick = autoPick({
+      teamId: team.id,
+      strategy: team.strategy,
+      table: round.table,
+      held: heldByTeam[team.id],
+      seed: state.seed,
+      roundIndex: state.roundIndex,
+    });
+    selections[team.id] = {
+      primary: pick.primary,
+      backup: pick.backup,
+      confirmed: pick.primary !== null,
+      source: 'auto',
+    };
+  }
+  return { ...state, selections };
+}
+
+export interface CreateGameOptions {
+  seed?: number;
+  teamSetups?: Scenario['teamSetups'];
+}
+
+export function createGame(scenario: Scenario, options: CreateGameOptions = {}): GameState {
+  assertScenario(scenario);
+  const seed = options.seed ?? scenario.seed;
+  const setups: Scenario['teamSetups'] = {};
+  for (const teamId of TEAM_IDS) {
+    const merged = { ...scenario.teamSetups?.[teamId], ...options.teamSetups?.[teamId] };
+    if (Object.keys(merged).length > 0) setups[teamId] = merged;
+  }
+  const teams = buildTeams(setups);
+  const now = timestamp();
+  const base: GameState = {
+    version: 1,
+    scenarioId: scenario.id,
+    scenarioName: scenario.name,
+    scenarioTagline: scenario.tagline,
+    seed: seed >>> 0,
+    roundIndex: 0,
+    phase: 'selecting',
+    teams,
+    rounds: scenario.rounds,
+    selections: emptySelections(),
+    history: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return withAutoPicks(base);
+}
+
+export function assertScenario(scenario: Scenario): void {
+  if (!scenario.rounds.length) {
+    throw new Error('场景至少需要一轮');
+  }
+  const seen = new Set<string>();
+  for (const round of scenario.rounds) {
+    if (!round.table.length) {
+      throw new Error(`回合「${round.title}」没有标本`);
+    }
+    for (const specimen of round.table) {
+      if (seen.has(specimen.id)) {
+        throw new Error(`标本 id 重复: ${specimen.id}`);
+      }
+      seen.add(specimen.id);
+    }
+  }
+}
+
+export function canEdit(state: GameState, teamId: TeamId): boolean {
+  if (state.phase !== 'selecting') return false;
+  return getTeam(state.teams, teamId).control === 'manual';
+}
+
+export function setSelection(
+  state: GameState,
+  teamId: TeamId,
+  patch: Partial<Pick<Selection, 'primary' | 'backup'>>,
+): GameState {
+  if (!canEdit(state, teamId)) return state;
+  const selection = state.selections[teamId];
+  const primary = patch.primary !== undefined ? patch.primary : selection.primary;
+  const backup = patch.backup !== undefined ? patch.backup : selection.backup;
+  const normalizedBackup = backup !== null && backup === primary ? null : backup;
+  return {
+    ...state,
+    selections: {
+      ...state.selections,
+      [teamId]: {
+        primary,
+        backup: normalizedBackup,
+        confirmed: false,
+        source: 'manual',
+      },
+    },
+    updatedAt: timestamp(),
+  };
+}
+
+export function choiceErrors(state: GameState, teamId: TeamId): string[] {
+  const team = getTeam(state.teams, teamId);
+  const selection = state.selections[teamId];
+  return validateChoice(
+    team.name,
+    { primary: selection.primary, backup: selection.backup },
+    currentRound(state).table,
+  ).errors;
+}
+
+export function confirmSelection(state: GameState, teamId: TeamId): GameState {
+  if (!canEdit(state, teamId)) return state;
+  if (choiceErrors(state, teamId).length > 0) return state;
+  const selection = state.selections[teamId];
+  return {
+    ...state,
+    selections: {
+      ...state.selections,
+      [teamId]: { ...selection, confirmed: true },
+    },
+    updatedAt: timestamp(),
+  };
+}
+
+export function unconfirmSelection(state: GameState, teamId: TeamId): GameState {
+  if (!canEdit(state, teamId)) return state;
+  const selection = state.selections[teamId];
+  if (!selection.confirmed) return state;
+  return {
+    ...state,
+    selections: {
+      ...state.selections,
+      [teamId]: { ...selection, confirmed: false },
+    },
+    updatedAt: timestamp(),
+  };
+}
+
+export interface OpenCheck {
+  canOpen: boolean;
+  pendingTeamIds: TeamId[];
+  errors: string[];
+}
+
+export function checkOpen(state: GameState): OpenCheck {
+  const pendingTeamIds: TeamId[] = [];
+  const errors: string[] = [];
+  if (state.phase !== 'selecting') {
+    return { canOpen: false, pendingTeamIds, errors: ['本回合已经开牌'] };
+  }
+  for (const team of state.teams) {
+    const selection = state.selections[team.id];
+    if (!selection.confirmed) {
+      pendingTeamIds.push(team.id);
+    }
+    for (const error of choiceErrors(state, team.id)) {
+      errors.push(error);
+    }
+  }
+  return {
+    canOpen: pendingTeamIds.length === 0 && errors.length === 0,
+    pendingTeamIds,
+    errors,
+  };
+}
+
+export function openRound(state: GameState): GameState {
+  const check = checkOpen(state);
+  if (!check.canOpen) {
+    throw new Error(`还不能开牌: ${[...check.pendingTeamIds, ...check.errors].join('; ')}`);
+  }
+  const round = currentRound(state);
+  const priority = currentPriority(state);
+  const result = resolveRound({
+    roundIndex: state.roundIndex,
+    table: round.table,
+    priority,
+    choices: selectionsAsChoices(state.selections),
+  });
+  return {
+    ...state,
+    phase: 'opened',
+    history: [...state.history, result],
+    updatedAt: timestamp(),
+  };
+}
+
+export function nextRound(state: GameState): GameState {
+  if (state.phase !== 'opened') return state;
+  if (state.roundIndex + 1 >= state.rounds.length) return state;
+  const advanced: GameState = {
+    ...state,
+    roundIndex: state.roundIndex + 1,
+    phase: 'selecting',
+    selections: emptySelections(),
+    updatedAt: timestamp(),
+  };
+  return withAutoPicks(advanced);
+}
+
+export function restartGame(state: GameState, seed = state.seed): GameState {
+  const base: GameState = {
+    ...state,
+    seed: seed >>> 0,
+    roundIndex: 0,
+    phase: 'selecting',
+    selections: emptySelections(),
+    history: [],
+    updatedAt: timestamp(),
+  };
+  return withAutoPicks(base);
+}
+
+export function setTeamControl(
+  state: GameState,
+  teamId: TeamId,
+  control: TeamControl,
+): GameState {
+  if (state.phase !== 'selecting') return state;
+  const teams = state.teams.map((team) =>
+    team.id === teamId ? { ...team, control } : team,
+  );
+  const next: GameState = { ...state, teams, updatedAt: timestamp() };
+  if (control === 'auto') return withAutoPicks(next);
+  // 交回手动时清空自动选择，由操作者本人重新挑选并确认。
+  return {
+    ...next,
+    selections: {
+      ...next.selections,
+      [teamId]: emptySelection(),
+    },
+  };
+}
+
+/** 配置动作只允许在开选前、且由旁观者或该队本人执行。 */
+export function canConfigure(state: GameState, viewer: Viewer, teamId: TeamId): boolean {
+  if (state.phase !== 'selecting') return false;
+  return viewer === 'observer' || viewer === teamId;
+}
+
+export function setTeamStrategy(
+  state: GameState,
+  teamId: TeamId,
+  strategy: 'set' | 'value',
+): GameState {
+  if (state.phase !== 'selecting') return state;
+  const teams = state.teams.map((team) =>
+    team.id === teamId ? { ...team, strategy } : team,
+  );
+  const next: GameState = { ...state, teams, updatedAt: timestamp() };
+  const team = getTeam(teams, teamId);
+  if (team.control === 'auto') return withAutoPicks(next);
+  return next;
+}
+
+/** 演示脚本：仅为手动队填入场景预设；自动队保持自身选择。 */
+export function applyDemoScript(state: GameState): GameState {
+  if (state.phase !== 'selecting') return state;
+  const round = currentRound(state);
+  const recommendations = round.recommendations;
+  if (!recommendations) return state;
+
+  let next = state;
+  for (const teamId of TEAM_IDS) {
+    const rec = recommendations[teamId];
+    if (!rec) continue;
+    if (!canEdit(next, teamId)) continue;
+    const tableIds = new Set(round.table.map((specimen) => specimen.id));
+    if (!tableIds.has(rec.primary)) continue;
+    if (rec.backup !== null && !tableIds.has(rec.backup)) continue;
+    if (rec.backup === rec.primary) continue;
+    next = setSelection(next, teamId, { primary: rec.primary, backup: rec.backup });
+    if (choiceErrors(next, teamId).length === 0) {
+      next = confirmSelection(next, teamId);
+    }
+  }
+  return next;
+}
+
+export function lastResult(state: GameState): RoundResult | null {
+  return state.history[state.history.length - 1] ?? null;
+}
+
+export function standings(state: GameState) {
+  return computeStandings(state.history);
+}
+
+export function isFinalRound(state: GameState): boolean {
+  return state.roundIndex >= state.rounds.length - 1;
+}
+
+export interface RoundView {
+  phase: Phase;
+  roundIndex: number;
+  roundTitle: string;
+  roundBrief: string;
+  priority: TeamId[];
+  table: Specimen[];
+  selections: Record<TeamId, SelectionView>;
+  result: RoundResult | null;
+  allConfirmed: boolean;
+  pendingTeamIds: TeamId[];
+}
+
+export interface SelectionView {
+  primary: string | null;
+  backup: string | null;
+  confirmed: boolean;
+  source: 'manual' | 'auto';
+  hidden: boolean;
+  isSelf: boolean;
+}
+
+/**
+ * 按阶段和视角裁剪信息：
+ * - 选牌阶段：各队只能看到自己的选择，公共信息（确认状态、桌面、优先顺序）可见；
+ * - 开牌后：所有选择与裁定明细公开。
+ */
+export function toRoundView(state: GameState, viewer: Viewer): RoundView {
+  const round = currentRound(state);
+  const opened = state.phase === 'opened';
+  const result = opened ? lastResult(state) : null;
+  const check = checkOpen(state);
+  const selections = {} as Record<TeamId, SelectionView>;
+  for (const teamId of TEAM_IDS) {
+    const selection = state.selections[teamId];
+    const isSelf = viewer === teamId;
+    const hidden = !opened && !isSelf;
+    selections[teamId] = {
+      primary: hidden ? null : selection.primary,
+      backup: hidden ? null : selection.backup,
+      confirmed: selection.confirmed,
+      source: selection.source,
+      hidden,
+      isSelf,
+    };
+  }
+  return {
+    phase: state.phase,
+    roundIndex: state.roundIndex,
+    roundTitle: round.title,
+    roundBrief: round.brief,
+    priority: currentPriority(state),
+    table: round.table,
+    selections,
+    result,
+    allConfirmed: check.pendingTeamIds.length === 0 && check.errors.length === 0,
+    pendingTeamIds: check.pendingTeamIds,
+  };
+}
+
+export function scoreForTeam(state: GameState, teamId: TeamId) {
+  return scoreTeam(state.history, teamId);
+}
+
+const GAME_VERSION = 1;
+
+export interface SaveEnvelope {
+  version: 1;
+  saves: import('./types').SaveFile[];
+}
+
+export function isGameState(value: unknown): value is GameState {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<GameState>;
+  return (
+    candidate.version === GAME_VERSION &&
+    typeof candidate.scenarioId === 'string' &&
+    typeof candidate.seed === 'number' &&
+    typeof candidate.roundIndex === 'number' &&
+    (candidate.phase === 'selecting' || candidate.phase === 'opened') &&
+    Array.isArray(candidate.teams) &&
+    Array.isArray(candidate.rounds) &&
+    Array.isArray(candidate.history) &&
+    !!candidate.selections &&
+    typeof candidate.selections === 'object'
+  );
+}
+
+export function isViewer(value: unknown): value is Viewer {
+  return value === 'observer' || value === 'red' || value === 'blue' || value === 'gold';
+}
+
+export function isSaveFile(value: unknown): value is import('./types').SaveFile {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<import('./types').SaveFile>;
+  return (
+    candidate.version === 1 &&
+    typeof candidate.id === 'string' &&
+    typeof candidate.label === 'string' &&
+    typeof candidate.savedAt === 'string' &&
+    isViewer(candidate.viewTeam) &&
+    isGameState(candidate.game)
+  );
 }

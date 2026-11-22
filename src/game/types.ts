@@ -1,110 +1,181 @@
-// 标本轮选 —— 核心类型定义（纯数据，无 DOM / React 依赖）
+export const CATEGORY_ORDER = ['陶器', '玉器', '骨器', '简牍'] as const;
+export type Category = (typeof CATEGORY_ORDER)[number];
 
-export type CategoryId = 'rock' | 'insect' | 'plant';
+export type TeamId = 'red' | 'blue' | 'gold';
+export const TEAM_IDS: readonly TeamId[] = ['red', 'blue', 'gold'];
 
-export interface CategoryDef {
-  id: CategoryId;
-  label: string;
-  /** 集齐多少件算一套 */
-  setSize: number;
-  /** 每凑成一套额外加分 */
-  setBonus: number;
-}
+export type TeamControl = 'manual' | 'auto';
+export type AutoStrategy = 'set' | 'value';
+export type Viewer = TeamId | 'observer';
 
 export interface Specimen {
   id: string;
-  label: string;
-  category: CategoryId;
-  /** 单件基础分 */
+  name: string;
+  /** 单字标记，纯文字标本的视觉索引。 */
+  glyph: string;
+  category: Category;
   value: number;
+  note: string;
 }
 
-export type TeamId = 'A' | 'B' | 'C';
-
-export type AutoStrategy = 'valueFirst' | 'setSeeker' | null;
-
-export interface TeamDef {
+export interface Team {
   id: TeamId;
-  label: string;
-  autoStrategy: AutoStrategy;
+  name: string;
+  sigil: string;
   color: string;
+  control: TeamControl;
+  strategy: AutoStrategy;
 }
 
-/** 空手原因：没抢到的也要有记录，并能区分两种情况 */
-export type MissReason =
-  | 'noBackup' // 没有合适备选（本队根本没提交备用）
-  | 'backupTaken'; // 备选已被别人拿走
+export type Phase = 'selecting' | 'opened';
 
-export type OutcomeStatus =
-  | 'primaryWon' // 首选到手
-  | 'backupWon' // 首选撞选落败，备用到手
-  | 'missedNoBackup' // 首选落败，且没有备选
-  | 'missedBackupTaken'; // 首选落败，备选也被分走
-
-export interface PickLog {
-  teamId: TeamId;
-  priorityIndex: number; // 本轮优先顺序中的位置（0 = 最优先）
-  primaryId: string | null;
-  backupId: string | null;
-  outcome: OutcomeStatus;
-  wonSpecimenId: string | null;
-  missReason: MissReason | null;
-  /** 首选被谁抢走（按优先顺序处理时占用的队），用于开牌来由 */
-  primaryTakenBy: TeamId | null;
-  /** 备用被谁抢走 */
-  backupTakenBy: TeamId | null;
-}
-
-export interface TeamChoices {
-  primaryId: string | null;
-  backupId: string | null;
+export interface Selection {
+  primary: string | null;
+  backup: string | null;
   confirmed: boolean;
+  source: 'manual' | 'auto';
 }
 
-export interface RoundState {
-  index: number; // 从 0 开始
-  specimens: Specimen[];
-  /** 本轮优先顺序（队 id 序列，每轮整体左旋一位） */
-  priority: TeamId[];
-  choices: Record<TeamId, TeamChoices>;
-  log: PickLog[] | null; // 开牌后才有
-  allocations: Record<TeamId, string | null> | null;
+export interface DemoPick {
+  primary: string;
+  backup: string | null;
 }
 
-export interface GameConfig {
-  totalRounds: number;
-  seed: number;
+export interface ScenarioRound {
+  title: string;
+  brief: string;
+  table: Specimen[];
+  /** 演示脚本：套用后可在对应回合触发指定裁定。 */
+  recommendations?: Partial<Record<TeamId, DemoPick>>;
 }
 
-export type ScenarioId =
-  | 'sandbox'
-  | 'collisionPrimary'
-  | 'collisionBackup'
-  | 'tieScore';
-
-export interface RoundSetup {
-  specimens: Specimen[];
-  /** 预置选择（内置回合用）；缺省的队由自动策略或手动补 */
-  presets?: Partial<Record<TeamId, TeamChoices>>;
+export interface TeamSetup {
+  control: TeamControl;
+  strategy: AutoStrategy;
 }
 
-export interface ScenarioDef {
-  id: ScenarioId;
-  label: string;
+export interface Scenario {
+  id: string;
+  name: string;
+  tagline: string;
   description: string;
-  totalRounds: number;
+  highlights: string[];
   seed: number;
-  rounds: RoundSetup[];
+  rounds: ScenarioRound[];
+  teamSetups?: Partial<Record<TeamId, Partial<TeamSetup>>>;
+}
+
+export interface Choice {
+  primary: string | null;
+  backup: string | null;
+}
+
+export interface Assignment {
+  teamId: TeamId;
+  specimenId: string;
+  via: 'primary' | 'backup';
+  /** 本次开牌中的授予次序，从 1 开始。 */
+  order: number;
+}
+
+export type MissReason = 'no-backup' | 'backup-taken';
+
+export interface MissRecord {
+  teamId: TeamId;
+  primaryId: string | null;
+  backupId: string | null;
+  reason: MissReason;
+  primaryTakenBy?: TeamId;
+  backupTakenBy?: TeamId;
+}
+
+export interface TraceEvent {
+  pass: 'primary' | 'backup';
+  teamId: TeamId;
+  specimenId: string | null;
+  outcome: 'granted' | 'taken' | 'no-request';
+  takenBy?: TeamId;
+}
+
+export interface RoundResult {
+  roundIndex: number;
+  priority: TeamId[];
+  table: Specimen[];
+  choices: Record<TeamId, Choice>;
+  assignments: Assignment[];
+  misses: MissRecord[];
+  trace: TraceEvent[];
 }
 
 export interface GameState {
-  version: number;
-  scenarioId: ScenarioId;
+  version: 1;
+  scenarioId: string;
+  scenarioName: string;
+  scenarioTagline: string;
   seed: number;
-  teams: TeamDef[];
-  categories: Record<CategoryId, CategoryDef>;
-  rounds: RoundState[];
-  currentRound: number;
-  /** 已开牌轮次的指纹（种子+选择 -> 结果），用于验证可重复性 */
-  fingerprint: string | null;
+  roundIndex: number;
+  phase: Phase;
+  teams: Team[];
+  rounds: ScenarioRound[];
+  selections: Record<TeamId, Selection>;
+  history: RoundResult[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SetTier = 'none' | 'pair' | 'triad' | 'quad';
+
+export interface CategoryBreakdown {
+  category: Category;
+  itemIds: string[];
+  count: number;
+  tier: SetTier;
+  perItemBonus: number;
+  totalBonus: number;
+}
+
+export interface ItemScoreLine {
+  specimenId: string;
+  name: string;
+  glyph: string;
+  category: Category;
+  base: number;
+  setBonus: number;
+  total: number;
+  acquiredRound: number;
+  via: 'primary' | 'backup';
+  reasons: string[];
+}
+
+export interface TeamScore {
+  teamId: TeamId;
+  count: number;
+  baseTotal: number;
+  setBonusTotal: number;
+  total: number;
+  categories: CategoryBreakdown[];
+  items: ItemScoreLine[];
+}
+
+export interface Standings {
+  scores: TeamScore[];
+  topScore: number;
+  tiedTeamIds: TeamId[];
+  isTie: boolean;
+  roundsPlayed: number;
+}
+
+export interface SaveFile {
+  version: 1;
+  id: string;
+  label: string;
+  savedAt: string;
+  viewTeam: Viewer;
+  game: GameState;
+}
+
+export interface StorageLike {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
 }
