@@ -1,0 +1,15 @@
+{
+  "colors": [
+    {"name": "enemy 红", "rgb": [229, 57, 53], "locked": false},
+    {"name": "ally 绿", "rgb": [67, 160, 71], "locked": false},
+    {"name": "danger 橙", "rgb": [251, 140, 0], "locked": false},
+    {"name": "poison 黄绿", "rgb": [192, 202, 51], "locked": false},
+    {"name": "quest 蓝", "rgb": [30, 136, 229], "locked": true},
+    {"name": "neutral 白", "rgb": [240, 240, 240], "locked": false}
+  ],
+  "required_pairs": [
+    ["enemy 红", "ally 绿"],
+    ["danger 橙", "poison 黄绿"]
+  ],
+  "note": "前两对在普通视觉可分, deutan/protan 模拟下会明显靠拢; quest 蓝示例锁定色。"
+}

@@ -1,0 +1,87 @@
+{
+  "markers": [
+    {
+      "name": "enemy",
+      "rgb": [
+        229,
+        57,
+        53
+      ],
+      "shape": "circle"
+    },
+    {
+      "name": "ally",
+      "rgb": [
+        67,
+        160,
+        71
+      ],
+      "shape": "square"
+    },
+    {
+      "name": "danger",
+      "rgb": [
+        251,
+        140,
+        0
+      ],
+      "shape": "triangle"
+    },
+    {
+      "name": "poison",
+      "rgb": [
+        192,
+        202,
+        51
+      ],
+      "shape": "diamond"
+    },
+    {
+      "name": "quest",
+      "rgb": [
+        30,
+        136,
+        229
+      ],
+      "shape": "pentagon"
+    },
+    {
+      "name": "neutral",
+      "rgb": [
+        240,
+        240,
+        240
+      ],
+      "shape": "cross"
+    }
+  ],
+  "light_bg": [
+    245,
+    245,
+    245
+  ],
+  "dark_bg": [
+    30,
+    30,
+    30
+  ],
+  "expected_conflict_pairs": [
+    [
+      "enemy",
+      "ally"
+    ],
+    [
+      "danger",
+      "poison"
+    ]
+  ],
+  "singles": [
+    "marker_enemy.png",
+    "marker_ally.png",
+    "marker_danger.png",
+    "marker_poison.png",
+    "marker_quest.png",
+    "marker_neutral.png"
+  ],
+  "spritesheet": "spritesheet.png"
+}
