@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>绳绕拐角规则演示</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <h1>绳绕拐角 · 规则演示</h1>
+        <span class="sub">二维摆荡 / 锚点 / 多边形障碍</span>
+        <a class="readme" href="./README.md" target="_blank" rel="noreferrer">规则说明</a>
+      </div>
+      <div class="toolbar">
+        <label class="field">
+          <span>场景</span>
+          <select id="scenario"></select>
+        </label>
+        <label class="field">
+          <span>单步步长</span>
+          <select id="step-size">
+            <option value="0.0083333">1/120 s</option>
+            <option value="0.0166667" selected>1/60 s</option>
+            <option value="0.0666667">1/15 s（大步骤）</option>
+            <option value="0.2">0.2 s（大步骤）</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>速度</span>
+          <select id="speed">
+            <option value="0.25">0.25×</option>
+            <option value="0.5" selected>0.5×</option>
+            <option value="1">1×</option>
+            <option value="2">2×</option>
+          </select>
+        </label>
+        <button id="play" class="primary">暂停</button>
+        <button id="step">逐步</button>
+        <button id="reset">重跑</button>
+        <button id="replay-check" title="用相同初始状态跑两遍，对比关键拐点事件">复现校验</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="stage-wrap">
+        <canvas id="stage" aria-label="摆荡场景"></canvas>
+        <div class="stage-foot">
+          <div id="status" class="status"></div>
+          <div id="readout" class="readout"></div>
+        </div>
+        <div id="hint" class="hint"></div>
+      </section>
+
+      <aside class="panel">
+        <div class="card">
+          <h2>控制</h2>
+          <div class="row">
+            <button id="anchor-up" title="锚点上移 24px">锚点 ↑</button>
+            <button id="anchor-down" title="锚点下移 24px">锚点 ↓</button>
+          </div>
+          <div class="row">
+            <button id="trim-in" class="hold" title="按住收绳">收绳（按住）</button>
+            <button id="trim-out" class="hold" title="按住放绳">放绳（按住）</button>
+          </div>
+          <p class="keys">
+            ← → / A D 左右发力 · W S 收放 · 空格暂停 · <b>.</b> 单步 · 拖动蓝色锚点可改高度
+          </p>
+          <label class="check"><input type="checkbox" id="auto-wrap" checked /> 记录“绕上”事件到时间线</label>
+          <label class="check"><input type="checkbox" id="auto-release" checked /> 记录“解开”事件到时间线</label>
+          <label class="check"><input type="checkbox" id="show-sweep" checked /> 显示子步采样（大步不穿透）</label>
+        </div>
+
+        <div class="card">
+          <h2>起点与初速度</h2>
+          <label class="check"><input type="checkbox" id="edit-start" /> 暂停时拖动角色设置起点</label>
+          <div class="row vel">
+            <label class="num-field">初速 vx <input id="start-vx" type="number" step="20" value="0" /></label>
+            <label class="num-field">vy <input id="start-vy" type="number" step="20" value="0" /></label>
+          </div>
+          <div class="row vel">
+            <label class="num-field">初始松弛 <input id="start-slack" type="number" step="10" min="0" value="0" /></label>
+            <button id="apply-start">从该起点重跑</button>
+          </div>
+          <p class="keys" id="start-readout">起点：—</p>
+        </div>
+
+        <div class="card">
+          <h2>绳段（实际路径）</h2>
+          <div id="segments" class="segments"></div>
+          <div class="meter" id="rope-meter"><span></span></div>
+          <div class="kv">
+            <div><span>张力方向</span><div id="tension" class="tension"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>限制 / 状态</h2>
+          <p id="reason" class="reason">—</p>
+          <p id="replay" class="note">复现校验：未运行</p>
+          <p id="scenario-note" class="note"></p>
+        </div>
+      </aside>
+    </main>
+
+    <section class="timeline-wrap">
+      <div class="timeline-head">
+        <h2>时间线</h2>
+        <span class="legend"><i class="wrap"></i>绕上 <i class="release"></i>解开 <i class="limit"></i>受限</span>
+        <label class="scrub">
+          回看
+          <input id="scrub" type="range" min="0" max="1000" value="0" />
+          <span id="scrub-label">t = 0.00 s</span>
+        </label>
+      </div>
+      <canvas id="timeline" aria-label="拐点事件时间线"></canvas>
+      <ul id="events" class="events"></ul>
+    </section>
+
+    <script type="module" src="./dist/src/main.js"></script>
+  </body>
+</html>
