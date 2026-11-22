@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>建造规则沙盒 · 悬空构件结算</title>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>建造规则沙盒</h1>
+        <p class="subtitle">
+          沿实际接触边传力 · 多支撑按边均分 · 承重环无地基判悬空 · 拆除先预览后提交可撤销
+        </p>
+      </header>
+      <main>
+        <div class="canvas-wrap">
+          <canvas id="stage" width="616" height="440"></canvas>
+          <div id="statusbar" class="statusbar"></div>
+        </div>
+        <aside id="panel" class="panel"></aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
