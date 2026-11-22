@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>影子运灯 · 多轮回放</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px; background: #12161f; color: #cfd8ff;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+    display: flex; gap: 16px; justify-content: center;
+  }
+  canvas { background: #1c2230; border: 1px solid #2a3350; border-radius: 6px; }
+  .panel { width: 330px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+  .card { background: #1a2030; border: 1px solid #2a3350; border-radius: 6px; padding: 10px; }
+  .card h3 { margin: 0 0 6px; font-size: 13px; color: #8b95b0; font-weight: 600; }
+  .row { padding: 1px 0; }
+  .dim { color: #8b95b0; }
+  .conflict { color: #ffb74d; }
+  button {
+    background: #2a3350; color: #cfd8ff; border: 1px solid #3a4568;
+    border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 13px;
+  }
+  button:hover { background: #35406a; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  input[type=range] { width: 100%; }
+  #banner {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(20,28,48,0.95); border: 1px solid #3ddc84; color: #3ddc84;
+    padding: 8px 18px; border-radius: 6px; opacity: 0; transition: opacity .25s;
+    pointer-events: none; font-size: 14px;
+  }
+  #banner.show { opacity: 1; }
+  .big { font-size: 14px; font-weight: 600; }
+  kbd { background:#2a3350; border-radius:3px; padding:0 4px; }
+</style>
+</head>
+<body>
+  <div>
+    <canvas id="game" width="960" height="600"></canvas>
+    <div class="card" style="margin-top:8px; width:960px;">
+      <span class="big" id="roundLabel"></span> &nbsp;·&nbsp; <span id="modeLabel"></span>
+      <input type="range" id="timeline" min="0" max="0" value="0" step="1">
+      <div class="btns">
+        <button id="btnPause">暂停</button>
+        <button id="btnStepBack">◀ 上一拍</button>
+        <button id="btnStepFwd">下一拍 ▶</button>
+        <button id="btnLive">回到直播</button>
+        <button id="btnEndRound">结束本轮</button>
+        <button id="btnResetRound">重置本轮</button>
+        <button id="btnRerecord">重录上一轮</button>
+        <button id="btnCheck">校验一致性</button>
+        <button id="btnLevel1">关卡1</button>
+        <button id="btnLevel2">关卡2</button>
+      </div>
+      <div id="checkResult" class="dim" style="margin-top:6px;"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <h3>操作</h3>
+      <div class="dim">移动 <kbd>WASD</kbd>/方向键 · 捡/放灯 <kbd>E</kbd>/<kbd>J</kbd>/<kbd>空格</kbd> · 暂停 <kbd>P</kbd></div>
+      <div class="dim" style="margin-top:4px;">规则: 每轮固定时长, 真人操作被逐拍记录; 新一轮里旧轮次的影子按原时刻重放同样操作。抢灯优先级: 真人 &gt; 更早轮次的影子。</div>
+    </div>
+    <div class="card"><h3>关卡提示</h3><div id="hint" class="dim"></div></div>
+    <div class="card"><h3>当前拍状态</h3><div id="statePanel"></div></div>
+    <div class="card"><h3>抢灯冲突记录</h3><div id="conflictPanel"></div></div>
+    <div class="card"><h3>事件日志</h3><div id="eventPanel"></div></div>
+  </div>
+  <div id="banner"></div>
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>
