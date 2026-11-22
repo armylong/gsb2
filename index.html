@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>网格接缝检查与局部补缝</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d90b8'/%3E%3Cpath d='M7 9h18M7 23h18M7 9v14M25 9v14' stroke='%2305161d' stroke-width='2.4' fill='none'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">◈</span>
+          <div>
+            <h1>接缝检查 / 局部补缝</h1>
+            <p>区分“几何重合”与“共享顶点”的三角网格边界工具</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <label class="file-button">
+            导入 OBJ
+            <input id="file-input" type="file" accept=".obj,text/plain" />
+          </label>
+          <button id="btn-export" class="btn">导出 OBJ</button>
+          <button id="btn-verify" class="btn">导出并重开验证</button>
+          <button id="btn-reset-view" class="btn ghost">重置视角</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="panel left">
+          <section class="block">
+            <h2>内置样例</h2>
+            <div id="sample-list" class="sample-list"></div>
+          </section>
+
+          <section class="block">
+            <h2>网格概况</h2>
+            <div id="mesh-stats" class="stats"></div>
+            <div class="tol-row">
+              <label for="tol-input">几何重合容差</label>
+              <input id="tol-input" type="number" min="0" step="0.001" value="0.01" />
+            </div>
+            <p class="hint">容差只用于提示“几何上重合/贴近”，拓扑判定只认共享顶点。</p>
+          </section>
+
+          <section class="block">
+            <h2>边检查器</h2>
+            <div id="edge-inspector" class="inspector muted">在视图里点击任意一条边，查看它实际连接了哪些面。</div>
+          </section>
+
+          <section class="block grow">
+            <h2>拓扑问题</h2>
+            <div class="issue-tabs" id="issue-tabs">
+              <button data-tab="boundary" class="tab active">自由边</button>
+              <button data-tab="nonmanifold" class="tab">邻面&gt;2</button>
+              <button data-tab="orientation" class="tab">朝向</button>
+              <button data-tab="coincident" class="tab">几何重合</button>
+            </div>
+            <div id="issue-list" class="issue-list"></div>
+          </section>
+        </aside>
+
+        <section class="viewport">
+          <div id="canvas-host" class="canvas-host"></div>
+          <div class="viewport-toolbar">
+            <button id="tool-orbit" class="tool active">旋转/查看</button>
+            <button id="tool-select" class="tool">框选边界</button>
+            <span class="legend">
+              <i class="dot boundary"></i>自由边
+              <i class="dot nonmanifold"></i>非流形
+              <i class="dot orientation"></i>朝向冲突
+              <i class="dot chainA"></i>A 段
+              <i class="dot chainB"></i>B 段
+              <i class="dot candidate"></i>候选
+              <i class="dot preserved"></i>保留洞
+            </span>
+          </div>
+          <div id="selection-box" class="selection-box hidden"></div>
+          <div id="toast" class="toast hidden"></div>
+          <div id="crosshair-hint" class="canvas-hint">
+            拖动旋转 · 滚轮缩放 · 右键平移 · 切到「框选边界」后拖出矩形
+          </div>
+        </section>
+
+        <aside class="panel right">
+          <section class="block">
+            <h2>1 · 框住两段边界</h2>
+            <p class="hint">切到「框选边界」，在接缝附近拖出矩形；按住 Shift 可追加框选。矩形内的自由边会自动组成链，请分别指定 A / B。</p>
+            <div id="chain-box" class="chain-box">
+              <div class="chain-card" id="chain-card-a">
+                <div class="chain-head"><span class="swatch a"></span> A 段</div>
+                <div class="chain-body muted">尚未选择</div>
+              </div>
+              <div class="chain-card" id="chain-card-b">
+                <div class="chain-head"><span class="swatch b"></span> B 段</div>
+                <div class="chain-body muted">尚未选择</div>
+              </div>
+            </div>
+            <div class="button-row">
+              <button id="btn-swap-chains" class="btn ghost small">交换 A / B</button>
+              <button id="btn-clear-selection" class="btn ghost small">清空框选</button>
+              <button id="btn-focus-selection" class="btn ghost small">聚焦接缝</button>
+            </div>
+          </section>
+
+          <section class="block">
+            <h2>2 · 对应点与冲突</h2>
+            <div class="tol-row">
+              <label for="stitch-tol">配对容差</label>
+              <input id="stitch-tol" type="number" min="0.0001" step="0.001" value="0.05" />
+            </div>
+            <div id="pairing-summary" class="summary muted">选择两段边界后自动计算候选点。</div>
+            <div id="conflict-list" class="conflict-list"></div>
+            <div id="candidate-list" class="candidate-list"></div>
+            <div class="button-row">
+              <button id="btn-suggest" class="btn ghost small">按最近距离建议剔除</button>
+              <button id="btn-clear-excluded" class="btn ghost small">恢复已剔除</button>
+            </div>
+          </section>
+
+          <section class="block">
+            <h2>3 · 预览与写入</h2>
+            <div class="settings-grid">
+              <label>最小面积比 <input id="min-area" type="number" min="0.001" max="1" step="0.01" value="0.05" /></label>
+              <label>法线反向阈值 <input id="opposite-dot" type="number" min="-1" max="1" step="0.05" value="-0.5" /></label>
+            </div>
+            <div id="preview-checks" class="checks muted">配对就绪后显示写入前检查。</div>
+            <div class="button-row">
+              <button id="btn-preview" class="btn secondary" disabled>预览变化</button>
+              <button id="btn-apply" class="btn primary" disabled>确认合并</button>
+            </div>
+            <p id="apply-hint" class="hint"></p>
+          </section>
+
+          <section class="block">
+            <h2>4 · 合并后 / 撤销</h2>
+            <div id="post-report" class="summary muted">尚未合并。</div>
+            <div id="hole-list" class="hole-list"></div>
+            <div class="button-row">
+              <button id="btn-undo" class="btn ghost" disabled>撤销这次修补</button>
+            </div>
+            <div id="history-list" class="history-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <dialog id="verify-dialog" class="dialog">
+      <h2>导出并重新打开：拓扑验证</h2>
+      <div id="verify-body"></div>
+      <div class="dialog-actions">
+        <button id="btn-reopen-export" class="btn secondary" type="button">载入这份导出继续检查</button>
+        <button id="btn-close-verify" class="btn" type="button">关闭</button>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
