@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>网格坐标压缩检查器</title>
+    <link rel="stylesheet" href="./src/ui/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>网格坐标压缩检查器</h1>
+        <p class="sub">定点量化 · 接缝分析 · 误差热图 · 导出回读</p>
+
+        <section class="block">
+          <h2>1. 输入模型</h2>
+          <label class="field-label">内置模型</label>
+          <select id="modelSelect"></select>
+          <label class="field-label">或载入小 OBJ（按 o/g 分块）</label>
+          <input type="file" id="objFile" accept=".obj,text/plain" />
+          <div id="modelInfo" class="info-line"></div>
+        </section>
+
+        <section class="block">
+          <h2>2. 量化设置</h2>
+          <label class="field-label">坐标范围</label>
+          <div class="radio-row">
+            <label><input type="radio" name="rangeMode" value="global" checked /> 整件共用范围</label>
+            <label><input type="radio" name="rangeMode" value="perChunk" /> 各块单独算</label>
+          </div>
+          <div class="slider-grid" id="bitSliders">
+            <div class="slider-row">
+              <span>X 位数</span>
+              <input type="range" id="bitsX" min="2" max="24" step="1" value="8" />
+              <b id="bitsXVal">8</b>
+            </div>
+            <div class="slider-row">
+              <span>Y 位数</span>
+              <input type="range" id="bitsY" min="2" max="24" step="1" value="8" />
+              <b id="bitsYVal">8</b>
+            </div>
+            <div class="slider-row">
+              <span>Z 位数</span>
+              <input type="range" id="bitsZ" min="2" max="24" step="1" value="8" />
+              <b id="bitsZVal">8</b>
+            </div>
+          </div>
+          <div class="preset-row">
+            <button data-preset="4">4 bit</button>
+            <button data-preset="6">6 bit</button>
+            <button data-preset="8">8 bit</button>
+            <button data-preset="12">12 bit</button>
+            <button data-preset="16">16 bit</button>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>3. 显示</h2>
+          <div class="slider-row">
+            <span>误差放大</span>
+            <input type="range" id="exag" min="1" max="200" step="1" value="1" />
+            <b id="exagVal">1×</b>
+          </div>
+          <div class="check-row">
+            <label><input type="checkbox" id="wireframe" /> 线框</label>
+            <label><input type="checkbox" id="seamLines" checked /> 接缝线</label>
+            <label><input type="checkbox" id="dupMarkers" checked /> 重复顶点</label>
+          </div>
+          <div class="radio-row">
+            <label><input type="radio" name="heatScale" value="log" checked /> 对数热图</label>
+            <label><input type="radio" name="heatScale" value="linear" /> 线性热图</label>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>4. 导出 / 回读</h2>
+          <button id="exportBtn" class="primary">导出压缩结果 (.mqid.json)</button>
+          <label class="field-label">回读校验（可选源模型自动全量比对）</label>
+          <input type="file" id="importFile" accept=".json,application/json" />
+        </section>
+      </aside>
+
+      <main id="main">
+        <div id="viewerBar">
+          <div class="viewport-tag" style="left: 25%">原始几何</div>
+          <div class="viewport-tag" style="left: 75%">还原几何（热图 / 接缝 / 重复点）</div>
+        </div>
+        <div id="viewer"></div>
+        <canvas id="legend" width="260" height="34"></canvas>
+        <div id="pickCard" class="card hidden"></div>
+        <div id="importCard" class="card hidden"></div>
+      </main>
+
+      <aside id="stats">
+        <h2>有效精度与数据量</h2>
+        <div id="statBody"></div>
+        <h2>接缝判定</h2>
+        <div id="seamBody"></div>
+        <h2>重复顶点 / 零厚度轴</h2>
+        <div id="specialBody"></div>
+      </aside>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
