@@ -36,6 +36,7 @@ bin/
 coverage/
 .coverage
 .pytest_cache/
+.ruff_cache/
 
 # ---- 系统与IDE ----
 .DS_Store
