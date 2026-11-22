@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>点云疏密 / 投影重叠查看器</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='5' cy='5' r='2' fill='%235aa9ff'/%3E%3Ccircle cx='11' cy='6' r='1.5' fill='%23ff8000'/%3E%3Ccircle cx='7' cy='11' r='1.5' fill='%23eb4034'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <h1>点云疏密查看器</h1>
+        <p class="hint">区分<span class="tag-dense">几何面 (局部高密度)</span>与<span class="tag-overlap">投影重叠 (视线方向叠点)</span></p>
+
+        <section>
+          <h2>1 · 场景 (确定性种子, 可复现)</h2>
+          <div id="scene-picker" class="radio-grid"></div>
+          <p id="scene-desc" class="desc"></p>
+          <p class="desc">种子: <code id="scene-seed"></code> · 原始点数: <code id="raw-count"></code></p>
+        </section>
+
+        <section>
+          <h2>2 · 分层抽样</h2>
+          <label>抽样比例 <b id="ratio-val"></b>
+            <input type="range" id="ratio" min="0.05" max="1" step="0.05" value="1" />
+          </label>
+          <p class="desc">固定 12³ 空间网格内独立洗牌抽样, 改变比例时空间分布形态不变, 仅密度等比变化。当前点数: <code id="sampled-count"></code></p>
+        </section>
+
+        <section>
+          <h2>3 · 球形邻域</h2>
+          <label>邻域半径 r <b id="radius-val"></b>
+            <input type="range" id="radius" min="0.05" max="0.8" step="0.01" value="0.18" />
+          </label>
+          <p class="desc">
+            邻域体积 V = 4/3·π·r³ = <code id="sphere-vol"></code> 体积单位<br />
+            <b>密度单位: points per unit volume (ppv, 点/单位体积)</b> = 邻域点数 k ÷ V, k 含中心点自身。
+          </p>
+        </section>
+
+        <section>
+          <h2>4 · 剖切</h2>
+          <label class="row"><input type="checkbox" id="clip-enable" /> 启用剖切 (保留切面正侧)</label>
+          <div class="row">
+            法向轴
+            <select id="clip-axis">
+              <option value="0">+X</option>
+              <option value="1" selected>+Y</option>
+              <option value="2">+Z</option>
+            </select>
+            切面 <b id="clip-plane-val"></b>
+          </div>
+          <input type="range" id="clip-plane" min="-3" max="3" step="0.05" value="0" />
+          <label class="row"><input type="checkbox" id="clip-exclude" checked /> 被切掉的点<b>不参与</b>密度统计</label>
+          <p class="desc" id="clip-status"></p>
+        </section>
+
+        <section>
+          <h2>5 · 着色模式</h2>
+          <div id="color-picker" class="radio-grid"></div>
+          <div id="legend">
+            <canvas id="legend-bar" width="220" height="14"></canvas>
+            <div class="legend-labels"><span id="legend-lo"></span><span id="legend-hi"></span></div>
+          </div>
+          <p class="desc" id="legend-note"></p>
+          <button id="overlap-now">按当前相机视角分析投影重叠</button>
+          <p class="desc" id="overlap-params">
+            投影格边长 <input type="number" id="bin-size" value="0.15" step="0.05" min="0.05" />
+            深度判据 <input type="number" id="depth-gap" value="0.3" step="0.05" min="0.05" />
+          </p>
+        </section>
+
+        <section>
+          <h2>6 · 疏密分界验证 (Otsu 自动阈值 vs 真值标签)</h2>
+          <table id="validation">
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>7 · 点击查询</h2>
+          <p class="desc">点击任意点: 显示邻域大小、实际参与统计的邻点 (绿)、被剖切隐藏但仍参与的邻点 (品红), 中心为黄色。再次点击空白处取消。</p>
+          <div id="pick-info" class="pick-box">尚未选择点</div>
+        </section>
+      </aside>
+      <main id="viewport"></main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
