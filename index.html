@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="装配说明三维示意图标注：锚点跟随、标签避让、遮挡识别与稳定排布。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d141d'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23ffb257' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ffb257'/%3E%3C/svg%3E"
+    />
+    <title>装配标注 · 三维示意图</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <header class="brand">
+          <div class="eyebrow">ASSEMBLY · ANNOTATION</div>
+          <h1>装配三维标注</h1>
+          <p class="sub">锚点跟随 · 标签避让 · 遮挡识别 · 稳定排布</p>
+        </header>
+
+        <section class="card">
+          <h2>视角与机构</h2>
+          <div class="btn-row" id="view-buttons">
+            <button type="button" data-view="front" class="btn active">正面</button>
+            <button type="button" data-view="back" class="btn">背面</button>
+            <button type="button" data-view="side" class="btn">侧面</button>
+            <button type="button" data-view="crowd" class="btn accent">拥挤角落验收</button>
+          </div>
+          <label class="range-row" for="arm-range">
+            <span>摆臂角度</span>
+            <input id="arm-range" type="range" min="-28" max="32" step="1" value="0" />
+            <output id="arm-value">0°</output>
+          </label>
+          <label class="switch-row">
+            <input id="auto-swing" type="checkbox" />
+            <span>自动缓慢摆动（验证锚点随父部件移动）</span>
+          </label>
+          <label class="switch-row">
+            <input id="narrow-mode" type="checkbox" />
+            <span>窄窗模拟（三维视口压到 360px）</span>
+          </label>
+        </section>
+
+        <section class="card">
+          <h2>显示规则</h2>
+          <label class="switch-row">
+            <input id="show-occluded" type="checkbox" checked />
+            <span>显示被遮挡的标注（虚线样式）</span>
+          </label>
+          <div class="legend">
+            <span class="legend-item"><i class="swatch solid"></i>可见标注</span>
+            <span class="legend-item"><i class="swatch dashed"></i>被挡标注</span>
+            <span class="legend-item"><i class="swatch locked"></i>已锁定</span>
+          </div>
+        </section>
+
+        <details class="card" open>
+          <summary><h2>零件 <span id="part-count" class="count">0</span></h2></summary>
+          <p class="card-hint">取消勾选可隐藏零件；隐藏后其标注按同一套规则重排。</p>
+          <div id="part-list" class="list"></div>
+        </details>
+
+        <details class="card" open>
+          <summary><h2>标注 <span id="anchor-count" class="count">0</span></h2></summary>
+          <p class="card-hint">优先级 1–5，数值越大越先保留；锁定项永远优先于普通项。</p>
+          <div id="anchor-list" class="list anchor-list"></div>
+        </details>
+
+        <details class="card" open>
+          <summary><h2>已收起 <span id="hidden-count" class="count">0</span></h2></summary>
+          <p class="card-hint">空间不足时优先收起低优先级标注，原因如下。</p>
+          <div id="hidden-list" class="list hidden-list">
+            <p class="empty">暂无收起的标注</p>
+          </div>
+        </details>
+
+        <footer class="sidebar-footer">
+          拖拽旋转 · 滚轮缩放 · 右键平移 · 点击标签定位零件
+        </footer>
+      </aside>
+
+      <main id="stage">
+        <div id="viewport">
+          <svg id="leaders" aria-hidden="true"></svg>
+          <div id="labels"></div>
+          <div class="hud">
+            <div class="hud-row">
+              <span id="hud-stats" class="hud-pill">准备中</span>
+              <span id="hud-selected" class="hud-selected">未选中零件</span>
+            </div>
+            <div class="hud-tip" id="hud-tip">慢速旋转时标签保持稳定；切换视角会重新选位。</div>
+          </div>
+          <div id="stage-empty" class="stage-empty" hidden></div>
+        </div>
+      </main>
+
+      <button id="sidebar-toggle" type="button" class="sidebar-toggle" aria-label="收起/展开面板">☰</button>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

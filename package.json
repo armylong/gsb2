@@ -1,0 +1,29 @@
+{
+  "name": "assembly-labeler",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "装配说明三维示意图标注 — TypeScript + Three.js 本地网页",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "verify": "vitest run && npm run build",
+    "smoke": "node tests/smoke.mjs",
+    "check:browser": "node tests/browser-check.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "0.187.0",
+    "playwright-core": "^1.65.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.8",
+    "vitest": "5.1.1"
+  }
+}

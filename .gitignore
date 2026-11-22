@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 本场景运行期产物 ----
+# 自动化验收截图的默认输出目录（实际写到 /tmp，这里防御性忽略）
+assembly-shots/
+smoke-out/
