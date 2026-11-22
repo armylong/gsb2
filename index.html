@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>细斜线多帧合成 · 闪烁 / 拖影实验台</title>
+  </head>
+  <body>
+    <main class="app">
+      <section class="stage">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="gl"></canvas>
+          <div class="vp-label" id="lbl0">直接绘制（无历史）</div>
+          <div class="vp-label" id="lbl1">当前 + 历史合成</div>
+          <div class="vp-label" id="lbl2">历史沿用图</div>
+          <div class="hint">在画面上按住拖动可平移镜头（会清空历史缓存）</div>
+        </div>
+        <div class="legend">
+          <span><i class="sw" style="background:#1ab39e"></i>青色调 = 沿用历史（饱和度即历史占比）</span>
+          <span><i class="sw" style="background:#d95926"></i>橙色调 = 本帧新画面（遮挡揭开 / 换视角 / 出界）</span>
+          <span><i class="sw" style="background:#ffd626"></i>黄框 = 测量区 ROI；明度 = 当前画面亮度</span>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h1>多帧抑闪 / 拖影实验台</h1>
+
+        <section class="group">
+          <h2>播放控制</h2>
+          <div class="row">
+            <button id="play">暂停</button>
+            <button id="step">单步 ▸</button>
+            <button id="resetView">重置视角</button>
+          </div>
+          <div class="row">
+            <button id="jump">镜头瞬移 +180px</button>
+            <button id="fgToggle">前景 开/关</button>
+          </div>
+          <div class="row small">
+            <label>速度
+              <input type="range" id="speed" min="0" max="3" step="0.1" value="1" />
+              <span id="speedVal">1.0×</span>
+            </label>
+          </div>
+          <div class="row small">
+            <label>帧号 <span id="frameNo">0</span></label>
+          </div>
+        </section>
+
+        <section class="group">
+          <h2>混合权重（可独立调整）</h2>
+          <label class="slider">
+            当前画面权重
+            <input type="range" id="curW" min="0" max="1" step="0.01" value="0.35" />
+            <span id="curWVal">0.35</span>
+          </label>
+          <label class="slider">
+            历史画面权重
+            <input type="range" id="histW" min="0" max="1" step="0.01" value="0.65" />
+            <span id="histWVal">0.65</span>
+          </label>
+          <p class="note">每帧按 (cur·当前 + hist·历史) 归一化；某像素历史失效时只用当前。</p>
+        </section>
+
+        <section class="group">
+          <h2>内置片段（同运动重复比较）</h2>
+          <div class="row wrap" id="clipBtns"></div>
+          <p class="note" id="clipDesc"></p>
+          <label class="slider">
+            重复次数
+            <input type="range" id="repeats" min="1" max="10" step="1" value="4" />
+            <span id="repeatsVal">4</span>
+          </label>
+          <div class="row">
+            <button id="runTrial" class="primary">运行测量</button>
+            <button id="stopTrial">停止</button>
+          </div>
+          <p class="note" id="trialStatus">未运行</p>
+        </section>
+
+        <section class="group">
+          <h2>ROI 实时读数</h2>
+          <table class="readout">
+            <tbody>
+              <tr><td>平均 |Δ亮度|（0–255）</td><td id="liveMean">–</td></tr>
+              <tr><td>最大 |Δ亮度|</td><td id="liveMax">–</td></tr>
+              <tr><td>历史沿用比例</td><td id="liveReuse">–</td></tr>
+            </tbody>
+          </table>
+          <canvas id="chart" class="chart"></canvas>
+        </section>
+
+        <section class="group">
+          <h2>片段汇总</h2>
+          <table class="readout summary">
+            <thead>
+              <tr>
+                <th>片段</th><th>闪动幅度</th><th>峰值</th><th>历史沿用</th><th>恢复帧数</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody">
+              <tr><td colspan="5" class="muted">运行测量后填入</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
