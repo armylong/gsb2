@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纸片滑翔手感试验场</title>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>纸片滑翔 · 侧视试验场</h1>
+        <p class="sub">验证上升气流托举、迎风/顺风的空速地速差异、失速滞回与高速扫掠碰撞。物理固定步长 100Hz，与绘制帧率解耦。</p>
+      </header>
+
+      <div class="layout">
+        <div class="stage-wrap">
+          <canvas id="stage"></canvas>
+          <div class="legend">
+            <span><i style="background:#06d6a0"></i>地速（相对地面）</span>
+            <span><i style="background:#ffd166"></i>空速（相对空气）</span>
+            <span><i style="background:#9db4d4"></i>采样风向</span>
+            <span><i style="background:#ef476f"></i>失速段/失速状态</span>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <section>
+            <h2>运行控制</h2>
+            <label class="param full">
+              <span>固定操控样例</span>
+              <select id="scenario"></select>
+            </label>
+            <div class="btn-row">
+              <button id="btn-play">播放</button>
+              <button id="btn-reset">复位</button>
+              <button id="btn-rerun">同参数重跑+叠加轨迹</button>
+              <button id="btn-clear-overlay">清除叠加</button>
+            </div>
+            <label class="param full">
+              <span>绘制帧率（仅影响渲染）</span>
+              <select id="fps">
+                <option value="24">24 FPS</option>
+                <option value="30">30 FPS</option>
+                <option value="60" selected>60 FPS</option>
+                <option value="120">120 FPS</option>
+                <option value="144">144 FPS</option>
+              </select>
+            </label>
+            <div id="fps-readout" class="hint">60 FPS（物理固定 0.01s/步）</div>
+            <label class="param full">
+              <span>仿真倍速</span>
+              <select id="speed">
+                <option value="0.25">0.25×</option>
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+              </select>
+            </label>
+            <div class="check-row">
+              <label><input type="checkbox" id="show-wind" checked /> 采样风向箭头</label>
+              <label><input type="checkbox" id="show-trail" checked /> 飞行轨迹</label>
+              <label><input type="checkbox" id="show-vectors" checked /> 空速/地速矢量</label>
+            </div>
+          </section>
+
+          <section>
+            <h2>仿真参数（改后复位/重跑生效）</h2>
+            <div id="sim-params" class="grid2"></div>
+          </section>
+
+          <section>
+            <h2>风场参数（边缘渐变可配）</h2>
+            <div id="wind-params" class="grid2"></div>
+          </section>
+
+          <section>
+            <h2>叠加轨迹</h2>
+            <div id="overlay-list" class="overlay-list"></div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="log-panel">
+        <h2>事件日志（含转换时间与读数）</h2>
+        <div id="log"></div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
