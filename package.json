@@ -1,0 +1,20 @@
+{
+  "name": "flip-cover-explode-editor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "可翻盖三维仪表的爆炸图本地编辑器 (three.js + TypeScript)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.3.8"
+  }
+}

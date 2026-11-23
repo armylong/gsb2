@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231565c0'/%3E%3Cpath d='M3 9l3 3 7-7' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E"
+    />
+    <title>翻盖三维仪表 · 爆炸图编辑器</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="title">
+          <strong>翻盖三维仪表 · 爆炸图编辑器</strong>
+          <span class="subtitle">零件由代码生成 · 两段式展开 · 干涉检查</span>
+        </div>
+        <div class="topbar-actions">
+          <button id="btn-preset-valid" class="btn">载入合法顺序</button>
+          <button id="btn-preset-conflict" class="btn btn-warn">载入冲突示例</button>
+          <button id="btn-export" class="btn">导出 JSON</button>
+          <button id="btn-import" class="btn">导入 JSON</button>
+          <input id="file-import" type="file" accept="application/json,.json" hidden />
+          <button id="btn-reset-session" class="btn btn-ghost">清除存档</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="viewport" id="viewport">
+          <div class="hud" id="hud">
+            <div class="hud-row">
+              <span class="badge" id="badge-phase">第 1 段</span>
+              <span id="active-parts" class="active-parts">拖动进度条开始展开</span>
+            </div>
+            <div class="hud-row" id="live-warning" hidden>
+              <span class="badge badge-danger" id="live-warning-text"></span>
+            </div>
+          </div>
+          <div class="viewport-hint">左键旋转 · 右键平移 · 滚轮缩放 · 点击零件选中</div>
+        </section>
+
+        <aside class="panel" id="panel">
+          <section class="card">
+            <h3>装配层级</h3>
+            <div id="tree" class="tree"></div>
+          </section>
+
+          <section class="card" id="editor-card">
+            <h3>零件展开参数</h3>
+            <div id="part-editor">
+              <p class="muted">在左侧模型或树中选择一个零件</p>
+            </div>
+          </section>
+
+          <section class="card">
+            <h3>翻盖预览(仅合装状态)</h3>
+            <label class="field">
+              开盖角度 <span id="lid-value">0°</span>
+              <input type="range" id="lid-angle" min="0" max="110" step="1" value="0" />
+            </label>
+          </section>
+
+          <section class="card" id="collision-card">
+            <h3>干涉检查</h3>
+            <div id="collision-list"></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="timeline-bar">
+        <div class="timeline-head">
+          <div class="phase-label phase-0">第 1 段 · 拆铰链 / 提盖板</div>
+          <div class="phase-label phase-1">第 2 段 · 拆紧固件 / 取支架</div>
+        </div>
+        <div class="timeline" id="timeline"></div>
+        <div class="progress-row">
+          <button id="btn-play" class="btn btn-primary">播放</button>
+          <button id="btn-assemble" class="btn">回到合装</button>
+          <button id="btn-explode" class="btn">完全展开</button>
+          <input type="range" id="progress" min="0" max="1000" step="1" value="0" />
+          <span id="progress-value" class="progress-value">0%</span>
+          <button id="btn-camera" class="btn btn-ghost">重置视角</button>
+        </div>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
