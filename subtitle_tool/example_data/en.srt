@@ -1,0 +1,27 @@
+1
+00:00:00,500 --> 00:00:03,200
+We need to move before the storm hits.
+
+2
+00:00:03,400 --> 00:00:07,000
+The bridge is out, so take the north road.
+
+3
+00:00:07,200 --> 00:00:10,400
+And don't stop for anything.
+
+4
+00:00:12,000 --> 00:00:15,800
+I'll signal you when the gate opens.
+
+5
+00:00:16,000 --> 00:00:19,600
+If the lights go out, keep going.
+
+6
+00:00:20,000 --> 00:00:22,500
+Keep going, no matter what.
+
+7
+00:00:23,000 --> 00:00:26,500
+We'll meet at the old mill.
