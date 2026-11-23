@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>九宫格切片预览</title>
+<style>
+  :root { --line: #d0d4dc; --bg: #f4f5f7; --panel: #ffffff; --ink: #24292f; --dim: #6a737d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); }
+  header { padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  h1 { font-size: 16px; margin: 0 0 8px; }
+  h2 { font-size: 13px; margin: 0 0 6px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-bottom: 6px; }
+  .row:last-child { margin-bottom: 0; }
+  label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  select, input[type="number"], button { font: inherit; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+  input[type="number"] { width: 64px; }
+  button { cursor: pointer; }
+  button:hover { background: #eef1f5; }
+  .tip { margin: 6px 0 0; color: var(--dim); }
+  main { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 260px; gap: 12px; padding: 12px 16px; align-items: start; }
+  section, aside { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; }
+  .hint { font-weight: normal; color: var(--dim); font-size: 12px; }
+  .canvasWrap { overflow: auto; max-height: 62vh; border: 1px dashed var(--line); border-radius: 4px; }
+  canvas { display: block; }
+  #srcView, #dstView { cursor: crosshair; }
+  .info { margin-top: 6px; color: var(--dim); font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  aside label { display: flex; margin-bottom: 6px; }
+  aside button { margin: 0 6px 6px 0; }
+  #mag { border: 1px solid var(--line); image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<header>
+  <h1>九宫格切片预览</h1>
+  <div class="row">
+    <label>内置图
+      <select id="texSel">
+        <option value="narrow">窄边花纹(测窄边)</option>
+        <option value="rounded">半透明圆角(测透明边缘)</option>
+      </select>
+    </label>
+    <label>打开 PNG <input type="file" id="fileInput" accept="image/png,image/*"></label>
+    <label><input type="checkbox" id="chkRegions" checked> 显示分块对应</label>
+    <label><input type="checkbox" id="chkChecker" checked> 棋盘背景</label>
+    <label><input type="checkbox" id="chkSmooth" checked> 拉伸平滑</label>
+  </div>
+  <div class="row">
+    <label>上下边
+      <select id="modeH"><option value="stretch">拉伸</option><option value="tile">平铺</option></select>
+    </label>
+    <label>左右边
+      <select id="modeV"><option value="stretch">拉伸</option><option value="tile">平铺</option></select>
+    </label>
+    <label>中间
+      <select id="modeC"><option value="stretch">拉伸</option><option value="tile">平铺</option></select>
+    </label>
+    <label>源图缩放 <input id="srcZoom" type="number" value="3" min="0.5" max="16" step="0.5"></label>
+    <label>成品缩放 <input id="dstZoom" type="number" value="3" min="0.5" max="16" step="0.5"></label>
+  </div>
+  <p class="tip">提示:角上花纹被拉长,通常是因为分割线把花纹切进了可拉伸区。把线拖到花纹外侧,花纹就会留在四角保持原尺寸。</p>
+</header>
+<main>
+  <section>
+    <h2>源图 <span class="hint">拖动四条分割线(左/右/上/下)</span></h2>
+    <div class="canvasWrap"><canvas id="srcView"></canvas></div>
+    <div class="info" id="srcInfo"></div>
+  </section>
+  <section>
+    <h2>成品 <span class="hint">拖动右缘/下缘/右下角改尺寸</span></h2>
+    <div class="canvasWrap"><canvas id="dstView"></canvas></div>
+    <div class="info" id="dstInfo"></div>
+  </section>
+  <aside>
+    <h2>像素查看</h2>
+    <canvas id="mag" width="225" height="225"></canvas>
+    <div class="info" id="magInfo">把鼠标移到源图或成品上</div>
+    <h2 style="margin-top:10px">导出 PNG</h2>
+    <label>宽 <input id="expW" type="number" min="1" max="8192"></label>
+    <label>高 <input id="expH" type="number" min="1" max="8192"></label>
+    <div>
+      <button id="btnReadSize">读取当前尺寸</button>
+      <button id="btnApplySize">按导出尺寸预览</button>
+      <button id="btnExport">导出透明 PNG</button>
+    </div>
+    <div class="info">预览是 1:1 渲染后无平滑放大的结果,与导出文件逐像素一致。</div>
+  </aside>
+</main>
+<script type="module" src="dist/main.js"></script>
+</body>
+</html>

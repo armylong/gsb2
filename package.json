@@ -1,0 +1,14 @@
+{
+  "name": "nineslice-preview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "九宫格切片预览工具:拖动分割线、拉伸/平铺、像素查看、导出透明 PNG",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
