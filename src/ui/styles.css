@@ -1,0 +1,282 @@
+:root {
+  color-scheme: dark;
+  --bg: #0c0f16;
+  --panel: #171c28;
+  --panel2: #1e2534;
+  --line: #2b3346;
+  --text: #d7dcea;
+  --dim: #8590a6;
+  --accent: #7aa2ff;
+  --perfect: #8ef0c2;
+  --good: #ffd48a;
+  --miss: #ff7a7a;
+  --ignored: #8a909e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, 'PingFang SC', 'Segoe UI', sans-serif;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  gap: 12px;
+  padding: 12px;
+  height: 100vh;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.panel h2 {
+  font-size: 13px;
+  margin: 14px 0 6px;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.panel h2:first-child {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 6px 0 2px;
+  color: var(--dim);
+}
+
+input[type='number'],
+input[type='text'],
+select,
+textarea {
+  width: 100%;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font: inherit;
+}
+
+textarea {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+input[type='range'] {
+  width: 100%;
+}
+
+button {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font: inherit;
+}
+button:hover {
+  border-color: var(--accent);
+}
+button.primary {
+  background: #2c3f66;
+  border-color: #3d568c;
+}
+button.warn {
+  border-color: #6e3b3b;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 4px 0;
+}
+.row > * {
+  flex: 1;
+}
+.row .fix {
+  flex: 0 0 auto;
+}
+
+.inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.inline input[type='checkbox'] {
+  flex: 0 0 auto;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 10px;
+}
+
+#stage {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  display: block;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.hud .card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.hud .k {
+  color: var(--dim);
+  font-size: 11px;
+}
+.hud .v {
+  font-size: 20px;
+  font-family: ui-monospace, monospace;
+}
+
+#deltaLine {
+  font-family: ui-monospace, monospace;
+  min-height: 20px;
+  color: var(--dim);
+}
+#deltaLine .early {
+  color: var(--good);
+}
+#deltaLine .late {
+  color: var(--accent);
+}
+#deltaLine .edge {
+  color: var(--perfect);
+}
+
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+}
+.badge.perfect {
+  background: rgba(142, 240, 194, 0.15);
+  color: var(--perfect);
+}
+.badge.good {
+  background: rgba(255, 212, 138, 0.15);
+  color: var(--good);
+}
+.badge.miss {
+  background: rgba(255, 122, 122, 0.15);
+  color: var(--miss);
+}
+.badge.ignored {
+  background: rgba(138, 144, 158, 0.15);
+  color: var(--ignored);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+}
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 3px 4px;
+  text-align: left;
+  white-space: nowrap;
+}
+th {
+  color: var(--dim);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+}
+tr.expandable {
+  cursor: pointer;
+}
+tr.detail td {
+  background: var(--panel2);
+  color: var(--dim);
+  white-space: normal;
+}
+
+#selftest {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  background: var(--panel2);
+  border-radius: 6px;
+  padding: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+#selftest.ok {
+  border: 1px solid rgba(142, 240, 194, 0.4);
+}
+#selftest.fail {
+  border: 1px solid rgba(255, 122, 122, 0.5);
+}
+
+.help {
+  font-size: 11px;
+  color: var(--dim);
+}
+.help code {
+  color: var(--accent);
+}
+
+#pauseOverlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 16, 0.6);
+  border-radius: 10px;
+  pointer-events: none;
+  font-size: 28px;
+  letter-spacing: 0.3em;
+  color: var(--text);
+}
+#pauseOverlay.show {
+  display: flex;
+}
+
+.pill {
+  font-family: ui-monospace, monospace;
+  color: var(--dim);
+  font-size: 11px;
+}
