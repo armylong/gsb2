@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='24' height='18' rx='2' fill='%23123' stroke='%234fc3f7' stroke-width='2'/%3E%3Cpath d='M4 16h24' stroke='%237fd4ff' stroke-width='2'/%3E%3C/svg%3E" />
+    <title>玻璃水槽折射检查台 · Refraction Inspector</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="gl"></canvas>
+
+      <header id="topbar">
+        <h1>玻璃水槽 · 折射位置检查台</h1>
+        <div id="gl-badge" class="badge">WebGL 检测中…</div>
+      </header>
+
+      <aside id="panel-left" class="panel">
+        <section>
+          <h2>① 折射率参数</h2>
+          <label class="slider-row">
+            <span>空气 n<sub>air</sub></span>
+            <input type="range" id="ior-air" min="1.00" max="1.20" step="0.001" value="1.000" />
+            <b id="ior-air-val">1.000</b>
+          </label>
+          <label class="slider-row">
+            <span>玻璃 n<sub>glass</sub></span>
+            <input type="range" id="ior-glass" min="1.00" max="2.00" step="0.005" value="1.500" />
+            <b id="ior-glass-val">1.500</b>
+          </label>
+          <label class="slider-row">
+            <span>水 n<sub>water</sub></span>
+            <input type="range" id="ior-water" min="1.00" max="1.80" step="0.005" value="1.333" />
+            <b id="ior-water-val">1.333</b>
+          </label>
+          <div class="btn-grid">
+            <button id="preset-real">真实玻璃/水</button>
+            <button id="preset-equal-all">全部 n=1（基线）</button>
+            <button id="preset-equal-wg">水=玻璃=1.45</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>② 固定样例（同一套刻度核对）</h2>
+          <div class="btn-grid">
+            <button id="sample-front">正视样例</button>
+            <button id="sample-oblique">斜视样例</button>
+          </div>
+          <label class="check-row">
+            <input type="checkbox" id="compare-baseline" checked />
+            叠加 n=1 直线路径（等折射率基线）
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="show-camera-ray" checked />
+            显示相机到点击点的原始视线
+          </label>
+        </section>
+
+        <section>
+          <h2>③ 侧向全反射扫查</h2>
+          <p class="hint">相机绕水槽水平旋转，观察侧窗入射后在<b>后玻璃→空气</b>界面由折射变为全反射。</p>
+          <div class="btn-grid">
+            <button id="sweep-start">开始侧扫</button>
+            <button id="sweep-pause">暂停</button>
+            <button id="sweep-tir">跳到 TIR 临界点</button>
+          </div>
+          <label class="slider-row">
+            <span>方位角 φ</span>
+            <input type="range" id="sweep-angle" min="34" max="76" step="0.1" value="34" disabled />
+            <b id="sweep-angle-val">34.0°</b>
+          </label>
+          <label class="slider-row">
+            <span>相机高度 y</span>
+            <input type="range" id="sweep-height" min="2" max="30" step="0.5" value="12" />
+            <b id="sweep-height-val">12 cm</b>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="compare-swing" />
+            暂停时叠加 ±1.5° 两条路径对比
+          </label>
+        </section>
+
+        <section>
+          <h2>④ 显示</h2>
+          <label class="check-row"><input type="checkbox" id="toggle-grid" checked /> 刻度标尺</label>
+          <label class="check-row"><input type="checkbox" id="toggle-blocks" checked /> 水中方块</label>
+          <label class="check-row"><input type="checkbox" id="toggle-frame" checked /> 不透明槽框</label>
+        </section>
+      </aside>
+
+      <aside id="panel-right" class="panel">
+        <section>
+          <h2>追踪结果</h2>
+          <div id="result-status" class="status">等待点选画面…</div>
+          <div id="result-readout"></div>
+          <div id="result-events"></div>
+          <div id="result-explain"></div>
+        </section>
+      </aside>
+
+      <footer id="bottombar">
+        <span>拖拽旋转 · 滚轮缩放 · <b>点击画面</b>追踪该视线经过的全部介质边界 · 单位 cm</span>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

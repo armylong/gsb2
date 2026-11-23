@@ -1,0 +1,24 @@
+{
+  "name": "tank-refraction-inspector",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "玻璃水槽折射 / 全反射光线追踪检查页面",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "probe": "vite-node scripts/probe.ts"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.170.0",
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vite-node": "^2.1.8"
+  }
+}
