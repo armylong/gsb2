@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>开口纸罩加厚检查 · 凹角穿插定位</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%230e141d%27/%3E%3Cpath d=%27M6 22 L16 8 L26 22 Z%27 fill=%27none%27 stroke=%27%235ec8ff%27 stroke-width=%272%27/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <h1>开口纸罩加厚检查</h1>
+            <p>凹转角处的偏移面反折 / 穿插定位 · 程序生成曲面片 · 小三角网格</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span id="source-hash" class="pill" title="源网格指纹, 用于证明原始网格未被改动">源网格 —</span>
+          <span id="build-time" class="pill">构建 —</span>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="stage">
+          <div id="viewport" class="viewport" aria-label="三维检查视图"></div>
+          <div class="viewport-overlay">
+            <div class="legend">
+              <span><i class="swatch" style="background:#5a6b80"></i>原始层</span>
+              <span><i class="swatch" style="background:#d8e3ef"></i>偏移层</span>
+              <span><i class="swatch" style="background:#4fc3a1"></i>正常侧壁</span>
+              <span><i class="swatch" style="background:#f2545f"></i>问题侧壁</span>
+              <span><i class="swatch" style="background:#ffd166"></i>选中的原始边</span>
+            </div>
+            <div id="pick-hint" class="pick-hint">点击侧壁可查看它对应原始网格的哪条边</div>
+            <div id="view-status" class="view-status" role="status"></div>
+          </div>
+        </section>
+
+        <aside class="panel" id="panel">
+          <section class="card" data-step="1">
+            <h2><b>1</b> 曲面片与加厚</h2>
+            <div class="field">
+              <label>曲面片</label>
+              <div class="segmented" id="model-switch" role="group" aria-label="曲面片">
+                <button type="button" data-model="bowl">开口碗形片</button>
+                <button type="button" data-model="flap">凹角折片</button>
+              </div>
+              <p id="model-subtitle" class="hint"></p>
+            </div>
+            <div class="field">
+              <label for="thickness">加厚量 t <output id="thickness-value">0.055</output></label>
+              <input id="thickness" type="range" min="0" max="0.75" step="0.005" value="0.055" />
+              <div class="preset-buttons" id="preset-buttons"></div>
+            </div>
+            <div class="field">
+              <label>加厚方向</label>
+              <div class="segmented" id="side-switch" role="group" aria-label="加厚方向">
+                <button type="button" data-side="1">沿法线正侧 (凹侧)</button>
+                <button type="button" data-side="-1">沿法线负侧 (凸侧)</button>
+              </div>
+            </div>
+            <ul id="model-notes" class="notes"></ul>
+          </section>
+
+          <section class="card" data-step="2">
+            <h2><b>2</b> 侧壁与原始边</h2>
+            <p class="hint">侧壁由每条边界有向边生成。点选侧壁三角形, 可反查它对应的原始边、源三角形和两端点。</p>
+            <div id="wall-trace" class="trace-box">
+              <p class="empty">尚未选中侧壁</p>
+            </div>
+            <div class="field compact">
+              <label class="check"><input type="checkbox" id="show-problem-only" /> 只显示问题侧壁</label>
+              <label class="check"><input type="checkbox" id="show-side-walls" checked /> 显示侧壁</label>
+              <label class="check"><input type="checkbox" id="show-source-overlay" /> 叠图原始网格</label>
+              <label class="check"><input type="checkbox" id="show-problem-points" checked /> 标记反折/穿插点</label>
+            </div>
+            <div class="field">
+              <label for="explode">侧壁外移 <output id="explode-value">0</output></label>
+              <input id="explode" type="range" min="0" max="0.35" step="0.01" value="0" />
+            </div>
+          </section>
+
+          <section class="card" data-step="3">
+            <h2><b>3</b> 局部区域检查</h2>
+            <p class="hint">在视图中点击曲面选中种子三角形, 再向外生长若干圈, 检查该区域的厚度与法线。</p>
+            <div class="field compact">
+              <label class="check"><input type="checkbox" id="region-pick-mode" /> 点击曲面选择区域</label>
+              <label for="region-rings">生长圈数 <output id="region-rings-value">3</output></label>
+              <input id="region-rings" type="range" min="0" max="10" step="1" value="3" />
+            </div>
+            <div class="preset-buttons">
+              <button type="button" id="region-clear" class="ghost">清除区域</button>
+              <button type="button" id="region-high-risk" class="ghost">选最危险区域</button>
+            </div>
+            <div id="region-report" class="report-box">
+              <p class="empty">尚未选择区域</p>
+            </div>
+            <div class="field compact">
+              <label class="check"><input type="checkbox" id="show-region" checked /> 高亮选区与实测间隙</label>
+            </div>
+          </section>
+
+          <section class="card" data-step="4">
+            <h2><b>4</b> 反折 / 穿插定位</h2>
+            <div id="validation-summary" class="validation-summary"></div>
+            <div class="metric-grid" id="metric-grid"></div>
+            <div id="issue-list" class="issue-list"></div>
+          </section>
+
+          <section class="card" data-step="5">
+            <h2><b>5</b> 导出与读回</h2>
+            <div class="preset-buttons">
+              <button type="button" id="export-obj" class="primary">导出 OBJ</button>
+              <button type="button" id="readback-obj" class="ghost">读回并复核</button>
+              <label class="file-button">从文件读回<input type="file" id="obj-file" accept=".obj,text/plain" hidden /></label>
+            </div>
+            <p class="hint">导出时会带上分组 (原始层 / 偏移层 / 各条侧壁)。读回复核会重新检查闭合性、流形性与自相交。</p>
+            <label class="check"><input type="checkbox" id="compare-mode" checked /> 读回后单独显示读回几何 (隐藏主体)</label>
+            <div id="obj-report" class="report-box">
+              <p class="empty">尚未读回</p>
+            </div>
+            <p class="hint">内置验证参数: 一组边界闭合 (有效) 与一组凹角过厚 (无效)。</p>
+            <div class="preset-buttons">
+              <button type="button" id="run-presets" class="ghost">运行内置验证参数</button>
+            </div>
+            <div id="preset-report" class="report-box" style="margin-top: 8px">
+              <p class="empty">尚未运行</p>
+            </div>
+          </section>
+
+          <section class="card" data-step="6">
+            <h2><b>6</b> 源网格回归</h2>
+            <p class="hint">把厚度调到 0 再调回来, 验证源网格与初始实体都没有被改动。</p>
+            <button type="button" id="run-regression" class="ghost">运行厚度归零回归</button>
+            <div id="regression-report" class="report-box">
+              <p class="empty">尚未运行</p>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

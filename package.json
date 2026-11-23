@@ -1,0 +1,25 @@
+{
+  "name": "paper-cover-thickening-inspector",
+  "version": "1.0.0",
+  "description": "开口纸罩加厚与凹角自相交检查页 (TypeScript + three.js)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "ui-check": "node scripts/ui-check.mjs"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "puppeteer-core": "^25.18.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  },
+  "type": "module",
+  "private": true
+}
