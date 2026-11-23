@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# tsc -b 临时产物
+*.tsbuildinfo
