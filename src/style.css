@@ -1,0 +1,269 @@
+:root {
+  --bg: #16181d;
+  --panel: #1f232b;
+  --panel-2: #262b35;
+  --border: #333a47;
+  --text: #d8dde7;
+  --muted: #8b93a3;
+  --accent: #5b9dff;
+  --warn: #ffb454;
+  --danger: #ff6b6b;
+  --green: #7ee0a0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  height: 100vh;
+}
+
+#viewports {
+  position: relative;
+  min-width: 0;
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vp-label {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.vp-label.right {
+  left: 50%;
+}
+
+.tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.tag-live {
+  background: rgba(91, 157, 255, 0.2);
+  color: #9cc1ff;
+  border: 1px solid rgba(91, 157, 255, 0.45);
+}
+
+.tag-bake {
+  background: rgba(126, 224, 160, 0.16);
+  color: var(--green);
+  border: 1px solid rgba(126, 224, 160, 0.4);
+}
+
+.vp-sub {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.stale-banner {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 180, 84, 0.16);
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  padding: 8px 16px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.hidden {
+  display: none;
+}
+
+#panel {
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  padding: 14px 16px;
+  overflow-y: auto;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+
+section {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin: 7px 0;
+  color: var(--text);
+}
+
+label.inline {
+  flex: 1;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+input[type='range'] {
+  width: 100%;
+  vertical-align: middle;
+}
+
+input[type='number'],
+select {
+  width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 5px 7px;
+  margin-top: 3px;
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--warn);
+  min-height: 14px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 6px;
+}
+
+button {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0c1424;
+  font-weight: 600;
+}
+
+.bake-message {
+  font-size: 12px;
+  min-height: 18px;
+  color: var(--warn);
+}
+
+.atlas-wrap {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+#atlas-canvas {
+  width: 200px;
+  height: 200px;
+  background: #000;
+  border: 1px solid var(--border);
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+#zoom-canvas {
+  width: 120px;
+  height: 120px;
+  background: #000;
+  border: 1px solid var(--border);
+  image-rendering: pixelated;
+}
+
+.atlas-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.atlas-row canvas {
+  border: 1px solid var(--border);
+  image-rendering: pixelated;
+  background: #000;
+}
+
+pre#stats {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  white-space: pre-wrap;
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+}
+
+footer {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+code {
+  background: var(--panel-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}

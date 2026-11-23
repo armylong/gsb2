@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>固定照明贴图烘焙演示 · Three.js</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <main id="viewports">
+        <div class="viewport" id="viewport-realtime">
+          <canvas id="canvas"></canvas>
+          <div class="vp-label">
+            <span class="tag tag-live">实时光照</span>
+            <span class="vp-sub">点光源实时阴影（参考）</span>
+          </div>
+          <div class="vp-label right">
+            <span class="tag tag-bake">烘焙纹理</span>
+            <span class="vp-sub">射线遮挡逐纹素烘焙</span>
+          </div>
+          <div id="stale-banner" class="stale-banner hidden">
+            ⚠ 当前贴图已过期：设置已变更，点击「重新烘焙」更新
+          </div>
+        </div>
+      </main>
+
+      <aside id="panel">
+        <h1>光照烘焙演示</h1>
+
+        <section>
+          <h2>点光源（可移动）</h2>
+          <label>X <input type="range" id="light-x" min="0.4" max="3.6" step="0.05" /></label>
+          <label>Y <input type="range" id="light-y" min="0.4" max="2.9" step="0.05" /></label>
+          <label>Z <input type="range" id="light-z" min="0.4" max="3.6" step="0.05" /></label>
+          <div class="row">
+            <label class="inline">强度 <input type="number" id="light-intensity" min="1" max="40" step="0.5" /></label>
+            <label class="inline">环境 <input type="number" id="light-ambient" min="0" max="0.5" step="0.01" /></label>
+          </div>
+        </section>
+
+        <section>
+          <h2>采样设置</h2>
+          <label>图集分辨率
+            <select id="atlas-size">
+              <option value="64">64 × 64</option>
+              <option value="128">128 × 128</option>
+              <option value="256" selected>256 × 256</option>
+              <option value="512">512 × 512</option>
+            </select>
+          </label>
+          <label>纹素密度（纹素/世界单位）
+            <input type="number" id="texels-per-unit" min="2" max="64" step="1" />
+          </label>
+          <label>Padding（边缘扩张边距 px）
+            <input type="number" id="padding" min="0" max="16" step="1" />
+          </label>
+          <label>扩张迭代次数
+            <input type="number" id="dilation" min="0" max="32" step="1" />
+          </label>
+          <label>阴影射线 bias
+            <input type="range" id="ray-bias" min="0.0002" max="0.02" step="0.0002" />
+          </label>
+          <div class="hint" id="bias-hint"></div>
+        </section>
+
+        <section>
+          <h2>显示</h2>
+          <label>视口模式
+            <select id="view-mode">
+              <option value="split" selected>并排：实时 / 烘焙</option>
+              <option value="realtime">仅实时光照</option>
+              <option value="baked">仅烘焙纹理</option>
+              <option value="deviation">烘焙 + 遮挡边缘偏差标记</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="show-boundary" checked /> 图集上标红阴影边界</label>
+        </section>
+
+        <div class="actions">
+          <button id="btn-bake" class="primary">重新烘焙</button>
+          <button id="btn-export">导出贴图 + 采样设置</button>
+        </div>
+        <div id="bake-message" class="bake-message"></div>
+
+        <section>
+          <h2>图集预览 <span class="sub" id="atlas-caption"></span></h2>
+          <div class="atlas-wrap">
+            <canvas id="atlas-canvas" width="280" height="280"></canvas>
+            <canvas id="zoom-canvas" width="120" height="120" title="悬停放大"></canvas>
+          </div>
+          <div class="atlas-row">
+            <div>
+              <div class="sub">当前贴图</div>
+              <canvas id="atlas-current" width="88" height="88"></canvas>
+            </div>
+            <div>
+              <div class="sub">旧贴图（过期）</div>
+              <canvas id="atlas-old" width="88" height="88"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>统计</h2>
+          <pre id="stats">尚未烘焙</pre>
+        </section>
+
+        <footer>
+          验证命令：<code>npm run verify</code>（Node 下用同一份烘焙代码重建并比对）
+        </footer>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

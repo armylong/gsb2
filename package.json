@@ -1,0 +1,25 @@
+{
+  "name": "baked-lightmap-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Three.js + TypeScript 固定照明贴图烘焙本地演示",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "tsx src/verify.ts"
+  },
+  "dependencies": {
+    "pngjs": "^7.0.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/three": "^0.170.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5"
+  }
+}
