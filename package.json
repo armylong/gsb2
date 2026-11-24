@@ -1,0 +1,16 @@
+{
+  "name": "snow-trail",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "雪地足迹推理小游戏：扫雪观察、圈选足迹、验证轨迹",
+  "scripts": {
+    "build": "tsc",
+    "dump": "tsc && node dist/tools/dump.js",
+    "serve": "node tools/serve.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.6.3"
+  }
+}

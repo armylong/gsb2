@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>雪地足迹 · 扫雪推理</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="map-pane">
+        <header class="topbar">
+          <div>
+            <h1 id="scenario-title">雪地足迹</h1>
+            <p id="scenario-desc" class="desc"></p>
+          </div>
+          <div class="clock">
+            游戏时刻 <strong id="clock">0</strong> 分
+          </div>
+        </header>
+        <div class="canvas-wrap">
+          <canvas id="map" tabindex="0"></canvas>
+        </div>
+        <div id="toast" class="toast" hidden></div>
+      </main>
+
+      <aside class="side">
+        <section class="card">
+          <h2>题面与重开</h2>
+          <label class="field">
+            题面
+            <select id="scenario-select"></select>
+          </label>
+          <label class="field">
+            种子（同种子+同时刻重开，脚印完全复现）
+            <input id="seed-input" type="text" />
+          </label>
+          <div class="btn-row">
+            <button id="btn-restart" class="primary">按当前种子重开</button>
+          </div>
+          <div class="legend">
+            <span><i class="sw normal"></i>普通积雪</span>
+            <span><i class="sw wind"></i>迎风口</span>
+            <span><i class="sw shelter"></i>避风区</span>
+            <span><i class="sw block"></i>阻挡</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>行动</h2>
+          <div class="mode-row">
+            <button id="mode-move" class="mode active">移动模式</button>
+            <button id="mode-mark" class="mode">标记模式</button>
+          </div>
+          <ul class="help">
+            <li>WASD / 方向键：移动，踩入即观察该格</li>
+            <li>空格 / F：扫雪，观察周围一圈（时间 +3 分）</li>
+            <li>T：时间快进 10 分，看新雪如何盖脚印</li>
+            <li>移动模式点相邻格也可走；标记模式点已观察格圈线索</li>
+          </ul>
+          <div class="btn-row">
+            <button id="btn-scan">扫雪（空格）</button>
+            <button id="btn-advance">快进 10 分（T）</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>观察记录</h2>
+          <div id="observation-list" class="obs-list empty">
+            还没有观察记录。踩入格子或扫雪后，看得见的足迹会列在这里。
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>推断链</h2>
+          <div id="chain-list" class="chain-list empty">空。在标记模式下按顺序点选足迹。</div>
+          <div class="btn-row wrap">
+            <button id="btn-gap">插入跳格</button>
+            <button id="btn-undo">撤销最后一条</button>
+            <button id="btn-clear-chain">清空</button>
+            <button id="btn-verify" class="primary">验证推断</button>
+          </div>
+          <div id="verify-result" class="verify"></div>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="./dist/src/ui/main.js"></script>
+  </body>
+</html>
