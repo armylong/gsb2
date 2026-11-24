@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灯影拼摆 · 剪影小谜题</title>
+<style>
+  :root {
+    --ink: #2b2620;
+    --paper: #f3ead8;
+    --panel: #efe4cd;
+    --accent: #b4642a;
+    --good: #2e7d4f;
+    --bad: #b3322c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 18px;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #241f1a; color: var(--ink);
+    display: flex; justify-content: center;
+  }
+  #app { width: 1120px; max-width: 100%; }
+  h1 { color: var(--paper); font-size: 20px; margin: 0 0 4px; font-weight: 600; }
+  h1 small { font-weight: 400; font-size: 13px; color: #b9a98c; margin-left: 8px; }
+  #puzzle-bar { display: flex; gap: 8px; margin: 10px 0; align-items: center; flex-wrap: wrap; }
+  #puzzle-bar .spacer { flex: 1; }
+  button {
+    font: inherit; font-size: 13px; cursor: pointer;
+    border: 1px solid #8a7554; background: var(--panel); color: var(--ink);
+    border-radius: 6px; padding: 5px 12px;
+  }
+  button:hover { background: #e6d7b8; }
+  button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .45; cursor: default; }
+  #puzzle-desc { color: #cbbd9f; font-size: 13px; margin: 0 0 10px; }
+  #main { display: flex; gap: 14px; align-items: flex-start; }
+  .stage {
+    background: var(--paper); border-radius: 10px; padding: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.45);
+  }
+  .stage .label { font-size: 12px; color: #7a6a4e; margin: 0 2px 6px; }
+  canvas { display: block; border-radius: 6px; }
+  #screen { background: #f8f1df; cursor: grab; }
+  #screen.dragging { cursor: grabbing; }
+  #topview { background: #1d1915; cursor: ew-resize; }
+  #side { width: 300px; display: flex; flex-direction: column; gap: 10px; }
+  .card { background: var(--paper); border-radius: 10px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.45); }
+  .card h2 { font-size: 13px; margin: 0 0 8px; color: #7a6a4e; font-weight: 600; }
+  #piece-list { display: flex; flex-direction: column; gap: 4px; }
+  #piece-list button { text-align: left; display: flex; align-items: center; gap: 8px; }
+  #piece-list .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  #piece-list .meta { margin-left: auto; font-size: 11px; color: #7a6a4e; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .row button { flex: 1; white-space: nowrap; padding: 5px 4px; }
+  #score-line { font-size: 13px; line-height: 1.9; }
+  #score-line b { font-weight: 600; }
+  .bar { height: 8px; background: #ddd0b4; border-radius: 4px; overflow: hidden; margin: 2px 0 6px; }
+  .bar > div { height: 100%; background: var(--good); width: 0%; transition: width .15s; }
+  #hole-ok { color: var(--good); }
+  #hole-bad { color: var(--bad); font-weight: 600; }
+  #message {
+    min-height: 34px; font-size: 13px; line-height: 1.5;
+    background: #fdf6e3; border: 1px dashed #b39b6d; border-radius: 6px;
+    padding: 7px 9px; color: #5d4c2e;
+  }
+  #message.win { border-style: solid; border-color: var(--good); color: var(--good); font-weight: 600; }
+  #help { font-size: 12px; color: #8a7a5c; line-height: 1.8; }
+  kbd {
+    background: #e6dabc; border: 1px solid #b3a27e; border-bottom-width: 2px;
+    border-radius: 4px; padding: 0 4px; font-size: 11px; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>灯影拼摆<small>推拉薄片,在幕布上拼出指定的影子</small></h1>
+  <div id="puzzle-bar">
+    <button id="btn-p1">题一 · 双梁留孔</button>
+    <button id="btn-p2">题二 · 远近得当</button>
+    <span class="spacer"></span>
+    <button id="btn-save">保存当前摆法</button>
+    <button id="btn-load">恢复已存摆法</button>
+    <button id="btn-reset">重置本题</button>
+  </div>
+  <p id="puzzle-desc"></p>
+  <div id="main">
+    <div>
+      <div class="stage">
+        <p class="label">幕布(正面)——拖动薄片移动;拖动薄片上方的小圆柄旋转;滚轮推拉深度</p>
+        <canvas id="screen" width="560" height="560"></canvas>
+      </div>
+      <div class="stage" style="margin-top:14px">
+        <p class="label">台面(俯视)——灯在左,幕布在右;左右拖动薄片标记可改变深度,影子随之缩放</p>
+        <canvas id="topview" width="560" height="170"></canvas>
+      </div>
+    </div>
+    <div id="side">
+      <div class="card">
+        <h2>薄片</h2>
+        <div id="piece-list"></div>
+        <div class="row" style="margin-top:8px">
+          <button id="btn-rotl" title="逆时针转 5°">↺ 转</button>
+          <button id="btn-rotr" title="顺时针转 5°">↻ 转</button>
+          <button id="btn-nearer" title="靠近灯,影子变大">靠近灯</button>
+          <button id="btn-farther" title="远离灯,影子变小">远离灯</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>匹配</h2>
+        <div id="score-line">
+          命中 <b id="v-hit">0%</b>
+          <div class="bar"><div id="bar-hit"></div></div>
+          多影 <b id="v-extra">0%</b> · 透光孔 <span id="v-hole">—</span>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="btn-hint">提示一下</button>
+          <button id="btn-check">核对差异</button>
+        </div>
+      </div>
+      <div id="message">选择一片薄片开始摆弄。</div>
+      <div class="card" id="help">
+        <h2>操作</h2>
+        拖动:移动薄片 · 拖小圆柄:旋转 · 滚轮:改深度<br>
+        <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> 平移 · <kbd>Q</kbd>/<kbd>E</kbd> 旋转 · <kbd>W</kbd>/<kbd>S</kbd> 推拉深度<br>
+        位置、角度、深度接近整档时会轻轻吸附对齐。<br>
+        「核对差异」会标出缺影(红)与多影(橙);透光孔被盖住会闪红圈。
+      </div>
+    </div>
+  </div>
+</div>
+<script src="dist/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "none",
+    "outFile": "dist/main.js",
+    "strict": true,
+    "noUnusedLocals": true,
+    "lib": ["ES2019", "DOM"],
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

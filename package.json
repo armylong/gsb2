@@ -1,0 +1,14 @@
+{
+  "name": "shadow-puzzle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "灯影拼摆小谜题:推拉薄片在幕布上拼出指定影子",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "verify": "node test/verify.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
