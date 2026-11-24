@@ -1,0 +1,14 @@
+{
+  "name": "light-maze",
+  "version": "0.1.0",
+  "private": true,
+  "description": "彩灯反射解谜小房间(TypeScript + Canvas)",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test:sim": "node test/sim.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

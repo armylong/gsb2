@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>彩灯小屋 · 光路解谜</title>
+<style>
+  body { margin: 0; background: #101216; color: #dde1e6; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+  header { padding: 10px 16px; font-size: 18px; font-weight: 600; }
+  main { display: flex; gap: 14px; padding: 0 16px 16px; align-items: flex-start; flex-wrap: wrap; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .panel { background: #1b1e24; border-radius: 8px; padding: 10px 12px; min-width: 200px; }
+  .panel h3 { margin: 0 0 8px; font-size: 14px; color: #9aa3af; }
+  #tools button, #presets button, #actions button {
+    display: block; width: 100%; margin: 3px 0; padding: 6px 10px; text-align: left;
+    background: #262b33; color: #dde1e6; border: 1px solid #363d47; border-radius: 6px; cursor: pointer;
+  }
+  #actions button { text-align: center; }
+  #tools button:hover, #presets button:hover, #actions button:hover { background: #303743; }
+  #tools button.active { border-color: #6ea8ff; background: #2b3a55; }
+  canvas { background: #16181d; border-radius: 8px; cursor: pointer; }
+  #exit-status { font-size: 16px; font-weight: 700; padding: 6px 10px; border-radius: 6px; text-align: center; }
+  #exit-status.locked { background: #3a2a2a; color: #ff9a8a; }
+  #exit-status.unlocked { background: #234a2c; color: #7bf09a; }
+  #loop-info { background: #43301a; color: #ffb35c; padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+  #recv-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+  #recv-list li { cursor: pointer; }
+  #recv-list li:hover { text-decoration: underline; }
+  .ok { color: #4ade60; } .extra { color: #ff9040; } .bad { color: #ff6a6a; }
+  .hint { font-size: 12px; color: #8a929c; line-height: 1.7; }
+  #sel-info, #undo-info { font-size: 13px; }
+</style>
+</head>
+<body>
+<header>🚪 彩灯小屋 —— 转动镜面与分束块,把正确的颜色组合送进接收板,解锁出口</header>
+<main>
+  <div class="col">
+    <div class="panel"><h3>工具</h3><div id="tools"></div></div>
+    <div class="panel"><h3>盘面</h3><div id="presets"></div></div>
+  </div>
+  <div class="col">
+    <canvas id="canvas"></canvas>
+    <div id="exit-status" class="locked"></div>
+    <div id="loop-info" style="display:none"></div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>选中</h3>
+      <div id="sel-info">未选中棋子</div>
+      <div id="actions">
+        <button id="btn-rotate">旋转 (R)</button>
+        <button id="btn-color">换色 (C)</button>
+        <button id="btn-delete">删除 (Del)</button>
+        <button id="btn-undo">撤销 (Ctrl+Z)</button>
+      </div>
+      <div id="undo-info" class="hint"></div>
+    </div>
+    <div class="panel"><h3>接收板</h3><ul id="recv-list"></ul></div>
+    <div class="panel hint">
+      <h3>规则</h3>
+      · 光束沿上下左右行进;同方向穿过同一段的光合并颜色(红+绿=黄,三色=白),交叉通过互不干扰。<br>
+      · 镜面全反射;分束块一路直行、一路反射,两路都保留全部颜色。<br>
+      · 接收板要求的颜色组合必须<b>恰好</b>匹配:缺色、多收都不算满足。<br>
+      · 点击接收板可回看为它供光的光段与发光块(白色光环)。<br>
+      · 封闭反射回路会标橙,模拟有限步内收敛,离开回路的分束照常生效。
+    </div>
+  </div>
+</main>
+<script type="module" src="dist/main.js"></script>
+</body>
+</html>
