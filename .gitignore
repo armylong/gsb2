@@ -36,6 +36,7 @@ bin/
 coverage/
 .coverage
 .pytest_cache/
+*.tsbuildinfo
 
 # ---- 系统与IDE ----
 .DS_Store
