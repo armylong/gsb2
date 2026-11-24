@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chroma-inspector"
+version = "0.1.0"
+description = "本地短片色度平面查看器：核对 4:2:0 半像素色边偏移与色度采样点位置解释"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "PySide6>=6.5",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+chroma-inspector = "chroma_inspector.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

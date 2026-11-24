@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: chroma-inspector
+Version: 0.1.0
+Summary: 本地短片色度平面查看器：核对 4:2:0 半像素色边偏移与色度采样点位置解释
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.24
+Requires-Dist: PySide6>=6.5
+Provides-Extra: test
+Requires-Dist: pytest>=7; extra == "test"

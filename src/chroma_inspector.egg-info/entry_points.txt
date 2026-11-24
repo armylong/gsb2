@@ -1,0 +1,2 @@
+[console_scripts]
+chroma-inspector = chroma_inspector.app:main
