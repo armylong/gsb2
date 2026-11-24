@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>三角形覆盖查看器 · WebGL2</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <h1>三角形覆盖查看器</h1>
+        <p class="sub">
+          边函数 + 左上填充规则的软件光栅器，WebGL2 仅负责放大显示。
+          每个采样点的归属都由同一套确定性规则计算。
+        </p>
+
+        <section>
+          <h2>采样方式</h2>
+          <div class="row" id="patternRow">
+            <button data-pattern="1" class="active">单点 1×</button>
+            <button data-pattern="4">多点 4×</button>
+            <button data-pattern="9">多点 3×3</button>
+            <button data-pattern="16">多点 4×4</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>填充规则（覆盖归属）</h2>
+          <select id="ruleSelect">
+            <option value="topleft">左上规则（标准：公共边唯一归属）</option>
+            <option value="strict">严格 e&gt;0（演示：边上被咬掉）</option>
+            <option value="inclusive">全部 e&gt;=0（演示：公共边亮一道）</option>
+          </select>
+        </section>
+
+        <section>
+          <h2>几何操作</h2>
+          <div class="grid2">
+            <button id="btnSwap">交换绘制次序</button>
+            <button id="btnFlip">翻转顶点顺序</button>
+            <button id="btnRestoreOrder">恢复次序/绕序</button>
+            <button id="btnDegenerate">退化 T3 为线段</button>
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" id="chkVerts" checked /> 显示顶点</label>
+            <label><input type="checkbox" id="chkGrid" checked /> 显示网格</label>
+            <label><input type="checkbox" id="chkSamples" checked /> 显示采样点</label>
+          </div>
+          <div class="vertex-editor">
+            <div class="ve-head">
+              <span>顶点微调（亚像素，步长 0.125px）</span>
+            </div>
+            <div id="vertexList"></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>半像素平移场景</h2>
+          <div class="grid2">
+            <button id="btnShiftLeft">← 0.25px</button>
+            <button id="btnShiftRight">→ 0.25px</button>
+            <button id="btnShiftUp">↑ 0.25px</button>
+            <button id="btnShiftDown">↓ 0.25px</button>
+            <button id="btnHalfPx" class="wide">平移 +0.5px（半像素）</button>
+            <button id="btnResetOffset">offset 归零</button>
+          </div>
+          <div id="offsetReadout" class="readout"></div>
+        </section>
+
+        <section>
+          <h2>逐格放大</h2>
+          <div class="row">
+            <button id="btnZoomOut">－</button>
+            <span id="zoomReadout" class="zoom"></span>
+            <button id="btnZoomIn">＋</button>
+            <button id="btnResetScene" class="wide">重置全部</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>规则核对</h2>
+          <div id="validation" class="validation"></div>
+        </section>
+
+        <section class="log-section">
+          <h2>平移覆盖日志（点击回看）</h2>
+          <div id="shiftLog" class="shift-log"></div>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <div class="toolbar">
+          <div id="explainer" class="explainer"></div>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="gl"></canvas>
+          <div id="vertexLabels" class="vertex-labels"></div>
+        </div>
+        <div class="bottom">
+          <div id="pixelDetail" class="pixel-detail"></div>
+          <div class="legend">
+            <span><i class="dot gray"></i>未覆盖采样</span>
+            <span><i class="dot magenta"></i>重复占用</span>
+            <span><i class="dot yellow"></i>公共边/选中像素</span>
+            <span class="hint">拖顶点移动（亚像素）· 单击像素查看采样 · 滚轮缩放 · 方向键微调选中顶点</span>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
