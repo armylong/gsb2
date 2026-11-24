@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>会合站 · 居民日程调试页</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14181f; color: #dfe6f2; font-family: -apple-system, "PingFang SC", sans-serif; }
+  h1 { font-size: 18px; margin: 12px 16px 8px; }
+  #main { display: flex; gap: 12px; padding: 0 16px 16px; align-items: flex-start; }
+  #cv { background: #1e2430; border: 1px solid #333c4e; border-radius: 6px; }
+  #side { width: 460px; display: flex; flex-direction: column; gap: 8px; }
+  .box { background: #1c222d; border: 1px solid #333c4e; border-radius: 6px; padding: 8px 10px; }
+  .box h2 { font-size: 13px; margin: 0 0 6px; color: #9fb0cc; }
+  #clockbar { display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; }
+  button, select { background: #2a3446; color: #dfe6f2; border: 1px solid #465062; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
+  button:hover { background: #35415a; }
+  input[type=text] { background: #14181f; color: #dfe6f2; border: 1px solid #465062; border-radius: 4px; padding: 3px 6px; width: 130px; font-size: 12px; }
+  .row { display: flex; gap: 6px; align-items: center; margin: 4px 0; flex-wrap: wrap; font-size: 12px; }
+  .dst { color: #9fb0cc; font-size: 11px; }
+  .pcard { border: 1px solid #333c4e; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; background: #1c222d; }
+  .pcard.hi { border-color: #ffd93d; box-shadow: 0 0 6px #ffd93d66; }
+  .pcard h3 { margin: 0 0 4px; font-size: 13px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+  .loc { color: #9fb0cc; font-weight: normal; font-size: 12px; }
+  .star { color: #ffd93d; font-size: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 11px; }
+  th, td { border: 1px solid #333c4e; padding: 2px 5px; text-align: left; }
+  th { color: #9fb0cc; }
+  tr.ok td { color: #6fd08c; }
+  tr.bad td { color: #ff8080; }
+  tr.cur td { color: #ffd93d; }
+  #log { height: 180px; overflow-y: auto; font-size: 11px; line-height: 1.5; }
+  .le { padding: 1px 4px; border-radius: 3px; cursor: pointer; }
+  .le:hover { background: #2a3446; }
+  .le.success { color: #6fd08c; }
+  .le.miss { color: #ffb347; }
+  .le.fail { color: #ff8080; }
+  .le.conflict { color: #c792ea; }
+  .le.player { color: #64b5f6; }
+  #locate { color: #ffd93d; font-size: 11px; min-height: 15px; margin-bottom: 4px; }
+  #rules { font-size: 11px; color: #9fb0cc; line-height: 1.6; }
+</style>
+</head>
+<body>
+<h1>会合站 · 居民日程调试页</h1>
+<div id="main">
+  <canvas id="cv" width="660" height="450"></canvas>
+  <div id="side">
+    <div class="box" id="clockbar">
+      <span id="clock">T = 0</span>
+      <span id="holder"></span>
+    </div>
+    <div class="box">
+      <h2>控制</h2>
+      <div class="row">
+        <button id="btnPause">⏸ 暂停</button>
+        <select id="selSpeed">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="4">4x</option>
+          <option value="8">8x</option>
+        </select>
+        <select id="selPreset">
+          <option value="ok">日程：正常交接</option>
+          <option value="cascade">日程：连锁错过</option>
+        </select>
+        <button id="btnReset">↺ 从头复跑</button>
+      </div>
+    </div>
+    <div class="box">
+      <h2>门（改时段只影响之后的行为，已发生的交接见日志）</h2>
+      <div class="row">门1(A↔B) <input type="text" id="w1"> <button id="apply1">应用时段</button> <button id="close1">临时关10分钟</button> <span class="dst" id="dst1"></span></div>
+      <div class="row">门2(B↔C) <input type="text" id="w2"> <button id="apply2">应用时段</button> <button id="close2">临时关10分钟</button> <span class="dst" id="dst2"></span></div>
+    </div>
+    <div class="box" id="rules">
+      规则：① 两人在约定时段同时身处约定房间且都未离开，纪念品才当面转交；任意时刻只有一名持有者。
+      ② 门关闭时人会等待开门，或改道始终开放但更慢的外廊。③ 会面时间冲突时只参加开始较早的一场，其余自动放弃。
+      ④ 过了约定时刻，人继续执行日程上的后续安排。
+    </div>
+    <div>
+      <div class="pcard" id="card-jia"><h3><span class="dot" style="background:#ff6b6b"></span>甲 <span class="loc" id="loc-jia"></span><span class="star" id="star-jia"></span></h3><table id="plan-jia"></table></div>
+      <div class="pcard" id="card-yi"><h3><span class="dot" style="background:#4ecdc4"></span>乙 <span class="loc" id="loc-yi"></span><span class="star" id="star-yi"></span></h3><table id="plan-yi"></table></div>
+      <div class="pcard" id="card-bing"><h3><span class="dot" style="background:#ffd93d"></span>丙 <span class="loc" id="loc-bing"></span><span class="star" id="star-bing"></span></h3><table id="plan-bing"></table></div>
+    </div>
+    <div class="box">
+      <h2>事件记录</h2>
+      <div id="locate"></div>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "tsc main.ts --target es2017 --lib es2017,dom --strict",
+    "check": "node main.js"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
