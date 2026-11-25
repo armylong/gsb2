@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>陶盘上色原型</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>陶盘上色小游戏 · 本地原型</h1>
+      <p id="status-line" class="status">就绪</p>
+    </header>
+
+    <main class="layout">
+      <section class="stage">
+        <canvas id="disc" aria-label="陶盘画布"></canvas>
+        <p class="hint">
+          红色刻度为陶盘局部零度线。鼠标按住拖动即下笔，颜料画在陶盘自己的位置上，盘转回来原笔仍在原处。
+        </p>
+      </section>
+
+      <aside class="panel">
+        <section class="card">
+          <h2>目标花纹</h2>
+          <select id="pattern-select"></select>
+          <p id="pattern-desc" class="desc"></p>
+        </section>
+
+        <section class="card">
+          <h2>转盘</h2>
+          <div class="row">
+            <button id="pause-btn" type="button">暂停</button>
+            <label class="slider-label">
+              转速 <span id="rpm-value">30</span> rpm
+              <input id="rpm" type="range" min="0" max="120" step="1" value="30" />
+            </label>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>刷子</h2>
+          <div id="swatches" class="swatches"></div>
+          <label class="slider-label">
+            笔宽 <span id="width-value">14</span> px
+            <input id="brush-width" type="range" min="4" max="40" step="1" value="14" />
+          </label>
+          <div id="paint-bars" class="paint-bars"></div>
+        </section>
+
+        <section class="card">
+          <h2>操作</h2>
+          <div class="button-grid">
+            <button id="undo-btn" type="button">撤回一笔 (Ctrl+Z)</button>
+            <button id="clear-btn" type="button" class="danger">清空并补满颜料</button>
+            <button id="check-btn" type="button" class="primary">完成检查</button>
+            <button id="clear-score-btn" type="button">清除标记</button>
+          </div>
+          <div id="score-result" class="score-result hidden"></div>
+        </section>
+
+        <section class="card">
+          <h2>存档</h2>
+          <div class="button-grid">
+            <button id="save-btn" type="button">保存到浏览器</button>
+            <button id="load-btn" type="button">读取浏览器存档</button>
+            <button id="export-btn" type="button">导出 JSON 文件</button>
+          </div>
+          <label class="file-button">
+            导入 JSON 文件
+            <input id="import-file" type="file" accept="application/json,.json" hidden />
+          </label>
+          <p class="desc">下笔、撤回后会自动保存到浏览器 localStorage。</p>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
