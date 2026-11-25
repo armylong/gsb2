@@ -1,0 +1,19 @@
+{
+  "name": "leaf-mip-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local TypeScript + WebGL2 lab for alpha-tested leaf mipmaps and coverage-preserving reductions.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test test/*.test.ts",
+    "table": "node scripts/print-hand-table.ts",
+    "verify": "npm test && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "^7.1.0"
+  }
+}

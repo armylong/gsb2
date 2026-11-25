@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>树叶 Mip / 透明裁切观察台</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">TypeScript · WebGL2 · 本地可复现</p>
+          <h1>树叶缩小：透明裁切丢尖，还是底图本来就稀？</h1>
+          <p class="lede">
+            左右两镜共用同一张原图、同一个镜头和阈值。左侧是普通 alpha box 缩小层；右侧是按“保住原图通过面积”再生的层级。
+            若左侧在某一级突然掉像素而右侧能补回，主要原因就是裁切/平均，而不是原图没有面积。
+          </p>
+        </div>
+      </header>
+
+      <div id="errorBanner" class="error-banner" hidden></div>
+
+      <section class="toolbar" aria-label="观察控制">
+        <label class="control">
+          <span>可重复推镜样例</span>
+          <select id="sampleSelect">
+            <option value="front-uniform">A · 正面卡片匀速推远</option>
+            <option value="cross-dwell">B · 交叉卡片逐级驻留</option>
+          </select>
+        </label>
+
+        <div class="control" role="group" aria-label="卡片摆法">
+          <span>摆法</span>
+          <div class="segmented">
+            <button type="button" data-arrangement="front" class="is-active">正面卡片</button>
+            <button type="button" data-arrangement="cross">交叉卡片</button>
+          </div>
+        </div>
+
+        <label class="control">
+          <span>原图 / 手算图</span>
+          <select id="sourceSelect">
+            <option value="procedural">程序叶簇 128²</option>
+            <option value="hand4">手算 4×4（4 个孤立叶像素）</option>
+            <option value="hand8">手算 8×8（4×4 叶芯 + 4 个尖）</option>
+          </select>
+        </label>
+
+        <label class="control control--cutoff">
+          <span>透明裁切阈值 α ≥ <output id="cutoffValue">128</output></span>
+          <input id="cutoffRange" type="range" min="0" max="255" step="1" value="128" />
+        </label>
+
+        <label class="control">
+          <span>采样层级</span>
+          <select id="lodLockSelect"><option value="auto">自动（跟随镜头）</option></select>
+        </label>
+      </section>
+
+      <section class="playback-bar">
+        <button type="button" id="playPause" class="primary">暂停</button>
+        <button type="button" id="replay">重播推镜</button>
+        <label class="progress-control">
+          <span>推镜进度</span>
+          <input id="progressRange" type="range" min="0" max="1000" value="0" />
+        </label>
+        <div class="camera-stats" id="cameraStats" aria-live="polite"></div>
+      </section>
+
+      <section id="verdictBar" class="verdict-bar" aria-live="polite"></section>
+
+      <section class="stage-card">
+        <div class="stage-head">
+          <div class="stage-title stage-title--ordinary">普通缩小 + α test</div>
+          <div class="stage-title stage-title--area">面积目标再生 + α test</div>
+        </div>
+        <div class="canvas-frame checker-bg" id="canvasFrame">
+          <canvas id="glCanvas" width="1280" height="640" aria-label="左右对照 WebGL2 画面"></canvas>
+          <div class="side-tag side-tag--left">普通层</div>
+          <div class="side-tag side-tag--right">保面积层</div>
+          <div class="roi-overlay" aria-hidden="true">
+            <div class="roi-side roi-side--left"><div class="roi-box" id="roiBox0"></div></div>
+            <div class="roi-side roi-side--right"><div class="roi-box" id="roiBox1"></div></div>
+          </div>
+          <div class="canvas-hint" id="canvasHint">暂停后，在任意一侧点击要放大的 48×48 显示块；左右会取同一归一化区域。</div>
+        </div>
+      </section>
+
+      <section class="zoom-panel">
+        <div class="zoom-controls">
+          <h2>暂停后放大同一块显示区域</h2>
+          <label><input type="checkbox" id="outlineToggle" checked /> 叠加实际帧缓冲轮廓</label>
+          <label>
+            放大底景
+            <select id="backgroundSelect">
+              <option value="checker">棋盘格</option>
+              <option value="dark">深色</option>
+            </select>
+          </label>
+          <button type="button" id="clearRoi">清除框选</button>
+          <span id="zoomStatus" class="zoom-status">尚未框选。</span>
+        </div>
+        <div class="zoom-grid">
+          <figure>
+            <figcaption>普通层：实际画出的像素</figcaption>
+            <div class="zoom-canvas-wrap checker-bg"><canvas id="zoomOrdinary" width="288" height="288"></canvas></div>
+            <div id="zoomOrdinaryReadout" class="zoom-readout"></div>
+          </figure>
+          <figure>
+            <figcaption>保面积层：同一显示块</figcaption>
+            <div class="zoom-canvas-wrap checker-bg"><canvas id="zoomArea" width="288" height="288"></canvas></div>
+            <div id="zoomAreaReadout" class="zoom-readout"></div>
+          </figure>
+          <aside class="zoom-reading" id="zoomReading"></aside>
+        </div>
+      </section>
+
+      <section class="metrics-grid" aria-label="逐层透明值读数">
+        <div id="ordinaryPanel" class="metric-panel"></div>
+        <div id="areaPanel" class="metric-panel"></div>
+      </section>
+
+      <section id="atlasPanel" class="atlas-section" aria-label="小图集串色和脏边验证"></section>
+
+      <section class="handbook">
+        <h2>可手算面积样例与本地验证</h2>
+        <div class="handbook-grid">
+          <article>
+            <h3>4×4 小图：普通 L1 就开始丢叶</h3>
+            <p>阈值 α≥128。原图四个角附近各有一个 255 像素，分别落在四个 2×2 块中，因此原图通过面积是 <strong>4 px</strong>。</p>
+            <pre id="handMatrix"></pre>
+            <p>普通 L1 每个纹素是 <code>255/4 ≈ 64</code>，小于 128，所以通过数为 <strong>0</strong>；几何期望是 <code>4/4=1</code> 个 L1 像素。保面积链在 L1 保留 1 个像素。到 L2 期望 <code>4/16=0.25</code>，最近整数目标为 0，这个层级差是整数量化极限，不是算法没保住。</p>
+          </article>
+          <article>
+            <h3>两种可重复推镜</h3>
+            <ul>
+              <li><strong>样例 A</strong>：正面卡片，LOD −1.5→7.2 线性变化。</li>
+              <li><strong>样例 B</strong>：±45° 交叉卡片，在 L0–L6 逐级驻留。</li>
+            </ul>
+            <p>镜头使用固定 1280×640 缓冲、两个 640×640 视口和正交投影，因此几何 LOD 可由距离公式复算，不随窗口 CSS 尺寸漂移。放大只是最近邻复制已绘制缓冲，不会重新触发纹理采样或生成新 mip。</p>
+            <pre>npm install
+npm run table
+npm test
+npm run dev
+# 另一个终端：npm run build &amp;&amp; npm run preview</pre>
+          </article>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
