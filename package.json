@@ -1,0 +1,23 @@
+{
+  "name": "rolling-stamp-puzzle",
+  "version": "1.0.0",
+  "description": "滚方块盖印 — TypeScript + Canvas 本地谜题页",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "validate": "esbuild scripts/validate.ts --bundle --platform=node --format=cjs --outfile=tmp/validate.cjs && node tmp/validate.cjs",
+    "smoke": "node scripts/smoke.mjs",
+    "verify": "npm run typecheck && npm run validate && npm run build",
+    "design": "esbuild scripts/design.ts --bundle --platform=node --format=cjs --outfile=tmp/design.cjs && node tmp/design.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "puppeteer-core": "^23.11.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vite-plugin-singlefile": "^2.3.4"
+  }
+}

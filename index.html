@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='8' y='8' width='84' height='84' rx='20' fill='%23c8402a'/%3E%3Ctext x='50' y='70' font-size='54' text-anchor='middle' fill='%23fff3e0' font-family='sans-serif' font-weight='900'%3E%E5%8D%B0%3C/text%3E%3C/svg%3E"
+    />
+    <title>滚方块盖印 · Rolling Stamp Puzzle</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">印</div>
+          <div>
+            <h1>滚方块盖印</h1>
+            <p class="tagline">六面色签 · 贴地留印 · 一步一滚的短谜题</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span id="save-status" class="save-status" aria-live="polite"></span>
+          <button id="btn-save" class="btn ghost" type="button">💾 保存本局</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <!-- 左：题面与画布 -->
+        <section class="card stage-card">
+          <nav id="level-tabs" class="level-tabs" aria-label="选择谜题"></nav>
+
+          <div class="level-head">
+            <h2 id="level-name">关卡</h2>
+            <span id="level-subtitle" class="subtitle"></span>
+          </div>
+          <p id="level-brief" class="brief"></p>
+
+          <div id="variant-box" class="variant-box" hidden>
+            <span class="variant-title">起点朝向</span>
+            <div id="variant-list" class="variant-list" role="tablist"></div>
+            <p id="variant-note" class="variant-note"></p>
+          </div>
+
+          <div id="canvas-wrap" class="canvas-wrap">
+            <canvas id="game-canvas" aria-label="滚方块盖印棋盘"></canvas>
+            <div id="win-overlay" class="win-overlay" hidden>
+              <div class="win-card">
+                <div class="win-seal">成</div>
+                <h3>盖印完成！</h3>
+                <p id="win-detail"></p>
+                <div class="win-actions">
+                  <button id="btn-win-replay" class="btn primary" type="button">再来一次</button>
+                  <button id="btn-win-next" class="btn ghost" type="button">下一关</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ul class="legend" aria-label="图例">
+            <li><span class="sw wall"></span>墙：移动被挡，位置/朝向/印记都不变</li>
+            <li><span class="sw ink"></span>未干印：按规则不能再次进入</li>
+            <li><span class="sw clean"></span>素格：可走过，不能留色</li>
+            <li><span class="sw seal"></span>封口格：最后才能盖</li>
+          </ul>
+        </section>
+
+        <!-- 右：操作与状态 -->
+        <aside class="side">
+          <section class="card pose-card">
+            <h3 class="card-title">方块六面</h3>
+            <div id="pose-grid" class="pose-grid"></div>
+            <button id="btn-stamp" class="stamp-btn" type="button">
+              <span id="stamp-preview" class="stamp-preview">?</span>
+              <span class="stamp-text">
+                <strong>盖印</strong>
+                <small>用当前贴地色签（空格）</small>
+              </span>
+            </button>
+          </section>
+
+          <section class="card controls-card">
+            <div class="dpad" role="group" aria-label="方向滚动">
+              <button class="dbtn up" data-dir="N" type="button" aria-label="向上滚">▲</button>
+              <button class="dbtn left" data-dir="W" type="button" aria-label="向左滚">◀</button>
+              <span class="dpad-dot" aria-hidden="true"></span>
+              <button class="dbtn right" data-dir="E" type="button" aria-label="向右滚">▶</button>
+              <button class="dbtn down" data-dir="S" type="button" aria-label="向下滚">▼</button>
+            </div>
+
+            <div class="action-row">
+              <button id="btn-undo" class="btn" type="button">↶ 撤销</button>
+              <button id="btn-redo" class="btn" type="button">↷ 重做</button>
+              <button id="btn-hint" class="btn accent" type="button">💡 提示</button>
+              <button id="btn-reset" class="btn danger-ghost" type="button">重置</button>
+            </div>
+
+            <label class="rule-toggle">
+              <input id="rule-blocks" type="checkbox" />
+              <span>规则：盖过印的格干透后不可再次进入</span>
+            </label>
+          </section>
+
+          <section class="card progress-card">
+            <h3 class="card-title">题面进度 <span id="progress-count" class="count-pill"></span></h3>
+            <ul id="progress-list" class="progress-list"></ul>
+            <p id="seal-status" class="seal-status"></p>
+          </section>
+
+          <section id="hint-box" class="card hint-box" aria-live="polite">
+            <h3 class="card-title">短提示</h3>
+            <p id="hint-text">点「提示」会从当前姿态与纸面出发，实时搜一条可行的下一步；若已无解，则提示退回几步。</p>
+            <div id="hint-actions" class="hint-actions"></div>
+          </section>
+
+          <section class="card log-card">
+            <h3 class="card-title">记录</h3>
+            <ul id="log-list" class="log-list" aria-live="polite"></ul>
+          </section>
+
+          <p class="kbd-help">
+            键盘：<kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> / WASD 滚动 ·
+            <kbd>Space</kbd> 盖印 · <kbd>Z</kbd> 撤销 · <kbd>Y</kbd> 重做 · <kbd>H</kbd> 提示
+          </p>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
