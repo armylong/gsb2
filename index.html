@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>织带拼图 · Ribbon Loom</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <h1>织带拼图</h1>
+        <div class="level-switch" id="levelSwitch"></div>
+      </header>
+      <main class="layout">
+        <section class="board-panel">
+          <canvas id="board" width="720" height="560" aria-label="织框画布"></canvas>
+          <div class="toolbar" id="toolbar"></div>
+        </section>
+        <aside class="side-panel">
+          <section class="card">
+            <h2 id="puzzleName"></h2>
+            <p class="hint" id="puzzleHint"></p>
+          </section>
+          <section class="card">
+            <h2>操作模式</h2>
+            <div class="mode-list" id="modeList"></div>
+            <p class="mode-tip" id="modeTip"></p>
+          </section>
+          <section class="card">
+            <h2>格点判断</h2>
+            <p class="cell-info" id="cellInfo">点击画布上的格点查看当前判断。</p>
+          </section>
+          <section class="card">
+            <h2>检查结果</h2>
+            <div id="summary"></div>
+            <ul class="problem-list" id="problemList"></ul>
+          </section>
+          <section class="card">
+            <h2>目标花纹</h2>
+            <div id="targetList"></div>
+          </section>
+          <section class="card actions">
+            <button id="btnCheck">检查一次</button>
+            <button id="btnSave">保存布局</button>
+            <button id="btnLoad">读取存档</button>
+            <button id="btnRestart">重新开局</button>
+            <button id="btnClear">清空当前颜色</button>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
