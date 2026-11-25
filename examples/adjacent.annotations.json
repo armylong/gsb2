@@ -1,0 +1,51 @@
+{
+  "sample_rate": 16000,
+  "marks": [
+    {
+      "label": "N1",
+      "sample": 2000,
+      "time_s": 0.125
+    },
+    {
+      "label": "N2",
+      "sample": 6700,
+      "time_s": 0.41875
+    },
+    {
+      "label": "N3",
+      "sample": 15050,
+      "time_s": 0.940625
+    },
+    {
+      "label": "N4",
+      "sample": 28950,
+      "time_s": 1.809375
+    }
+  ],
+  "regions": [
+    {
+      "start": 6400,
+      "end": 6800,
+      "keep_ms": 50.0,
+      "note": "冲突A左"
+    },
+    {
+      "start": 6600,
+      "end": 7040,
+      "keep_ms": 50.0,
+      "note": "冲突A右(重叠)"
+    },
+    {
+      "start": 15040,
+      "end": 15360,
+      "keep_ms": 40.0,
+      "note": "冲突B左"
+    },
+    {
+      "start": 15360,
+      "end": 15680,
+      "keep_ms": 40.0,
+      "note": "冲突B右(挨住)"
+    }
+  ]
+}

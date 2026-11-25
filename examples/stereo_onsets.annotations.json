@@ -1,0 +1,44 @@
+{
+  "sample_rate": 16000,
+  "marks": [
+    {
+      "label": "L1",
+      "sample": 1600,
+      "time_s": 0.1
+    },
+    {
+      "label": "R1",
+      "sample": 2400,
+      "time_s": 0.15
+    },
+    {
+      "label": "L2",
+      "sample": 13600,
+      "time_s": 0.85
+    },
+    {
+      "label": "R2",
+      "sample": 12800,
+      "time_s": 0.8
+    },
+    {
+      "label": "MID",
+      "sample": 20000,
+      "time_s": 1.25
+    }
+  ],
+  "regions": [
+    {
+      "start": 5200,
+      "end": 11200,
+      "keep_ms": 100.0,
+      "note": "双声道共同静音1"
+    },
+    {
+      "start": 18000,
+      "end": 28800,
+      "keep_ms": 120.0,
+      "note": "双声道共同静音2"
+    }
+  ]
+}

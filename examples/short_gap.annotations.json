@@ -1,0 +1,45 @@
+{
+  "sample_rate": 16000,
+  "marks": [
+    {
+      "label": "M1",
+      "sample": 800,
+      "time_s": 0.05
+    },
+    {
+      "label": "M2",
+      "sample": 3900,
+      "time_s": 0.24375
+    },
+    {
+      "label": "M3",
+      "sample": 12000,
+      "time_s": 0.75
+    },
+    {
+      "label": "M4",
+      "sample": 14085,
+      "time_s": 0.880313
+    }
+  ],
+  "regions": [
+    {
+      "start": 3200,
+      "end": 4800,
+      "keep_ms": 80.0,
+      "note": "短停顿, 保留80ms"
+    },
+    {
+      "start": 9600,
+      "end": 10400,
+      "keep_ms": 150.0,
+      "note": "保留需求超过区间, 应放过"
+    },
+    {
+      "start": 13600,
+      "end": 14080,
+      "keep_ms": 0.0,
+      "note": "整段删除, 硬切"
+    }
+  ]
+}

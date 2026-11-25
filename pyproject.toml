@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pause-editor"
+version = "1.0.0"
+description = "本地口述音频停顿整理工具 (PySide6 + numpy), 只对手工确认过的区间动刀"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "PySide6",
+]
+
+[tool.setuptools]
+packages = ["pause_editor"]
