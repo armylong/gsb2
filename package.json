@@ -1,0 +1,20 @@
+{
+  "name": "vector-mask-preview",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test:geo": "esbuild test/geo.test.ts --bundle --platform=node --format=esm --outfile=tmp/geo.test.mjs && node tmp/geo.test.mjs",
+    "test:browser": "node test/browser-check.mjs",
+    "test:interact": "node test/interact-check.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}

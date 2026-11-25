@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>矢量遮罩预览 · 双层变换 / 填充规则核对</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="toolbar">
+        <div class="brand">矢量遮罩预览</div>
+        <div id="view-mode-group" class="seg-group" role="group" aria-label="视图模式"></div>
+        <div class="spacer"></div>
+        <span id="selftest-badge" class="badge badge-unknown">自检未运行</span>
+      </header>
+      <main class="workspace">
+        <section class="canvas-wrap">
+          <canvas id="stage"></canvas>
+          <div id="hud" class="hud"></div>
+        </section>
+        <aside id="sidebar" class="sidebar"></aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
