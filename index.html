@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>分段转动步道 · 机关原型</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header>
+        <h1>分段转动步道 · 本地机关原型</h1>
+        <p class="sub">
+          转动前悬停手柄查看扫掠范围；被栏杆/墙角截停时步道与通路保持原位。
+        </p>
+      </header>
+
+      <div class="toolbar">
+        <span class="level-name" id="level-name"></span>
+        <button id="btn-l1">房间 1（可通关）</button>
+        <button id="btn-l2">房间 2（半程遇挡）</button>
+        <button id="btn-edges">切换可走边 (E)</button>
+        <button id="btn-reset">重来 (R)</button>
+      </div>
+
+      <div class="stage">
+        <canvas id="game"></canvas>
+        <div id="banner" class="banner"></div>
+      </div>
+
+      <div class="hud" id="status"></div>
+
+      <section class="help">
+        <h2>操作</h2>
+        <ul>
+          <li><b>WASD / 方向键</b>：逐格移动；转动中无法走到未接好的地面。</li>
+          <li><b>鼠标悬停手柄</b>：显示该步道 90° 转动的受影响范围（黄色=可转，红色扫掠=会被挡）。</li>
+          <li><b>左键 / 空格</b>：顺时针转 90°；<b>右键 / Q</b>：逆时针转 90°。</li>
+          <li>站在步道上会随板一起移动；只有端口位置与朝向同时对上，两块板之间才允许通行。</li>
+          <li><b>E</b> 显示/隐藏可走边；<b>1 / 2</b> 切换预置房间；<b>R</b> 完全复原。</li>
+        </ul>
+        <h2>图例</h2>
+        <ul class="legend">
+          <li><span class="swatch platform"></span>可转动步道（A 蓝 / B 紫），黄点+三角是端口与朝外朝向</li>
+          <li><span class="swatch edge"></span>当前可走边（绿），与可见地面逐格一致</li>
+          <li><span class="swatch rail"></span>固定栏杆（可能截停载人转动）</li>
+          <li><span class="swatch pit"></span>空洞：没有接好端口时不可跨越</li>
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="./dist/bundle.js"></script>
+  </body>
+</html>
