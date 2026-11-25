@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>隔山旗语 · 三观测台规则沙盘</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-seal">旗</span>
+          <div>
+            <h1>隔山旗语 · 规则沙盘</h1>
+            <p class="subtitle">三座观测台、可移动遮挡物，与「遮了半拍还认不认整条消息」的可试规则</p>
+          </div>
+        </div>
+        <div class="score-pill" id="score-pill">得分 0</div>
+      </header>
+
+      <main class="layout">
+        <section class="stage-card">
+          <div class="stage-head">
+            <div class="stage-title">
+              <span id="cue-title">尚未开演</span>
+              <span class="stage-hint" id="cue-note">选择剧本或自编序列，逐拍推进</span>
+            </div>
+            <div class="half-toggle" role="group" aria-label="选择编辑哪半拍遮挡">
+              <button data-action="set-half" data-half="0" class="half-btn">前半拍遮挡位</button>
+              <button data-action="set-half" data-half="1" class="half-btn">后半拍遮挡位</button>
+              <button data-action="sweep" class="ghost-btn" title="播放遮挡物从前半拍位置移到后半拍位置的扫动">▶ 演示扫动</button>
+            </div>
+          </div>
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas id="scene" width="1000" height="640" aria-label="三观测台旗语场景"></canvas>
+            <div class="canvas-legend">
+              <span><i class="dot red"></i>左旗（朱）</span>
+              <span><i class="dot blue"></i>右旗（青）</span>
+              <span><i class="line ok"></i>视线可见</span>
+              <span><i class="line bad"></i>被遮挡</span>
+              <span class="drag-hint">可直接拖动云、雾、木屏</span>
+            </div>
+          </div>
+          <div class="transport" id="transport"></div>
+        </section>
+
+        <aside class="sidebar">
+          <nav class="tabs" id="tabs">
+            <button class="tab" data-action="tab" data-tab="script">剧本 / 编旗</button>
+            <button class="tab" data-action="tab" data-tab="receipts">观测收条</button>
+            <button class="tab" data-action="tab" data-tab="decode">译码 / 裁决</button>
+            <button class="tab" data-action="tab" data-tab="checks">验收清单</button>
+            <button class="tab" data-action="tab" data-tab="rules">规则页</button>
+          </nav>
+          <div class="panel" id="panel"></div>
+        </aside>
+      </main>
+
+      <section class="rules-bottom" id="rules-bottom"></section>
+      <footer class="footer">TypeScript + Canvas 2D · 规则纯函数均有 vitest 用例锁定</footer>
+    </div>
+    <div id="modal-root"></div>
+    <div id="toast-root"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
