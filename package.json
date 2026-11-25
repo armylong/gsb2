@@ -1,0 +1,16 @@
+{
+  "name": "greenhouse-pollen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "温室传粉配色小游戏：风向、挡风板与多源混色的确定性回合模拟",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/tests/engine.test.js",
+    "start": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}

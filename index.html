@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>温室传粉配色</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="board-pane">
+        <header class="topbar">
+          <div>
+            <h1>温室传粉配色</h1>
+            <p id="scenario-name" class="scenario-name"></p>
+          </div>
+          <div class="round-badge">第 <span id="round-num">1</span> 轮</div>
+        </header>
+        <div class="canvas-wrap">
+          <canvas id="board" width="640" height="500"></canvas>
+        </div>
+        <div class="controls">
+          <button id="btn-level1" class="level-btn">关卡 1</button>
+          <button id="btn-level2" class="level-btn">关卡 2</button>
+          <button id="btn-execute" class="primary">执行本轮（不移动 = 等一轮）</button>
+          <button id="btn-undo">撤销上一步</button>
+          <button id="btn-reset">重置本关</button>
+        </div>
+        <p id="hint" class="hint"></p>
+      </section>
+
+      <aside class="side-pane">
+        <section class="card">
+          <h2>任务</h2>
+          <p id="task-brief" class="brief"></p>
+          <p id="task-detail" class="detail"></p>
+          <p id="goal-status" class="goal-status"></p>
+        </section>
+
+        <section class="card">
+          <h2>花朵检查器</h2>
+          <div id="inspector" class="inspector">执行一轮后点击任意花朵，查看本轮实际来源与颜色变化。</div>
+        </section>
+
+        <section class="card">
+          <h2>图例与规则</h2>
+          <ul class="legend">
+            <li><span class="swatch" style="background:#e0524d"></span>红 / <span class="swatch" style="background:#f2c029"></span>黄 / <span class="swatch" style="background:#3f7fd6"></span>蓝 为三原色花粉</li>
+            <li>红+黄=橙，红+蓝=紫，黄+蓝=绿；混色是原色集合取并集，与到达顺序无关</li>
+            <li>「微」微风只飞 1 格，「疾」疾风连飞 2 格；棕色方块是挡风板，拦截进入该格的花粉</li>
+            <li>同色连续到 3 轮才稳定；空一轮进度 −1，换颜色则从第 1 轮重新积累</li>
+            <li>每朵花本轮发出的颜色，只由轮开始时的稳定颜色决定</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="./dist/src/ui/main.js"></script>
+  </body>
+</html>
