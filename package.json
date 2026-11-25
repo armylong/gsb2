@@ -1,0 +1,22 @@
+{
+  "name": "lantern-pulley-rules",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "纸灯滑轮配重规则页：固定穿线路径 + 可换配重的本地规则仿真（TypeScript + Canvas，无通用绳索物理）",
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --format=iife --outfile=dist/bundle.js",
+    "build:test": "esbuild test/engine.test.ts --bundle --platform=node --format=esm --outfile=dist/engine.test.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+    "test": "npm run build:test && node --test --test-reporter=spec dist/engine.test.mjs",
+    "tune": "esbuild tools/tune.ts --bundle --platform=node --format=esm --outfile=dist/tune.mjs && node dist/tune.mjs",
+    "sweep": "esbuild tools/sweep.ts --bundle --platform=node --format=esm --outfile=dist/sweep.mjs && node dist/sweep.mjs",
+    "e2e": "esbuild tools/e2e.ts --bundle --platform=node --format=esm --outfile=dist/e2e.mjs && node dist/e2e.mjs",
+    "serve": "node serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.7",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  }
+}

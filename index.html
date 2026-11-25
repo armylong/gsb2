@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纸灯滑轮配重 · 本地规则页</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>纸灯滑轮配重规则页</h1>
+      <p class="sub">
+        一条固定穿线绳、两个可换配重托架、一盏纸灯。规则化约束仿真（统一绳张力 + 限位接触锁 + 窗格卡榫），
+        不含通用绳索物理。向下为正，绳长不变量 <code>h1 + h灯 + h2 = 660</code>。
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="canvas-wrap">
+        <canvas id="stage"></canvas>
+        <div id="strands" class="strands"></div>
+      </section>
+
+      <aside class="panel">
+        <h2>运行控制</h2>
+        <div class="btn-row">
+          <button id="btnPlay">▶ 播放</button>
+          <button id="btnPause" class="active">⏸ 暂停</button>
+          <button id="btnStep">⏭ 单步</button>
+          <button id="btnReset">↺ 重置</button>
+        </div>
+        <p class="hint">空格键 播放/暂停，→ 键 单步（每步 1/60s，含 2 个子步）。</p>
+
+        <h2>内置摆位</h2>
+        <div id="presets" class="presets"></div>
+        <p id="presetDesc" class="desc">默认载入“精确平衡”摆位，系统静止，可先换一个配重观察平滑起步。</p>
+        <p id="presetExpect" class="expect"></p>
+
+        <h2>配重（行程中可直接换，速度不跳变）</h2>
+        <div class="weights">
+          <label>托架1
+            <select id="w_carriage1"></select>
+          </label>
+          <label>纸灯
+            <select id="w_lantern"></select>
+          </label>
+          <label>托架2
+            <select id="w_carriage2"></select>
+          </label>
+        </div>
+
+        <h2>窗格卡榫（可松开）</h2>
+        <div class="latches">
+          <button id="latch_upper" class="latch"></button>
+          <button id="latch_lower" class="latch"></button>
+        </div>
+        <p class="hint">仅在灯进入对应高度区间且 |v| ≤ 22px/s 时合上；过快经过会在下方检查表留 too-fast 记录。</p>
+
+        <h2>实时读数</h2>
+        <div id="readouts"></div>
+      </aside>
+    </main>
+
+    <section class="logs">
+      <div>
+        <h2>卡榫检查记录</h2>
+        <div id="checkLog" class="log-box"></div>
+      </div>
+      <div>
+        <h2>机械事件（限位 / 换配重 / 松锁）</h2>
+        <div id="eventLog" class="log-box"></div>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        规则要点：绳不可伸长且处处张力相同；每个动滑轮受 2T 向上力；限位是单向接触锁，
+        仅停住真正受限的体；卡榫是硬锁，需手动松开。数值内核见 <code>src/model.ts</code>。
+      </p>
+    </footer>
+
+    <script src="dist/bundle.js"></script>
+  </body>
+</html>
