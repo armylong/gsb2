@@ -1,0 +1,22 @@
+{
+  "app": "mosaic-studio-scenario",
+  "schema_version": 1,
+  "name": "配额冲突例子：5×4 色带 vs 每块 2 次配额",
+  "description": "底图 400×320，格子 80px -> 5 列 × 4 行共 20 格；只有 5 块样块且每块最多用 2 次，总容量 10 格，另有八邻域同块限制和一个固定格。运行后问题面板会逐格列出哪些格未匹配以及是配额还是邻接原因。",
+  "base_image": "base.png",
+  "tile_folder": "tiles",
+  "params": {
+    "cell_size": 80,
+    "max_uses": 2,
+    "adjacency_radius": 1,
+    "seed": 42
+  },
+  "quota_overrides": {},
+  "fixed": [
+    {
+      "row": 0,
+      "col": 0,
+      "tile_id": "qc_01_red"
+    }
+  ]
+}

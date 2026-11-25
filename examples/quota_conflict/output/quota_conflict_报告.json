@@ -1,0 +1,631 @@
+{
+  "app": "mosaic-studio-report",
+  "schema_version": 1,
+  "seed": 42,
+  "reproducibility_note": "保留本文件中的 seed、params、素材路径、sha1 与 crop_box，用相同素材重新载入并计算即可重现一致排版；fixed 为手动固定格。",
+  "params": {
+    "cell_size": 80,
+    "max_uses": 2,
+    "adjacency_radius": 1,
+    "seed": 42,
+    "color_weight": 0.25,
+    "layout_weight": 0.45,
+    "texture_weight": 0.3,
+    "improvement_passes": 2
+  },
+  "base_image": {
+    "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/base.png",
+    "size": [
+      400,
+      320
+    ],
+    "grid_cols": 5,
+    "grid_rows": 4,
+    "cell_size": 80,
+    "used_rect": [
+      0,
+      0,
+      400,
+      320
+    ]
+  },
+  "tile_folder": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles",
+  "quota_overrides": {},
+  "fixed": [
+    {
+      "row": 0,
+      "col": 0,
+      "tile_id": "qc_01_red"
+    }
+  ],
+  "summary": {
+    "cell_count": 20,
+    "tile_count": 5,
+    "assigned_count": 10,
+    "unmatched_count": 10,
+    "free_deficit": 10,
+    "capacity_total": 10,
+    "free_capacity": 9,
+    "elapsed_ms": 0,
+    "fixed_conflicts": []
+  },
+  "tiles": [
+    {
+      "ordinal": 0,
+      "id": "qc_01_red",
+      "name": "qc_01_red",
+      "source_group": "tiles",
+      "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_01_red.png",
+      "sha1": "d1f14fc6087c",
+      "source_size": [
+        160,
+        160
+      ],
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "quota": 2,
+      "usage": 2,
+      "fixed_usage": 1
+    },
+    {
+      "ordinal": 1,
+      "id": "qc_02_green",
+      "name": "qc_02_green",
+      "source_group": "tiles",
+      "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_02_green.png",
+      "sha1": "520fe0e791cf",
+      "source_size": [
+        160,
+        160
+      ],
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "quota": 2,
+      "usage": 2,
+      "fixed_usage": 0
+    },
+    {
+      "ordinal": 2,
+      "id": "qc_03_blue",
+      "name": "qc_03_blue",
+      "source_group": "tiles",
+      "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_03_blue.png",
+      "sha1": "5e3c04b3fbfb",
+      "source_size": [
+        160,
+        160
+      ],
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "quota": 2,
+      "usage": 2,
+      "fixed_usage": 0
+    },
+    {
+      "ordinal": 3,
+      "id": "qc_04_gold",
+      "name": "qc_04_gold",
+      "source_group": "tiles",
+      "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_04_gold.png",
+      "sha1": "392ae7c923ed",
+      "source_size": [
+        160,
+        160
+      ],
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "quota": 2,
+      "usage": 2,
+      "fixed_usage": 0
+    },
+    {
+      "ordinal": 4,
+      "id": "qc_05_purple",
+      "name": "qc_05_purple",
+      "source_group": "tiles",
+      "path": "/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_05_purple.png",
+      "sha1": "d7250e77e062",
+      "source_size": [
+        160,
+        160
+      ],
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "quota": 2,
+      "usage": 2,
+      "fixed_usage": 0
+    }
+  ],
+  "cells": [
+    {
+      "row": 0,
+      "col": 0,
+      "row_human": 1,
+      "col_human": 1,
+      "status": "fixed",
+      "fixed": true,
+      "tile_id": "qc_01_red",
+      "tile_name": "qc_01_red",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.256767,
+      "similarity": 0.743233,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 0,
+      "col": 1,
+      "row_human": 1,
+      "col_human": 2,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_03_blue",
+      "tile_name": "qc_03_blue",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.429105,
+      "similarity": 0.570895,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 0,
+      "col": 2,
+      "row_human": 1,
+      "col_human": 3,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_05_purple",
+      "tile_name": "qc_05_purple",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.39046,
+      "similarity": 0.60954,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 0,
+      "col": 3,
+      "row_human": 1,
+      "col_human": 4,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_03_blue",
+      "tile_name": "qc_03_blue",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.592537,
+      "similarity": 0.407463,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 0,
+      "col": 4,
+      "row_human": 1,
+      "col_human": 5,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_05_purple」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "row_human": 2,
+      "col_human": 1,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_04_gold",
+      "tile_name": "qc_04_gold",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.442421,
+      "similarity": 0.557579,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "row_human": 2,
+      "col_human": 2,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_02_green",
+      "tile_name": "qc_02_green",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.257092,
+      "similarity": 0.742908,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "row_human": 2,
+      "col_human": 3,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_04_gold",
+      "tile_name": "qc_04_gold",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.585014,
+      "similarity": 0.414986,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 1,
+      "col": 3,
+      "row_human": 2,
+      "col_human": 4,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_02_green",
+      "tile_name": "qc_02_green",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.500403,
+      "similarity": 0.499597,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "row_human": 2,
+      "col_human": 5,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_05_purple",
+      "tile_name": "qc_05_purple",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.257882,
+      "similarity": 0.742118,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 2,
+      "col": 0,
+      "row_human": 3,
+      "col_human": 1,
+      "status": "matched",
+      "fixed": false,
+      "tile_id": "qc_01_red",
+      "tile_name": "qc_01_red",
+      "source_group": "tiles",
+      "crop_box": [
+        0,
+        0,
+        160,
+        160
+      ],
+      "distance": 0.256767,
+      "similarity": 0.743233,
+      "reason_code": null,
+      "reason": "",
+      "quota_blocker_ids": [],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "row_human": 3,
+      "col_human": 2,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_02_green」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 2,
+      "col": 2,
+      "row_human": 3,
+      "col_human": 3,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_03_blue」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "row_human": 3,
+      "col_human": 4,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_04_gold」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "row_human": 3,
+      "col_human": 5,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_05_purple」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 3,
+      "col": 0,
+      "row_human": 4,
+      "col_human": 1,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_01_red」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "row_human": 4,
+      "col_human": 2,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_02_green」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "row_human": 4,
+      "col_human": 3,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_03_blue」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "row_human": 4,
+      "col_human": 4,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_04_gold」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    },
+    {
+      "row": 3,
+      "col": 4,
+      "row_human": 4,
+      "col_human": 5,
+      "status": "unmatched",
+      "fixed": false,
+      "tile_id": null,
+      "tile_name": null,
+      "source_group": null,
+      "crop_box": null,
+      "distance": null,
+      "similarity": null,
+      "reason_code": "quota",
+      "reason": "配额不足：5 种样块的全图配额都已用完，该格未能匹配。 最相似的是「qc_05_purple」，但配额已用完。",
+      "quota_blocker_ids": [
+        "qc_01_red",
+        "qc_02_green",
+        "qc_03_blue",
+        "qc_04_gold",
+        "qc_05_purple"
+      ],
+      "adjacency_blocker_ids": []
+    }
+  ]
+}

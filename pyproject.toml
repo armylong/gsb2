@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-studio"
+version = "1.0.0"
+description = "本地照片马赛克工具：受限样块分配、固定格、种子重现、相似度/来源定位与导出"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.5",
+    "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+mosaic-studio = "mosaic_studio.gui.app:main"
+
+[tool.setuptools.packages.find]
+include = ["mosaic_studio*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,6 @@
+﻿样块ID,样块名,来源分组,源文件路径,sha1短码,原图宽,原图高,裁切框,配额,总使用次数,其中固定次数
+qc_01_red,qc_01_red,tiles,/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_01_red.png,d1f14fc6087c,160,160,"0,0,160,160",2,2,1
+qc_02_green,qc_02_green,tiles,/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_02_green.png,520fe0e791cf,160,160,"0,0,160,160",2,2,0
+qc_03_blue,qc_03_blue,tiles,/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_03_blue.png,5e3c04b3fbfb,160,160,"0,0,160,160",2,2,0
+qc_04_gold,qc_04_gold,tiles,/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_04_gold.png,392ae7c923ed,160,160,"0,0,160,160",2,2,0
+qc_05_purple,qc_05_purple,tiles,/Users/zhangzelong/works/gsb2/tasks/15433/repo/examples/quota_conflict/tiles/qc_05_purple.png,d7250e77e062,160,160,"0,0,160,160",2,2,0
