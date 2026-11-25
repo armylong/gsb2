@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>拉丝金属材质对照 · Three.js</title>
+  </head>
+  <body>
+    <div id="layout">
+      <aside id="panel">
+        <h1>拉丝金属材质对照</h1>
+        <p class="hint">
+          左：均匀粗糙度（各向同性对照）<br />
+          右：顺纹/横纹分别可调的拉丝材质
+        </p>
+
+        <section>
+          <h2>对照预设</h2>
+          <div class="btn-row">
+            <button id="preset-rotate90">纹路转 90° 对照</button>
+            <button id="preset-equal">等粗糙度校验</button>
+            <button id="preset-default">恢复默认</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>粗糙度</h2>
+          <label>左侧均匀粗糙度
+            <input id="iso-rough" type="range" min="0.04" max="1" step="0.01" value="0.35" />
+            <span id="iso-rough-val" class="val"></span>
+          </label>
+          <label>右侧·沿纹路粗糙度（顺纹）
+            <input id="rough-along" type="range" min="0.04" max="1" step="0.01" value="0.22" />
+            <span id="rough-along-val" class="val"></span>
+          </label>
+          <label>右侧·横过纹路粗糙度（横纹）
+            <input id="rough-across" type="range" min="0.04" max="1" step="0.01" value="0.62" />
+            <span id="rough-across-val" class="val"></span>
+          </label>
+        </section>
+
+        <section>
+          <h2>拉丝方向</h2>
+          <div class="radio-row">
+            <label><input type="radio" name="grain-mode" value="linear" checked /> 直线纹</label>
+            <label><input type="radio" name="grain-mode" value="circular" /> 环形纹（绕样板中心）</label>
+          </div>
+          <label>纹路转角
+            <input id="grain-angle" type="range" min="0" max="360" step="1" value="0" />
+            <span id="grain-angle-val" class="val"></span>
+          </label>
+          <label>右侧相对转角（90° 对照）
+            <input id="aniso-offset" type="range" min="0" max="360" step="1" value="0" />
+            <span id="aniso-offset-val" class="val"></span>
+          </label>
+          <label>物体绕竖直轴转动
+            <input id="object-yaw" type="range" min="-180" max="180" step="1" value="0" />
+            <span id="object-yaw-val" class="val"></span>
+          </label>
+        </section>
+
+        <section>
+          <h2>可移动的灯</h2>
+          <p class="hint">也可直接拖动场景里的黄色灯球；两块舞台的灯位始终镜像同步。</p>
+          <label>方位角
+            <input id="light-az" type="range" min="-180" max="180" step="1" value="35" />
+            <span id="light-az-val" class="val"></span>
+          </label>
+          <label>仰角
+            <input id="light-el" type="range" min="-30" max="80" step="1" value="18" />
+            <span id="light-el-val" class="val"></span>
+          </label>
+        </section>
+
+        <section>
+          <h2>视角与检查</h2>
+          <div class="btn-row">
+            <button id="view-front">正视</button>
+            <button id="view-grazing">掠视</button>
+          </div>
+          <label class="check"><input id="show-directions" type="checkbox" checked /> 显示点击方向标记</label>
+          <label class="check"><input id="show-field" type="checkbox" /> 显示样板方向场网格</label>
+          <button id="clear-markers" class="minor">清除标记</button>
+          <pre id="pick-info">点击任意金属表面查看该点的纹路方向。</pre>
+        </section>
+      </aside>
+      <main id="viewport">
+        <div id="app"></div>
+        <div id="status">拖动灯球或调整滑块开始对照。</div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
