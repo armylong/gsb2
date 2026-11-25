@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>半透明精灵合批观察台 · WebGL2</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%235bd6ff' fill-opacity='0.55'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <div>
+            <h1>半透明精灵合批观察台</h1>
+            <p>逐像素核对"逐个绘制"与"合批绘制"的透明覆盖结果</p>
+          </div>
+        </div>
+
+        <nav class="scene-tabs" id="sceneTabs" aria-label="场景">
+          <button data-scene="sparse">稀疏</button>
+          <button data-scene="interleaved">交叉混合</button>
+          <button data-scene="dense">密集</button>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="resetCamera" class="ghost" title="相机回到全图">全图</button>
+          <button id="zoomOut" class="ghost" title="拉远">－</button>
+          <button id="zoomIn" class="ghost" title="拉近">＋</button>
+          <button id="resetDrag" class="ghost" title="把所有探针放回初始位置与层">复位探针</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="stage">
+          <div class="stage-canvas" id="stageCanvas">
+            <canvas id="glCanvas"></canvas>
+            <canvas id="overlayCanvas"></canvas>
+            <div class="stage-hint" id="stageHint">
+              滚轮缩放 · 按住空白处拖动画面 · 拖动 A/B/C 改变位置
+            </div>
+            <div class="fatal hidden" id="fatal"></div>
+          </div>
+          <div class="stage-footer">
+            <div class="compare-modes" id="compareModes" role="group" aria-label="对照方式">
+              <button data-mode="0" class="active">参考（逐个）</button>
+              <button data-mode="1">合批</button>
+              <button data-mode="2">滑动对照</button>
+              <button data-mode="3">差异放大</button>
+            </div>
+            <label class="inline-control" id="splitControl">
+              分割线
+              <input id="splitSlider" type="range" min="0" max="1000" value="500" />
+            </label>
+            <label class="inline-control" id="amplifyControl">
+              差异放大 ×<span id="amplifyValue">8</span>
+              <input id="amplifySlider" type="range" min="1" max="40" value="8" />
+            </label>
+            <label class="switch">
+              <input id="batchColorToggle" type="checkbox" />
+              <span>按批次着色</span>
+            </label>
+            <label class="switch danger" title="反例诊断：合批侧在同层内按混合重排，批次更少但破坏可见次序">
+              <input id="breakOrderToggle" type="checkbox" />
+              <span>反例：同层内按混合重排</span>
+            </label>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="card stats-card">
+            <h2>统计 <span class="tag" id="sceneTag"></span></h2>
+            <p class="scene-subtitle" id="sceneSubtitle"></p>
+            <div class="stat-grid" id="statGrid"></div>
+            <div class="muted small" id="offScreenNote"></div>
+          </section>
+
+          <section class="card">
+            <h2>批次带 <span class="muted small">（绘制次序从左到右）</span></h2>
+            <div class="ribbon" id="ribbon" aria-label="批次带"></div>
+            <div class="legend small">
+              <span><i class="swatch blend-alpha"></i>普通透明批次</span>
+              <span><i class="swatch blend-additive"></i>叠加发光批次</span>
+              <span><i class="swatch cut-layer"></i>下层色带 = 层</span>
+              <span><i class="swatch cut-interrupt"></i>探针夹断</span>
+            </div>
+            <div class="pill-row" id="interruptionList"></div>
+            <div class="batch-list" id="batchList"></div>
+          </section>
+
+          <section class="card">
+            <h2>选中对象 <span class="muted small">点画布上的精灵</span></h2>
+            <div class="probe-list" id="probeList"></div>
+            <div class="probe-editor" id="probeEditor"></div>
+            <div class="probe-info" id="selectionInfo"></div>
+          </section>
+
+          <section class="card">
+            <h2>缓冲区像素对照</h2>
+            <div class="row gap wrap">
+              <button id="readbackBtn" class="primary">读回并整幅比对</button>
+              <label class="switch">
+                <input id="autoCompareToggle" type="checkbox" checked />
+                <span>停下后自动比对</span>
+              </label>
+              <label class="switch">
+                <input id="pixelProbeToggle" type="checkbox" checked />
+                <span>悬停取样</span>
+              </label>
+            </div>
+            <div class="diff-result" id="diffResult"></div>
+            <div class="pixel-result" id="pixelResult">
+              <div class="muted small">把鼠标移到画面上，查看同一像素在两条路径缓冲区里的 RGBA。</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>贴图（程序生成）</h2>
+            <div class="texture-strip" id="textureStrip"></div>
+          </section>
+
+          <section class="card notes-card">
+            <h2>这个场景想说明什么</h2>
+            <ul id="sceneNotes"></ul>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
