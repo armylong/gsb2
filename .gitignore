@@ -19,6 +19,9 @@ data.json
 *.sqlite
 *.sqlite3
 tmp/
+generated_samples/
+/light_trail_stack_*.png
+/participating_frames_*.csv
 
 # ---- 依赖与构建产物 ----
 node_modules/
