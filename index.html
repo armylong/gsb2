@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>二维漫反射实验室 · 一次墙面反射</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">二维漫反射实验室 <span class="sub">俯视图 · 灯 → 墙 → 地面（一次反射）</span></div>
+      <div class="toolbar">
+        <div class="tool-group" id="tool-group">
+          <button data-tool="select" class="active">选择/拖动</button>
+          <button data-tool="wall">加墙段</button>
+          <button data-tool="point">加取样点</button>
+          <button data-tool="pan">平移视图</button>
+        </div>
+        <div class="tool-group" id="quality-group">
+          <button data-quality="quick" class="active">快预览</button>
+          <button data-quality="dense">密集取样</button>
+        </div>
+        <div class="tool-group">
+          <label class="chk"><input type="checkbox" id="show-heat" checked /> 热图</label>
+          <label class="chk">右视图
+            <select id="right-mode">
+              <option value="total" selected>直射+一次反射</option>
+              <option value="reflected">仅一次反射</option>
+              <option value="direct">仅直射</option>
+            </select>
+          </label>
+        </div>
+        <div class="tool-group">
+          <button id="btn-reset-view">适配视图</button>
+          <button id="btn-preset-default">默认场景</button>
+          <button id="btn-preset-empty">仅外墙</button>
+          <button id="btn-export">导出 JSON</button>
+          <button id="btn-import">导入 JSON</button>
+          <input type="file" id="import-file" accept="application/json" hidden />
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="stage">
+        <div class="canvas-wrap">
+          <div class="panel-title">左：仅直射（direct）</div>
+          <canvas id="canvas-left"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <div class="panel-title" id="right-title">右：直射 + 一次墙面反射</div>
+          <canvas id="canvas-right"></canvas>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="card">
+          <h3>灯（长度可拖端点）</h3>
+          <label>功率 <input type="range" id="lamp-power" min="5" max="200" step="1" />
+            <span id="lamp-power-val"></span></label>
+          <label>灯长 <span id="lamp-length"></span></label>
+          <div class="hint">在画布上拖动黄色端点即可改变灯长与位置。</div>
+        </section>
+
+        <section class="card">
+          <h3>墙段 / 隔板</h3>
+          <div class="wall-list" id="wall-list"></div>
+          <button id="btn-delete-wall" class="danger" disabled>删除选中墙段</button>
+        </section>
+
+        <section class="card">
+          <h3>探针读数 <span id="probe-coord" class="hint"></span></h3>
+          <div id="probe-summary"></div>
+          <div class="scrollbox" id="probe-contribs"></div>
+          <div class="hint">
+            勾选某墙段的“假设关闭”可对比关闭后读数；点击画布任意地面可更换探针位置。
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>取样点</h3>
+          <div id="sample-list" class="sample-list"></div>
+        </section>
+
+        <section class="card">
+          <h3>显示与校验</h3>
+          <label>曝光增益 <input type="range" id="exposure" min="0.2" max="2.5" step="0.05" />
+            <span id="exposure-val"></span></label>
+          <div id="stats"></div>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="statusbar">
+      <span id="status-coord"></span>
+      <span id="status-mode"></span>
+      <span id="status-hint"></span>
+    </footer>
+
+    <script type="module" src="./dist/main.js"></script>
+  </body>
+</html>

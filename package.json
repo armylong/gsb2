@@ -1,0 +1,17 @@
+{
+  "name": "diffuse-reflection-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "二维俯视图漫反射（一次墙面反射）光照实验，TypeScript + Canvas",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "test": "tsc -p tsconfig.test.json && node --test \"dist-test/test/**/*.test.js\"",
+    "test:browser": "npm run build && node scripts/run-browser-tests.cjs",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.7",
+    "typescript": "^5.6.3"
+  }
+}
