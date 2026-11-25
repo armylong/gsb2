@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "video_path": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/builtin_lesson.mp4",
+  "srt_path": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/builtin_lesson.srt",
+  "width": 1280,
+  "height": 720,
+  "fps": 24.0,
+  "duration": 12.0,
+  "obstacles": [
+    {
+      "id": "obs_1",
+      "name": "右上角固定题板",
+      "rect": {
+        "x": 900,
+        "y": 42,
+        "w": 340,
+        "h": 190
+      },
+      "start": 0.0,
+      "end": 12.0,
+      "color": "#ff4d4f"
+    },
+    {
+      "id": "obs_2",
+      "name": "中途滑入图片的扫过区",
+      "rect": {
+        "x": 858,
+        "y": 585,
+        "w": 422,
+        "h": 113
+      },
+      "start": 6.0,
+      "end": 8.2,
+      "color": "#ff4d4f"
+    },
+    {
+      "id": "obs_3",
+      "name": "临时上方题板",
+      "rect": {
+        "x": 80,
+        "y": 64,
+        "w": 1120,
+        "h": 218
+      },
+      "start": 9.4,
+      "end": 11.2,
+      "color": "#ff4d4f"
+    },
+    {
+      "id": "obs_4",
+      "name": "临时下方题板",
+      "rect": {
+        "x": 80,
+        "y": 448,
+        "w": 1120,
+        "h": 244
+      },
+      "start": 9.4,
+      "end": 11.2,
+      "color": "#ff4d4f"
+    }
+  ],
+  "cues": [
+    {
+      "id": "cue_1",
+      "index": 1,
+      "start": 0.5,
+      "end": 2.8,
+      "text": "欢迎来到字幕避让功能演示。"
+    },
+    {
+      "id": "cue_2",
+      "index": 2,
+      "start": 3.1,
+      "end": 5.4,
+      "text": "右上角是整节课都在的题板，字幕会记住安全位置，不会无故来回跳。"
+    },
+    {
+      "id": "cue_3",
+      "index": 3,
+      "start": 5.7,
+      "end": 8.6,
+      "text": "右边这张图会在句子中间滑进来，所以整句字幕都要提前避开它可能出现的区域。"
+    },
+    {
+      "id": "cue_4",
+      "index": 4,
+      "start": 9.0,
+      "end": 11.6,
+      "text": "这时上下同时出现题板，常规候选位可能全部放不下。"
+    }
+  ],
+  "manual_positions": {
+    "cue_4": {
+      "x": 177.0,
+      "y": 318.0
+    }
+  },
+  "style": {}
+}

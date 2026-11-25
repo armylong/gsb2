@@ -1,0 +1,256 @@
+{
+  "status": "ok",
+  "out_dir": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo",
+  "video": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/builtin_lesson.mp4",
+  "srt": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/builtin_lesson.srt",
+  "output_video": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/subtitled_demo.mp4",
+  "output_srt": "/Users/zhangzelong/works/gsb2/tasks/16360/repo/examples/demo/subtitled_demo.srt",
+  "ffprobe": {
+    "path": "examples/demo/subtitled_demo.mp4",
+    "width": 1280,
+    "height": 720,
+    "fps": 24.0,
+    "duration": 12.0,
+    "has_audio": false
+  },
+  "issues_before_manual": [
+    {
+      "cue_id": "cue_4",
+      "time": 9.0,
+      "markers": [
+        9.0,
+        9.4,
+        11.2
+      ],
+      "message": "字幕 4（9.00–11.60s）没有能避开整条时间窗内所有禁放区的候选位"
+    }
+  ],
+  "placements": {
+    "cue_1": {
+      "slot_id": "bottom_1",
+      "safe": true,
+      "manual": false,
+      "box": {
+        "x": 380,
+        "y": 601,
+        "w": 520,
+        "h": 80
+      },
+      "collisions": []
+    },
+    "cue_2": {
+      "slot_id": "bottom_1",
+      "safe": true,
+      "manual": false,
+      "box": {
+        "x": 84,
+        "y": 540,
+        "w": 1112,
+        "h": 141
+      },
+      "collisions": []
+    },
+    "cue_3": {
+      "slot_id": "bottom_3",
+      "safe": true,
+      "manual": false,
+      "box": {
+        "x": 66,
+        "y": 410,
+        "w": 1148,
+        "h": 141
+      },
+      "collisions": []
+    },
+    "cue_4": {
+      "slot_id": "manual",
+      "safe": true,
+      "manual": true,
+      "box": {
+        "x": 177,
+        "y": 318,
+        "w": 926,
+        "h": 80
+      },
+      "collisions": []
+    }
+  },
+  "moments": [
+    {
+      "time": 0.5,
+      "cue_id": "cue_1",
+      "reason": "字幕开始",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 2.8,
+      "cue_id": null,
+      "reason": "字幕结束",
+      "safe": []
+    },
+    {
+      "time": 3.1,
+      "cue_id": "cue_2",
+      "reason": "字幕开始",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 5.4,
+      "cue_id": null,
+      "reason": "字幕结束",
+      "safe": []
+    },
+    {
+      "time": 5.7,
+      "cue_id": "cue_3",
+      "reason": "字幕开始",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 6.0,
+      "cue_id": "cue_3",
+      "reason": "禁放区开始",
+      "safe": [
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 8.2,
+      "cue_id": "cue_3",
+      "reason": "禁放区消失",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 8.6,
+      "cue_id": null,
+      "reason": "字幕结束",
+      "safe": []
+    },
+    {
+      "time": 9.0,
+      "cue_id": "cue_4",
+      "reason": "字幕开始",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 9.4,
+      "cue_id": "cue_4",
+      "reason": "禁放区开始",
+      "safe": []
+    },
+    {
+      "time": 11.2,
+      "cue_id": "cue_4",
+      "reason": "禁放区消失",
+      "safe": [
+        "bottom_1",
+        "bottom_2",
+        "bottom_3"
+      ]
+    },
+    {
+      "time": 11.6,
+      "cue_id": null,
+      "reason": "字幕结束",
+      "safe": []
+    }
+  ],
+  "moment_step_count": 12,
+  "preview_checks": [
+    {
+      "name": "preview_slide_avoidance",
+      "time": 6.6,
+      "cue_id": "cue_3",
+      "placement": {
+        "x": 66,
+        "y": 410,
+        "w": 1148,
+        "h": 141
+      },
+      "slot_id": "bottom_3",
+      "widget_png": "examples/demo/preview_slide_avoidance_widget.png",
+      "source_preview_png": "examples/demo/preview_slide_avoidance_source_coords.png"
+    },
+    {
+      "name": "preview_manual_center",
+      "time": 10.3,
+      "cue_id": "cue_4",
+      "placement": {
+        "x": 177,
+        "y": 318,
+        "w": 926,
+        "h": 80
+      },
+      "slot_id": "manual",
+      "widget_png": "examples/demo/preview_manual_center_widget.png",
+      "source_preview_png": "examples/demo/preview_manual_center_source_coords.png"
+    }
+  ],
+  "timing_checks": [
+    {
+      "cue_id": "cue_1",
+      "visible_at": 1.4,
+      "ended_check_at": 3.05,
+      "mid": {
+        "mean_diff": 130.85001401737836,
+        "changed_ratio": 0.9415942435286422,
+        "samples": 10701
+      },
+      "after_end": {
+        "mean_diff": 0.5083948540634765,
+        "changed_ratio": 0.0,
+        "samples": 10701
+      }
+    },
+    {
+      "cue_id": "cue_3",
+      "visible_at": 7.0,
+      "ended_check_at": 8.85,
+      "mid": {
+        "mean_diff": 145.20373137372292,
+        "changed_ratio": 0.9118922229026332,
+        "samples": 40825
+      },
+      "after_end": {
+        "mean_diff": 0.13972647479077197,
+        "changed_ratio": 0.0,
+        "samples": 40825
+      }
+    },
+    {
+      "cue_id": "cue_4",
+      "visible_at": 10.35,
+      "ended_check_at": 11.85,
+      "mid": {
+        "mean_diff": 135.7147813288539,
+        "changed_ratio": 0.8764718250630782,
+        "samples": 19024
+      },
+      "after_end": {
+        "mean_diff": 0.16650897112419114,
+        "changed_ratio": 0.0,
+        "samples": 19024
+      }
+    }
+  ]
+}
