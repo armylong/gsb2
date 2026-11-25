@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FM 电铃合成器</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>FM 电铃合成器 <span class="sub">调频合成 · 侧带观察 · WAV 导出</span></h1>
+      <div class="preset-row">
+        <span class="row-label">示例:</span>
+        <button id="preset-pure" class="btn">近纯音</button>
+        <button id="preset-bell" class="btn">强侧带电铃</button>
+        <button id="mod-zero" class="btn btn-warn">调制归零 (I=0)</button>
+        <span id="preset-desc" class="preset-desc"></span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- 左列: 参数控制 -->
+      <section class="panel controls">
+        <h2>合成参数</h2>
+
+        <div class="control-block">
+          <div class="control-head">
+            <label>载波模式</label>
+            <div class="seg" id="carrier-mode">
+              <button data-mode="track" class="seg-btn active">跟随音高</button>
+              <button data-mode="fixed" class="seg-btn">固定频率</button>
+            </div>
+          </div>
+          <div class="control-row" id="fixed-freq-row" hidden>
+            <label for="fixed-freq">固定载波频率 (Hz)</label>
+            <input type="number" id="fixed-freq" min="20" max="8000" step="1" value="220" />
+          </div>
+          <p class="hint">
+            按住同一个音符时来回切换两种模式: 载波只会平滑滑到新频率, 不会重新触发起音。
+          </p>
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="mod-ratio">调制比 fm / fc</label>
+            <span class="val" id="mod-ratio-val">2.76</span>
+          </div>
+          <input type="range" id="mod-ratio" min="0" max="8" step="0.01" value="2.76" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="mod-depth">峰值调制指数 I (调制深度)</label>
+            <span class="val" id="mod-depth-val">3.20</span>
+          </div>
+          <input type="range" id="mod-depth" min="0" max="8" step="0.01" value="3.2" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="model-time">模型时间 (曲线展开时长, s)</label>
+            <span class="val" id="model-time-val">1.20</span>
+          </div>
+          <input type="range" id="model-time" min="0.1" max="4" step="0.05" value="1.2" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="decay-time">振幅衰减到 -60dB 时长 (s)</label>
+            <span class="val" id="decay-time-val">2.40</span>
+          </div>
+          <input type="range" id="decay-time" min="0.2" max="8" step="0.1" value="2.4" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="attack-time">起音 (s)</label>
+            <span class="val" id="attack-time-val">0.005</span>
+          </div>
+          <input type="range" id="attack-time" min="0.001" max="0.1" step="0.001" value="0.005" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="output-gain">输出增益</label>
+            <span class="val" id="output-gain-val">0.50</span>
+          </div>
+          <input type="range" id="output-gain" min="0" max="1" step="0.01" value="0.5" />
+        </div>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label>调制深度分段曲线 I(t)</label>
+            <button id="curve-reset" class="btn btn-small">重置</button>
+          </div>
+          <canvas id="curve-canvas" width="620" height="280"></canvas>
+          <p class="hint">
+            点击空白处加断点, 拖动断点改值, 双击非端点删除。横轴为归一化时间, 纵轴为深度比例。
+          </p>
+        </div>
+      </section>
+
+      <!-- 右列: 分析与导出 -->
+      <section class="panel analysis">
+        <h2>侧带分析</h2>
+        <div id="freq-summary" class="freq-summary"></div>
+        <div id="nyquist-warning" class="warning" hidden></div>
+
+        <div class="table-wrap">
+          <table id="sideband-table">
+            <thead>
+              <tr>
+                <th>阶数 n</th>
+                <th>标称频率 fc+n·fm (Hz)</th>
+                <th>采样后实际位置 (Hz)</th>
+                <th>相对电平 (dB)</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h2>实时频谱</h2>
+        <canvas id="spectrum-canvas" width="620" height="260"></canvas>
+        <p class="hint">
+          白线为实测 FFT, 竖线为按 J<sub>n</sub>(I) 预测的侧带位置;
+          <span class="tag tag-alias">红色</span> 表示标称频率超过 Nyquist、采样后折叠到别名位置。
+        </p>
+
+        <h2>导出 WAV</h2>
+        <div class="export-row">
+          <label for="export-note">音符</label>
+          <select id="export-note"></select>
+          <span class="hint" id="export-info"></span>
+        </div>
+        <button id="export-btn" class="btn btn-primary">导出该音符 WAV (含自然衰减尾巴)</button>
+      </section>
+    </main>
+
+    <section class="panel keyboard-panel">
+      <div class="control-row">
+        <h2>键盘</h2>
+        <span class="hint">鼠标按住或用电脑键盘 (A 排起为 C4), 重复按同一音符不会重触发</span>
+      </div>
+      <div id="keyboard" class="keyboard"></div>
+    </section>
+
+    <footer class="app-footer">
+      <span id="sample-rate-info"></span>
+    </footer>
+  </body>
+  <script type="module" src="/src/main.ts"></script>
+</html>
