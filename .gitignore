@@ -20,6 +20,11 @@ data.json
 *.sqlite3
 tmp/
 
+# Generated MKV samples and self-check outputs
+samples/*.mkv
+samples/**/*.mkv
+samples/selfcheck/
+
 # ---- 依赖与构建产物 ----
 node_modules/
 __pycache__/
