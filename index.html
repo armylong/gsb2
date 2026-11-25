@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>透视线相机标定实验</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="left">
+      <div id="toolbar">
+        <span class="tb-label">模式:</span>
+        <button data-mode="select" class="mode-btn active">选择/拖动</button>
+        <button data-mode="drawX" class="mode-btn draw-x">画 X 线</button>
+        <button data-mode="drawZ" class="mode-btn draw-z">画 Z 线</button>
+        <button data-mode="drawRef" class="mode-btn draw-ref">画参考线</button>
+        <button data-mode="place" class="mode-btn">放置盒子</button>
+        <span class="tb-sep"></span>
+        <button id="btn-fit">适应视图</button>
+        <span class="tb-hint">滚轮缩放 · 选择模式拖空白处平移</span>
+      </div>
+      <div id="image-wrap">
+        <canvas id="image-canvas"></canvas>
+      </div>
+      <div id="image-status"></div>
+    </div>
+    <div id="right">
+      <div id="view3d-wrap">
+        <canvas id="view3d-canvas"></canvas>
+        <div id="view3d-label">独立三维视图(拖动旋转 / 滚轮缩放)</div>
+      </div>
+      <div id="panel"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
