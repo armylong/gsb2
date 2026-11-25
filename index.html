@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图书馆书车 · 规则试玩小地图</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>图书馆自动书车 · 规则试玩</h1>
+      <div class="scenario-switch" id="scenario-switch"></div>
+    </header>
+
+    <main class="layout">
+      <section class="map-panel">
+        <div class="map-canvas-wrap">
+          <canvas id="map-canvas"></canvas>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="hint" id="hint"></div>
+      </section>
+
+      <aside class="side-panel">
+        <div class="controls">
+          <button id="btn-reset" type="button">回到起点</button>
+          <button id="btn-step-back" type="button">上一拍</button>
+          <button id="btn-step" type="button">单步</button>
+          <button id="btn-play" type="button">完整走</button>
+          <button id="btn-restore" type="button">恢复默认指令</button>
+        </div>
+        <div class="win-banner" id="win-banner" hidden></div>
+
+        <div class="editors" id="editors"></div>
+
+        <div class="timeline-block">
+          <div class="block-title">节拍时间轴（点任意一拍查看请求与判定）</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="detail-block">
+          <div class="block-title" id="detail-title">当前拍详情</div>
+          <div id="detail"></div>
+        </div>
+
+        <details class="rules">
+          <summary>阻挡与拿放规则（明示）</summary>
+          <ul>
+            <li>每拍两车按<b>当前格同时</b>提出动作，引擎统一仲裁后一次性结算。</li>
+            <li>前进目标是墙或边界：本拍被挡，原地不动。</li>
+            <li>两车同拍抢同一个普通格、或迎面交换位置：<b>双双阻挡</b>，画面上不会重叠。</li>
+            <li>被挡车辆的目标格若又被其他车占住，会连锁阻挡；被挡不影响下一拍继续提动作。</li>
+            <li>台面是可共享工位：后到的车可以并入静止停留的车（同拍一起挤进台面仍算抢格阻挡）。</li>
+            <li>拿/放只与当拍所在格的台面互动；同拍抢同一本书按 <b>A→B</b> 顺序仲裁，输的一方判失败。</li>
+            <li>车箱至多一格：满箱拿、空手放、无台面互动、错色台面放书，均判失败且状态不变。</li>
+            <li>过关条件：每一个角落台面都由一次成功放书得到同色书（不是车开过就算）。</li>
+            <li>改动任意一拍指令都会从初始局面整条重算，旧运行拿到的书不会残留在车上。</li>
+          </ul>
+        </details>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
