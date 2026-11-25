@@ -27,6 +27,7 @@ __pycache__/
 .venv/
 venv/
 dist/
+check-dist/
 build/
 target/
 bin/

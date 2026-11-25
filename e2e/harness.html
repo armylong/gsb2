@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>e2e 驱动</title>
+  <style>
+    :root {
+      --bg: #0a1826; --panel: #12283d; --panel-2: #0e2133; --line: #24445f;
+      --text: #eef3f8; --dim: #93a7ba; --tide: #4fb0e8; --ebb: #a986e8;
+      --gold: #ffd34d; --danger: #ff7b7b; --ok: #7ee6a4;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+      font-family: "PingFang SC", system-ui, sans-serif; display: flex; min-height: 100vh; }
+    #stage { flex: 1 1 auto; padding: 14px; min-width: 0; }
+    #map { width: 1150px; height: 780px; border: 1px solid var(--line);
+      border-radius: 10px; background: #0e2740; display: block; }
+    #side { flex: 0 0 380px; padding: 14px 16px; background: var(--panel);
+      border-left: 1px solid var(--line); display: flex; flex-direction: column;
+      gap: 12px; overflow-y: auto; max-height: 100vh; }
+    h1 { font-size: 18px; margin: 0; }
+    h2 { font-size: 14px; margin: 0 0 6px; color: var(--dim); font-weight: 600; }
+    .box { background: var(--panel-2); border: 1px solid var(--line);
+      border-radius: 8px; padding: 10px 12px; }
+    #puzzle-brief { font-size: 12.5px; color: var(--dim); line-height: 1.6; margin-top: 6px; }
+    #state-line { font-size: 13.5px; line-height: 1.7; }
+    .badge { display: inline-block; padding: 1px 8px; border-radius: 10px;
+      font-size: 12px; font-weight: 700; color: #08141f; }
+    .badge.tide { background: var(--tide); }
+    .badge.ebb { background: var(--ebb); color: #1c1230; }
+    button { font-family: inherit; font-size: 13px; color: var(--text);
+      background: #1d3d59; border: 1px solid var(--line); border-radius: 6px;
+      padding: 7px 10px; cursor: pointer; }
+    .puzzle-row, .tool-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .puzzle-row button.active { background: #2f6b46; border-color: var(--ok); }
+    #clock-box { display: none; gap: 8px; align-items: center; font-size: 13px; flex-wrap: wrap; }
+    .side-btn.tide { background: #16415c; }
+    .side-btn.ebb { background: #352753; }
+    .side-btn.cur { outline: 2px solid var(--gold); }
+    .medal { color: var(--dim); font-size: 13px; }
+    .medal.taken { color: var(--gold); font-weight: 700; }
+    #transit-card { font-size: 12.5px; line-height: 1.75; }
+    .card-title { color: var(--dim); font-size: 12px; margin-bottom: 4px; }
+    .arrow { color: var(--gold); font-weight: 700; }
+    .muted { color: var(--dim); font-size: 12px; }
+    #analysis { font-size: 12.5px; line-height: 1.7; min-height: 34px; }
+    #log { min-height: 120px; max-height: 220px; overflow-y: auto; font-size: 12px;
+      line-height: 1.65; background: #0a1b2b; border-radius: 6px; padding: 8px 10px; }
+    #hint { font-size: 11.5px; color: var(--dim); line-height: 1.6; }
+    .banner { position: fixed; top: 18px; left: 50%;
+      transform: translateX(-50%) translateY(-80px); padding: 12px 26px;
+      border-radius: 10px; font-weight: 700; font-size: 15px; transition: transform .35s;
+      z-index: 10; max-width: 70vw; text-align: center; }
+    .banner.show { transform: translateX(-50%) translateY(0); }
+    .banner.win { background: #2c5e3f; border: 1px solid var(--ok); }
+    .banner.trap { background: #5e2c2c; border: 1px solid var(--danger); }
+    #result {
+      position: fixed; bottom: 0; right: 0; width: 520px; max-height: 60vh;
+      overflow: auto; background: #0c1f30; color: #bfe3c8;
+      font: 11px/1.5 ui-monospace, Menlo, monospace; padding: 8px;
+      white-space: pre-wrap; z-index: 99; border: 1px solid var(--ok);
+    }
+  </style>
+</head>
+<body>
+  <div id="stage"><canvas id="map"></canvas></div>
+
+  <div id="side">
+    <div>
+      <h1>群岛潮汐传送（e2e）</h1>
+      <div class="puzzle-row" style="margin-top:8px">
+        <button data-puzzle="P1" class="active">题面一</button>
+        <button data-puzzle="P2">题面二</button>
+      </div>
+      <div class="box" style="margin-top:10px">
+        <div id="puzzle-title"></div>
+        <div id="puzzle-brief"></div>
+      </div>
+    </div>
+    <div class="box">
+      <h2>当前状态</h2>
+      <div id="state-line"></div>
+      <div id="clock-box" class="box" style="margin-top:8px; background:#0d2438"></div>
+      <div id="medal-box" class="medal" style="margin-top:8px"></div>
+    </div>
+    <div class="box">
+      <h2>分析</h2>
+      <div class="tool-row">
+        <button id="btn-reach">可达区域</button>
+        <button id="btn-trap">回不去</button>
+        <button id="btn-flipinfo">最短翻卡</button>
+        <button id="btn-reset">重来</button>
+      </div>
+      <div id="analysis" style="margin-top:8px"></div>
+    </div>
+    <div class="box"><h2>过门核对</h2><div id="transit-card"></div></div>
+    <div class="box"><h2>日志</h2><div id="log"></div></div>
+    <div id="hint"></div>
+  </div>
+
+  <div id="banner" class="banner"></div>
+  <div id="result">running…</div>
+
+  <script type="module" src="../dist/main.js"></script>
+  <script type="module">
+    const canvas = document.getElementById('map');
+    const result = document.getElementById('result');
+    const fails = [];
+    const ok = [];
+    function assert(cond, msg) {
+      (cond ? ok : fails).push((cond ? 'PASS ' : 'FAIL ') + msg);
+    }
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    function key(k) {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true }));
+    }
+    function keyUp(k) {
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true }));
+    }
+    async function hold(k, frames) {
+      key(k);
+      await sleep(frames * 18);
+      keyUp(k);
+    }
+    async function walkToGate(gateId) {
+      await sleep(300); // 等过门冷却结束
+      const g = window.__testGates.find((x) => x.id === gateId);
+      const rect = canvas.getBoundingClientRect();
+      // 点门旁站位（地面），只走不进；直接点门在 60px 内会立刻触发传送
+      canvas.dispatchEvent(
+        new MouseEvent('click', {
+          clientX: rect.left + g.standX,
+          clientY: rect.top + g.standY,
+          bubbles: true,
+        })
+      );
+      // 轮询直到玩家真的走到目标门旁（跨岛后坐标体系不变，按门的全局像素距离判断）
+      for (let i = 0; i < 80; i++) {
+        const p = api.snapshot();
+        const d = Math.hypot(g.x - p.x, g.y - p.y);
+        if (d <= 46) return;
+        await sleep(100);
+      }
+      const pp = api.snapshot();
+      throw new Error('走到门 ' + gateId + ' 超时, player=' + JSON.stringify(pp) + ' gate=' + JSON.stringify(g));
+    }
+    async function enter() {
+      key('Enter');
+      await sleep(160);
+    }
+
+    let api = null;
+    try {
+      for (let i = 0; i < 100 && !window.__testApi; i++) await sleep(50);
+      api = window.__testApi;
+      assert(!!api, '主程序已启动并暴露测试 API');
+      window.__testGates = api.gates;
+
+      // ---------- 题面一：两次翻卡取章 ----------
+      api.reset('P1');
+      await sleep(120);
+      let s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'tide', 'P1 起点：晨港·潮');
+
+      await walkToGate('A3');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I2' && s.side === 'tide', '过门1：晨港→钟鸣屿，保持潮面');
+      assert(s.facing === 'E', '落在西门背面，朝向东');
+
+      await walkToGate('B1');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'ebb', '过门2：回晨港翻成汐面（第 1 次翻卡）');
+      assert(s.facing === 'E', '落在西门背面，朝向东');
+      assert(!api.clockVisible(), '晨港没有潮钟，不能免费换面');
+
+      await walkToGate('A2');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I3' && s.side === 'tide', '过门3：进章岛翻回潮面（第 2 次翻卡）');
+      assert(s.facing === 'S', '落在北门背面，朝向南');
+      assert(s.medalTaken === true, '纪念章已取得');
+      assert(api.bannerShown().includes('题面一完成'), '完成横幅出现');
+
+      await walkToGate('C2');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'tide', '章岛可经西归门返回晨港（不是死胡同）');
+
+      await walkToGate('A2');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I2' && s.side === 'ebb', '同一东潮门潮面下去钟鸣屿（翻成汐，与汐面落点不同）');
+
+      // B1 汐面翻卡 → 晨港潮
+      await walkToGate('B1');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'tide', '钟鸣屿汐面经西钟门翻卡回晨港潮面');
+
+      // 凑出晨港汐面：A3 不翻卡到钟鸣屿潮，再 B1 翻卡回晨港汐
+      await walkToGate('A3');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I2' && s.side === 'tide', '西汐门潮面不翻卡，到钟鸣屿仍为潮');
+      await walkToGate('B1');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'ebb', '西钟门翻卡回到晨港·汐');
+
+      // 空规则拒绝：晨港汐面试 A3 应被拒绝
+      const logsBefore = api.logCount();
+      await walkToGate('A3');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I1', '西汐门汐面下拒绝通行，人没离开晨港');
+      assert(api.logCount() > logsBefore, '拒绝通行写入日志');
+
+      // ---------- 题面二：单向死胡同 ----------
+      api.reset('P2');
+      await sleep(120);
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'tide', 'P2 起点：晨港·潮');
+
+      await walkToGate('A1');
+      await enter();
+      s = api.snapshot();
+      assert(s.islandId === 'I4' && s.side === 'tide', '顺向通过北礁门到花澜礁，不翻卡');
+      assert(s.facing === 'S', '花澜礁落点朝向南');
+      assert(api.bannerShown().includes('单向死胡同'), '死胡同横幅出现');
+
+      const trappedLogs = api.logCount();
+      for (const gid of ['D1', 'D2', 'D3']) {
+        await walkToGate(gid);
+        await enter();
+      }
+      s = api.snapshot();
+      assert(s.islandId === 'I4', '三扇封死门全部拒绝，仍困在花澜礁');
+      assert(api.logCount() >= trappedLogs + 3, '每次撞封门都有日志');
+
+      const reach = api.reachableNow();
+      assert(reach.size === 1 && reach.has('I4'), '花澜礁可达区域只有自己');
+
+      key('r');
+      await sleep(200);
+      s = api.snapshot();
+      assert(s.islandId === 'I1' && s.side === 'tide' && s.medalTaken === false, 'R 重来恢复初始状态');
+
+      const traps = api.trappedNow().map((t) => t.state);
+      assert(traps.some((x) => x.startsWith('I4:')), '回不去分析点名花澜礁');
+      assert(!traps.some((x) => x.startsWith('I3:')), '章岛不在回不去名单');
+
+      api.reset('P1');
+      await walkToGate('A3');
+      await enter();
+      assert(api.clockVisible(), '钟鸣屿显示潮钟换面按钮');
+      api.pickClock('ebb');
+      await sleep(80);
+      s = api.snapshot();
+      assert(s.side === 'ebb', '潮钟把卡面重选为汐面（不翻卡）');
+
+      const before = api.snapshot();
+      await hold('d', 20);
+      const after = api.snapshot();
+      assert(after.x !== before.x && after.facing === 'E', '键盘 D 向东移动并改变朝向');
+    } catch (err) {
+      fails.push('用例抛异常: ' + (err && err.stack ? err.stack : String(err)));
+    }
+
+    result.textContent =
+      (fails.length ? '=== 有失败 ===\n' : '=== 全部通过 ===\n') +
+      ok.join('\n') + '\n' + fails.join('\n');
+    document.title = fails.length
+      ? `E2E FAIL ${fails.length}/${ok.length + fails.length}`
+      : `E2E PASS ${ok.length}/${ok.length + fails.length}`;
+    window.__testDone = true;
+    window.__testPassed = fails.length === 0;
+  </script>
+</body>
+</html>

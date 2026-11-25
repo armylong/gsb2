@@ -1,0 +1,16 @@
+{
+  "name": "tide-islands",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "群岛潮汐传送短题：TypeScript + Canvas 本地可玩，验证哪些看似连通的路走不回来",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.check.json && node check-dist/selfcheck.js",
+    "e2e": "node scripts/cdp-e2e.mjs",
+    "serve": "node scripts/server.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
