@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>波表混叠试音台 · Wavetable Alias Lab</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="page-head">
+        <h1>波表混叠试音台</h1>
+        <p class="subtitle">
+          单声部 Web Audio 实验：自画一周期波形 → 直接循环 vs. 限带播放 →
+          看理论谐波、实测成分与折叠（别名）频率，定位高音区混进来的低响来自哪里。
+        </p>
+      </header>
+
+      <!-- 卡片 1：波形编辑 -->
+      <section class="card" id="card-wave">
+        <div class="card-head">
+          <h2>1 · 一周期波形</h2>
+          <div class="preset-row" id="preset-row"></div>
+        </div>
+
+        <div class="editor-wrap">
+          <canvas id="wave-canvas" height="280" aria-label="波形编辑画布，鼠标或触摸拖动绘制"></canvas>
+          <div class="editor-hint">
+            拖动绘制；<kbd>Shift</kbd>+拖动为平滑；首尾各复制 1/4 周期拼在两侧（阴影区），接缝在中央竖线处可直接对照。
+          </div>
+          <canvas id="seam-canvas" height="120" aria-label="首尾接缝放大视图"></canvas>
+          <div class="editor-hint">接缝放大：左 = 周期尾部，右 = 周期开头，中间为接缝。此条也可拖动修改。</div>
+        </div>
+
+        <div class="wave-controls">
+          <label class="check">
+            <input type="checkbox" id="remove-dc" />
+            <span>去掉直流偏移后试听/分析</span>
+          </label>
+          <span class="stat" id="dc-stat"></span>
+          <span class="stat" id="peak-stat"></span>
+          <span class="stat" id="rms-stat"></span>
+          <div class="spacer"></div>
+          <button class="btn" id="btn-undo" type="button">撤销</button>
+          <button class="btn" id="btn-reset-wave" type="button">恢复当前预设</button>
+          <button class="btn" id="btn-normalize" type="button">峰值归一化</button>
+        </div>
+      </section>
+
+      <!-- 卡片 2：播放 -->
+      <section class="card" id="card-play">
+        <div class="card-head">
+          <h2>2 · 播放对照（单声部，同一时刻只响一个音）</h2>
+        </div>
+
+        <div class="mode-row">
+          <div class="seg" id="mode-seg">
+            <button class="seg-btn" data-mode="naive" type="button">A · 原波形直接循环（不限带）</button>
+            <button class="seg-btn active" data-mode="bandlimited" type="button">B · 按音高限带（剔除放不出的高次成分）</button>
+          </div>
+          <div class="ab-fade">
+            <label for="ab-fader">A↔B 连续混合</label>
+            <input type="range" id="ab-fader" min="0" max="1000" value="1000" />
+            <span class="stat" id="ab-fader-stat">B 100%</span>
+          </div>
+        </div>
+
+        <div class="note-row" id="note-row"></div>
+
+        <div class="pitch-row">
+          <div class="pitch-fader">
+            <label for="pitch-fader">按住时平滑扫频（对数音高，半音）</label>
+            <input type="range" id="pitch-fader" min="-24" max="24" step="0.1" value="0" />
+            <span class="stat" id="pitch-stat">+0.0 半音</span>
+          </div>
+          <div class="sweep-row">
+            <label class="check">
+              <input type="checkbox" id="auto-sweep" />
+              <span>自动往返扫频</span>
+            </label>
+            <label>范围
+              <select id="sweep-range">
+                <option value="12">±1 八度</option>
+                <option value="24" selected>±2 八度</option>
+                <option value="7">±五度</option>
+              </select>
+            </label>
+            <label>速度
+              <select id="sweep-speed">
+                <option value="4">慢（8 秒/趟）</option>
+                <option value="2" selected>中（4 秒/趟）</option>
+                <option value="1">快（2 秒/趟）</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="play-controls">
+          <button class="btn primary" id="btn-note" type="button">按住发音（或键盘空格）</button>
+          <button class="btn" id="btn-sustain" type="button">持续开关：关</button>
+          <label class="check">
+            <input type="checkbox" id="loudness-align" checked />
+            <span>等响度对齐（按输出 RMS 归一，两模式同音量）</span>
+          </label>
+          <label>总音量
+            <input type="range" id="master-gain" min="0" max="100" value="70" />
+          </label>
+          <span class="stat" id="engine-stat"></span>
+        </div>
+      </section>
+
+      <!-- 卡片 3：成分对照 -->
+      <section class="card" id="card-spectrum">
+        <div class="card-head">
+          <h2>3 · 成分对照：理论 vs 实测</h2>
+          <div class="legend" id="spectrum-legend">
+            <span class="lg"><i class="sw ideal"></i>理论谐波（波形 DFT，与能否播放无关）</span>
+            <span class="lg"><i class="sw measured"></i>实测频谱（试听链路 / 导出渲染后做 FFT）</span>
+            <span class="lg"><i class="sw alias"></i>预测折叠（别名）位置</span>
+            <span class="lg"><i class="sw extra"></i>实测多出的真峰</span>
+            <span class="lg"><i class="sw missing"></i>缺失的谐波（空心）</span>
+            <span class="lg"><i class="sw nyq"></i>奈奎斯特频率</span>
+          </div>
+        </div>
+
+        <div class="measure-row">
+          <button class="btn" id="btn-measure" type="button">离线测量当前音高（确定性，不依赖实时分析）</button>
+          <select id="measure-mode">
+            <option value="naive">测量 A · 直接循环</option>
+            <option value="bandlimited" selected>测量 B · 限带</option>
+          </select>
+          <span class="stat" id="measure-stat"></span>
+        </div>
+
+        <div class="spectrum-grid">
+          <figure class="spec-panel">
+            <figcaption>理论：该波形包含的谐波（在当前基频下的落频，灰段为超出奈奎斯特、无法直接播放的部分）</figcaption>
+            <canvas id="ideal-canvas" height="260"></canvas>
+          </figure>
+          <figure class="spec-panel">
+            <figcaption>实测：渲染后 FFT 测到的成分（红色真峰即“多出来的”，空心圈即“少了的”）</figcaption>
+            <canvas id="measured-canvas" height="260"></canvas>
+            <div class="tooltip" id="spec-tooltip" hidden></div>
+          </figure>
+        </div>
+
+        <details class="table-details" open>
+          <summary>谐波明细表（表格视图，颜色不是唯一信息通道）</summary>
+          <div class="table-wrap">
+            <table id="harmonic-table">
+              <thead>
+                <tr>
+                  <th>谐波</th><th>理论频率 Hz</th><th>理论 dB</th>
+                  <th>实测频率 Hz</th><th>实测 dB</th><th>状态</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="extra-list" id="extra-list"></div>
+        </details>
+      </section>
+
+      <!-- 卡片 4：导出与复现 -->
+      <section class="card" id="card-export">
+        <div class="card-head">
+          <h2>4 · 导出与可复现</h2>
+        </div>
+        <div class="export-row">
+          <button class="btn" id="btn-export-tone" type="button">导出当前音色 WAV（A 左声道 / B 右声道）</button>
+          <button class="btn" id="btn-export-seq" type="button">导出音高测试序列 WAV + 元数据 JSON</button>
+          <button class="btn" id="btn-export-settings" type="button">导出设置 JSON</button>
+          <label class="file-btn">
+            导入设置 JSON
+            <input type="file" id="import-settings" accept="application/json,.json" hidden />
+          </label>
+          <button class="btn" id="btn-reseed" type="button"></button>
+        </div>
+        <div class="seq-preview" id="seq-preview"></div>
+      </section>
+
+      <!-- 卡片 5：本地验证 -->
+      <section class="card" id="card-verify">
+        <div class="card-head">
+          <h2>5 · 本地验证</h2>
+          <button class="btn primary" id="btn-run-checks" type="button">运行全部检查</button>
+        </div>
+        <ul class="check-list" id="check-list"></ul>
+        <p class="editor-hint">
+          命令行另有确定性单元测试：<code>npm test</code>（FFT、折叠数学、WAV、PRNG、限带逻辑，不依赖浏览器）。
+        </p>
+      </section>
+
+      <footer class="page-foot">
+        <p>
+          原理：采样率 fs 下，频率 f 的分量只能取到 fs/2（奈奎斯特）。波表直接循环时，
+          谐波 k·f₀ 一旦超过 fs/2 不会消失，而按
+          <code>|((k·f₀ + fs/2) mod fs) − fs/2|</code>
+          折回可听频带——高音里混入的低响正是这些折叠分量。B 模式在播放前按当前音高剔除它们。
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# 浏览器端到端测试产物
+tests/e2e/shots/
