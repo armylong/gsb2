@@ -1,0 +1,19 @@
+{
+  "name": "wind-chime-detective",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "风铃辨片：用程序合成声音的本地推理小游戏",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check": "tsx scripts/check-model.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}
