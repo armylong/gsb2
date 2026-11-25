@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>双投影边缘融合铺图预演</title>
+    <link rel="stylesheet" href="./src/ui/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>双投影机边缘融合预演</h1>
+      <div class="scenario-group" id="scenarioGroup"></div>
+      <div class="view-group" id="viewGroup"></div>
+      <label class="range-label">
+        渐变占比
+        <input type="range" id="blendWidth" min="0.1" max="1" step="0.05" value="0.94" />
+        <span id="blendWidthValue">94%</span>
+      </label>
+      <label class="range-label">
+        渲染比例
+        <input type="range" id="renderScale" min="0.4" max="1" step="0.05" value="0.75" />
+        <span id="renderScaleValue">0.75×</span>
+      </label>
+    </header>
+
+    <main class="layout">
+      <section class="main-panel">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="screenCanvas"></canvas>
+          <div class="invalid-banner" id="invalidBanner" hidden></div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="probe-panel">
+          <div class="probe-head">
+            <span>幕布采样探针(点击幕布添加, 最多 8 个)</span>
+            <button id="clearProbes" type="button">清空探针</button>
+          </div>
+          <div class="probe-table-wrap">
+            <table id="probeTable">
+              <thead>
+                <tr>
+                  <th>#</th><th>幕布坐标</th><th>图案坐标</th><th>覆盖</th>
+                  <th>w₁ / w₂</th><th>合成灰度</th><th>参考灰度</th><th>差值</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <div id="projectorPanels"></div>
+
+        <div class="io-panel">
+          <h3>导入 / 导出</h3>
+          <div class="io-row">
+            <button id="btnExport" type="button">导出设置 + 两台输出图</button>
+          </div>
+          <div class="io-row">
+            <label class="file-label">
+              导入设置(JSON, 可选附带两台 PNG)
+              <input type="file" id="importFiles" accept=".json,image/png" multiple />
+            </label>
+          </div>
+          <div class="io-row import-status" id="importStatus"></div>
+        </div>
+
+        <div class="help-panel">
+          <h3>操作说明</h3>
+          <ul>
+            <li>拖动幕布上的四角手柄(红=投影1, 蓝=投影2)调整四边形。</li>
+            <li>拖成自交/退化时保留上次有效投影, 红条标出异常。</li>
+            <li>合成视图可切「融合 / 差值 / 覆盖」; 差值视图红=偏亮, 蓝=偏暗。</li>
+            <li>导出的两幅 PNG 即各自投影机实际输出(可直接喂真投影机)。</li>
+            <li>重新导入后会用导出图反演采样点并与编辑状态核对。</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

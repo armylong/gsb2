@@ -1,0 +1,20 @@
+{
+  "name": "edge-blend-preview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "双投影机边缘融合铺图预演(纯 Canvas2D + TypeScript, 不接真实投影机)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "node --no-warnings src/verify/verify.ts",
+    "verify:browser": "bash scripts/verify-browser.sh",
+    "test": "npm run verify && npm run build && npm run verify:browser"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.7",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}
