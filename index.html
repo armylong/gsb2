@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23101824'/%3E%3Ccircle cx='22' cy='12' r='5' fill='%23fbbf24'/%3E%3Cpath d='M2 25l8-9 6 6 5-5 9 8z' fill='%237db7ff' opacity='.75'/%3E%3C/svg%3E" />
+    <title>山脊与大气散射对照实验 · WebGL2</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>太阳、山脊与沿光路累积的颜色</h1>
+          <p>WebGL2 单遍大气积分 · 瑞利波长散射 / Cornette–Shanks 前向雾粒散射 · HDR 线性读数</p>
+        </div>
+        <div class="topbar-badge">本地 TypeScript 对照台</div>
+      </header>
+
+      <main class="layout">
+        <aside class="panel controls" aria-label="场景控制">
+          <section class="control-section">
+            <h2>预配条件</h2>
+            <div class="button-row">
+              <button id="presetNoon" type="button" class="btn">正午</button>
+              <button id="presetLow" type="button" class="btn btn-primary">低太阳</button>
+              <button id="presetExtreme" type="button" class="btn btn-warn">极端自检</button>
+            </div>
+            <p class="fine-print">预设只改太阳、视角与浑浊度，不改动曝光开关或 EV，便于固定亮度对照。</p>
+          </section>
+
+          <section class="control-section">
+            <h2>天空与观察</h2>
+            <label class="slider-row" for="sunElevation">
+              <span class="slider-label">太阳高度 <output id="sunElevationValue"></output></span>
+              <input id="sunElevation" type="range" min="-20" max="90" step="0.1" />
+            </label>
+
+            <label class="slider-row" for="eyeHeight">
+              <span class="slider-label">视线/眼睛离地高度 <output id="eyeHeightValue"></output></span>
+              <input id="eyeHeight" type="range" min="0" max="1000" step="1" />
+            </label>
+
+            <label class="slider-row" for="viewPitch">
+              <span class="slider-label">视角俯仰 <output id="viewPitchValue"></output></span>
+              <input id="viewPitch" type="range" min="-10" max="25" step="0.1" />
+            </label>
+
+            <label class="slider-row" for="yaw">
+              <span class="slider-label">水平朝向 <output id="yawValue"></output></span>
+              <input id="yaw" type="range" min="-180" max="180" step="0.1" />
+            </label>
+
+            <div class="button-row compact">
+              <button id="resetView" type="button" class="btn small">复位视角</button>
+              <button id="lookBack" type="button" class="btn small">转向背光处</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>空气与散射分量</h2>
+            <label class="slider-row" for="turbidity">
+              <span class="slider-label">空气浑浊程度 <output id="turbidityValue"></output></span>
+              <input id="turbidity" type="range" min="1" max="30" step="0.1" />
+            </label>
+
+            <label class="switch-row" for="rayleighEnabled">
+              <span>
+                <strong>瑞利散射</strong>
+                <small>波长相关，短波长更强</small>
+              </span>
+              <input id="rayleighEnabled" type="checkbox" class="switch" />
+            </label>
+
+            <label class="switch-row" for="mieEnabled">
+              <span>
+                <strong>雾粒/米氏散射</strong>
+                <small>偏向迎光方向的前向 lobe</small>
+              </span>
+              <input id="mieEnabled" type="checkbox" class="switch" />
+            </label>
+          </section>
+
+          <section class="control-section">
+            <h2>曝光对照</h2>
+            <label class="switch-row" for="autoExposure">
+              <span>
+                <strong>自动曝光</strong>
+                <small>关闭后 EV 冻结，适合 A/B 对照</small>
+              </span>
+              <input id="autoExposure" type="checkbox" class="switch" />
+            </label>
+            <label class="slider-row" for="exposureEv">
+              <span class="slider-label">固定曝光 <output id="exposureEvValue"></output></span>
+              <input id="exposureEv" type="range" min="-7" max="5" step="0.05" />
+            </label>
+            <p id="averageLuminance" class="fine-print"></p>
+          </section>
+        </aside>
+
+        <section class="stage-column" aria-label="渲染与分量对照">
+          <div class="panel main-panel">
+            <canvas id="mainCanvas" aria-label="大气、太阳和两道程序山脊的主视图"></canvas>
+            <div id="markerLayer" class="marker-layer" aria-hidden="true">
+              <div id="selectedMarker" class="marker marker-selected" hidden><span>测点</span></div>
+              <div id="sunMarker" class="marker marker-sun" hidden><span>太阳</span></div>
+              <div id="antiMarker" class="marker marker-anti" hidden><span>背光</span></div>
+            </div>
+            <div class="canvas-hint">点击像素读数 · 拖动旋转方向 / 俯仰</div>
+            <div id="glError" class="gl-error" hidden></div>
+          </div>
+
+          <div class="compare-grid">
+            <figure class="panel compare-card">
+              <div class="compare-head">
+                <h2>瑞利分量对照图</h2>
+                <span id="rayState" class="state-pill"></span>
+              </div>
+              <div class="canvas-frame">
+                <canvas id="rayCanvas"></canvas>
+              </div>
+              <figcaption>仅显示 ∫ T<sub>视图</sub>T<sub>太阳</sub> β<sub>R</sub>(λ) ρ<sub>R</sub> ds，使用与主图相同的曝光。</figcaption>
+            </figure>
+
+            <figure class="panel compare-card">
+              <div class="compare-head">
+                <h2>雾粒前向分量对照图</h2>
+                <span id="mieState" class="state-pill"></span>
+              </div>
+              <div class="canvas-frame">
+                <canvas id="mieCanvas"></canvas>
+              </div>
+              <figcaption>仅显示 Cornette–Shanks 前向相位对应的气溶胶累计光，使用相同曝光。</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <aside class="readout-column" aria-label="像素和测点读数">
+          <section class="panel readout-panel">
+            <h2>点击像素检查器</h2>
+            <p id="selectedEmpty" class="fine-print">正在使用默认山脊测点；也可以点击主画面中的天空或山脊。</p>
+            <div id="selectedReadout">
+              <div class="metric-grid">
+                <div class="metric">
+                  <span>观察仰角</span>
+                  <strong id="readElevation">—</strong>
+                </div>
+                <div class="metric">
+                  <span>方位角</span>
+                  <strong id="readAzimuth">—</strong>
+                </div>
+                <div class="metric">
+                  <span>命中</span>
+                  <strong id="readHit">—</strong>
+                </div>
+                <div class="metric">
+                  <span>距离</span>
+                  <strong id="readDistance">—</strong>
+                </div>
+              </div>
+
+              <div class="table-scroll">
+                <table class="value-table">
+                  <thead>
+                    <tr>
+                      <th>变换屏幕色之前</th>
+                      <th>R</th>
+                      <th>G</th>
+                      <th>B</th>
+                      <th>亮度</th>
+                    </tr>
+                  </thead>
+                  <tbody id="componentRows"></tbody>
+                </table>
+              </div>
+              <p id="readMeta" class="fine-print"></p>
+            </div>
+          </section>
+
+          <section class="panel readout-panel">
+            <h2>固定测点对比</h2>
+            <div class="table-scroll">
+              <table class="probe-table">
+                <thead>
+                  <tr>
+                    <th>方向</th>
+                    <th>命中</th>
+                    <th>总亮度</th>
+                    <th>瑞利</th>
+                    <th>雾粒</th>
+                  </tr>
+                </thead>
+                <tbody id="probeRows"></tbody>
+              </table>
+            </div>
+            <p class="fine-print">四个探针均由同一个 1×1 HDR 渲染通道计算；太阳在画外时读数仍连续有效。</p>
+          </section>
+
+          <section class="panel readout-panel explanation">
+            <h2>模型说明</h2>
+            <ul>
+              <li>两道山脊是半径 8 km 与 22 km 的程序圆柱轮廓，共用同一线性底色；视线命中后立即终止光路积分。</li>
+              <li>太阳方向不做屏幕空间钳制；低于地平线或位于画外时，高层大气仍接受光照。</li>
+              <li>读数为曝光、ACES 色调映射和 sRGB 转换前的线性 HDR 辐射度。</li>
+              <li>极端浑浊度使用有限钳制与安全函数，避免除零、NaN/Inf 变成坏点。</li>
+            </ul>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
