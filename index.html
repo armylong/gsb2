@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f3e9d2'/%3E%3Crect x='5' y='5' width='22' height='22' rx='3' fill='none' stroke='%231971c2' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <title>纸窗拼片小题面检查器</title>
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>纸窗拼片 · 小题面检查器</h1>
+      <p class="sub">
+        拖动木片入盘, 实时检查相邻边纹 / 洞边 / 外边条件; 旋转把纹路带到对应边; 同一块片不会同时出现在两处。
+      </p>
+    </header>
+
+    <main>
+      <section class="board-panel">
+        <div class="toolbar">
+          <div class="mode-group" role="radiogroup" aria-label="编辑模式">
+            <label><input type="radio" name="mode" value="play" checked /> 摆片</label>
+            <label><input type="radio" name="mode" value="hole" /> 留空/取消留空</label>
+            <label><input type="radio" name="mode" value="edge" /> 固定边</label>
+            <label class="edge-label">
+              边纹路
+              <input id="edge-label" value="A" maxlength="3" size="3" />
+            </label>
+          </div>
+          <div class="btn-group">
+            <button id="btn-undo" title="Ctrl+Z">↩ 撤销</button>
+            <button id="btn-redo" title="Ctrl+Y">↪ 重做</button>
+            <button id="btn-clear">清空盘面</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="board" width="620" height="620"></canvas>
+        </div>
+
+        <div id="status" class="status" aria-live="polite"></div>
+        <div id="edge-warn" class="edge-warn" style="display: none"></div>
+      </section>
+
+      <aside class="side-panel">
+        <section>
+          <h2>可用木片 <span class="muted">(拖入盘面或点选后点格)</span></h2>
+          <div id="tray" class="tray"></div>
+        </section>
+
+        <section>
+          <h2>检查与补全</h2>
+          <div class="btn-group vertical">
+            <button id="btn-solve" class="primary">按当前盘面找补全</button>
+            <button id="btn-apply" disabled>应用补全方案(锁定片不动)</button>
+            <button id="btn-hint">提示一步(不改盘面)</button>
+          </div>
+          <p class="muted small">
+            补全会尊重所有已摆片与锁定方向; 无解时给出有据可查的冲突或"剩余位置无可用片"解释。
+          </p>
+        </section>
+
+        <section>
+          <h2>预设题面</h2>
+          <div class="row">
+            <select id="preset"></select>
+            <button id="btn-load-preset">载入</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>保存 / 读入</h2>
+          <div class="btn-group">
+            <button id="btn-save">导出 JSON</button>
+            <label class="file-btn">
+              读入 JSON
+              <input id="file-input" type="file" accept="application/json,.json" hidden />
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2>操作日志</h2>
+          <div id="log" class="log"></div>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <p class="muted small">
+        快捷键: 选中木片后 <b>R</b> 旋转 · <b>L</b> 锁定/解锁 · <b>Delete</b> 移回托盘。
+        旋转对称的木片在求解与计数时按实际边纹去重, 不会因朝向写法不同被多算。
+      </p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
