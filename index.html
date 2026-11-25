@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>桌面齿轮谜题</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px; background: #1e2126; color: #dde1e6;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  canvas { background: #26292f; border-radius: 8px; cursor: pointer; flex: none; }
+  #panel { width: 300px; flex: none; }
+  #panel h2 { font-size: 15px; margin: 14px 0 6px; color: #9fb4c8; }
+  #panel h2:first-child { margin-top: 0; }
+  button, select {
+    background: #3a4048; color: #dde1e6; border: 1px solid #555c66;
+    border-radius: 6px; padding: 6px 10px; margin: 3px 4px 3px 0;
+    cursor: pointer; font-size: 13px;
+  }
+  button:hover { background: #474f59; }
+  button.sel { background: #2f6db3; border-color: #5b9be0; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button.on { background: #2e7d4f; border-color: #4caf7d; }
+  #goal, #info {
+    background: #2a2e35; border-radius: 6px; padding: 8px 10px;
+    font-size: 13px; line-height: 1.7; white-space: pre-wrap;
+  }
+  #info { min-height: 120px; }
+  #banner {
+    display: none; margin-top: 10px; padding: 8px; border-radius: 6px;
+    background: #2e7d4f; color: #fff; font-weight: bold; text-align: center;
+  }
+  .hint { font-size: 12px; color: #8a929c; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <canvas id="cv" width="980" height="640"></canvas>
+  <div id="panel">
+    <h2>题目</h2>
+    <select id="puzzleSel"></select>
+    <button id="resetBtn">重置本题</button>
+    <div id="goal"></div>
+    <h2>零件盒(选中后点空轴安装)</h2>
+    <div id="inv"></div>
+    <h2>手摇轮</h2>
+    <button id="autoBtn">自动摇动</button>
+    <button id="dirBtn">换成反转</button>
+    <div class="hint">也可以直接按住手摇轮拖动。红色表示连通组被锁死。</div>
+    <h2>轴状态(点轴心查看)</h2>
+    <div id="info">点击任意轴心查看它为什么动 / 为什么不动。</div>
+    <div id="banner">🎉 所有出口都按要求转起来了!</div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>

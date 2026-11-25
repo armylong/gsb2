@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "none",
+    "outFile": "main.js",
+    "strict": true,
+    "noUnusedLocals": true,
+    "lib": ["ES2019", "DOM"]
+  },
+  "files": ["src/main.ts"]
+}

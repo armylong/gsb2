@@ -1,0 +1,13 @@
+{
+  "name": "gear-puzzle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "桌面齿轮谜题:装齿轮、传动、冲突自锁",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
