@@ -1,0 +1,117 @@
+{
+  "reference": "upright-reference.png",
+  "samples": [
+    {
+      "file": "orientation-1-encoded.jpg",
+      "orientation": 1,
+      "label": "1 · 正常",
+      "stored_size": [
+        720,
+        480
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": false
+    },
+    {
+      "file": "orientation-2-encoded.jpg",
+      "orientation": 2,
+      "label": "2 · 水平镜像",
+      "stored_size": [
+        720,
+        480
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": true
+    },
+    {
+      "file": "orientation-3-encoded.jpg",
+      "orientation": 3,
+      "label": "3 · 旋转 180°",
+      "stored_size": [
+        720,
+        480
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": false
+    },
+    {
+      "file": "orientation-4-encoded.jpg",
+      "orientation": 4,
+      "label": "4 · 垂直镜像",
+      "stored_size": [
+        720,
+        480
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": true
+    },
+    {
+      "file": "orientation-5-encoded.jpg",
+      "orientation": 5,
+      "label": "5 · 转置 (镜像 + 旋转)",
+      "stored_size": [
+        480,
+        720
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": true
+    },
+    {
+      "file": "orientation-6-encoded.jpg",
+      "orientation": 6,
+      "label": "6 · 旋转 90° 顺时针",
+      "stored_size": [
+        480,
+        720
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": false
+    },
+    {
+      "file": "orientation-7-encoded.jpg",
+      "orientation": 7,
+      "label": "7 · 反置 (镜像 + 旋转)",
+      "stored_size": [
+        480,
+        720
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": true
+    },
+    {
+      "file": "orientation-8-encoded.jpg",
+      "orientation": 8,
+      "label": "8 · 旋转 90° 逆时针",
+      "stored_size": [
+        480,
+        720
+      ],
+      "upright_size": [
+        720,
+        480
+      ],
+      "mirrored": false
+    }
+  ]
+}
