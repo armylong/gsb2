@@ -1,0 +1,20 @@
+{
+  "name": "backstage-call",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "用 TypeScript + Canvas 制作的后台赶场排戏解谜原型",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "validate": "tsx scripts/validate.ts",
+    "test": "npm run validate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
