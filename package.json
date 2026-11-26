@@ -1,0 +1,24 @@
+{
+  "name": "belt-marking-experiment",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json && vite build",
+    "preview": "vite preview",
+    "test": "tsx --test src/test/*.test.ts",
+    "e2e": "tsx scripts/e2e.ts"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "@types/three": "^0.169.0",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
