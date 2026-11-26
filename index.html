@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>打孔纸带音乐盒</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #141824;
+        color: #dde3ee;
+        font-family: system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      canvas {
+        background: #171c2a;
+        border-radius: 10px;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 960px;
+      }
+      button,
+      select {
+        background: #2b3a55;
+        color: #dde3ee;
+        border: 1px solid #445;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      #status {
+        white-space: pre-line;
+        max-width: 960px;
+        min-height: 1.5em;
+      }
+      #status.pass {
+        color: #7ee787;
+      }
+      #status.fail {
+        color: #ff9f9f;
+      }
+      #hint {
+        color: #ffd166;
+        max-width: 960px;
+      }
+      #desc {
+        color: #9ab;
+        max-width: 960px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <strong>打孔纸带音乐盒</strong>
+      <select id="puzzle"></select>
+      <button id="reset">重置本题</button>
+    </div>
+    <div id="desc"></div>
+    <canvas id="cv"></canvas>
+    <div class="bar">
+      <button id="play">▶ 播放我的摆法</button>
+      <button id="step">⏭ 单拍</button>
+      <button id="stop">■ 停止</button>
+      <button id="play-target">🎯 试听目标</button>
+      <label>速度 <input id="speed" type="range" min="60" max="240" value="120" /> <span id="speed-label">120 BPM</span></label>
+    </div>
+    <div class="bar">
+      <button id="undo">↩ 撤销</button>
+      <button id="hint">💡 提示</button>
+      <button id="marker-add">＋返回标记</button>
+      <button id="marker-dec">◀ 目标前移</button>
+      <button id="marker-inc">目标后移 ▶</button>
+      <button id="marker-del">移除标记</button>
+    </div>
+    <div id="status"></div>
+    <div id="hint"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
