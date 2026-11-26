@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>玻璃上的两只清洁甲虫 · TS Canvas 原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="stage-column">
+        <section class="topbar">
+          <div>
+            <h1>玻璃双虫：镜像同步</h1>
+            <p>TypeScript + Canvas 本地规则原型 · 撤销 / 真实状态寻路提示 / 死局诊断 / 回放验证</p>
+          </div>
+          <label class="level-picker">
+            <span>关卡</span>
+            <select id="levelSelect" aria-label="选择关卡"></select>
+          </label>
+        </section>
+
+        <div class="canvas-card">
+          <canvas id="game" role="img" aria-label="两张镜像玻璃窗格和两只清洁甲虫"></canvas>
+        </div>
+
+        <section class="controls" aria-label="游戏控制">
+          <button id="undoBtn" class="btn" type="button">↶ 撤销 <kbd>U</kbd></button>
+          <button id="hintBtn" class="btn primary" type="button">💡 提示下一步 <kbd>H</kbd></button>
+          <button id="applyHintBtn" class="btn hint-apply" type="button" hidden>按提示走一步</button>
+          <button id="resetBtn" class="btn" type="button">⟳ 重置 <kbd>R</kbd></button>
+          <button id="replayWinBtn" class="btn success" type="button">▶ 回放过关</button>
+          <button id="replayDeadBtn" class="btn danger" type="button">⚰ 演示错误消耗死局</button>
+          <button id="stopReplayBtn" class="btn ghost" type="button" disabled>■ 停止回放</button>
+        </section>
+
+        <section class="mobile-keys" aria-label="方向键">
+          <button class="dpad up" data-dir="up" type="button">↑</button>
+          <button class="dpad left" data-dir="left" type="button">←</button>
+          <button class="dpad down" data-dir="down" type="button">↓</button>
+          <button class="dpad right" data-dir="right" type="button">→</button>
+        </section>
+      </main>
+
+      <aside class="sidebar">
+        <section class="panel intro">
+          <h2 id="levelName"></h2>
+          <p id="levelTagline" class="tagline"></p>
+          <p id="lessonBox" class="lesson"></p>
+        </section>
+
+        <section class="panel status-panel">
+          <div id="statusLine" class="status-line" data-tone="info"></div>
+
+          <div id="hintPanel" class="hint-panel" data-state="idle">
+            <div id="hintArrow" class="hint-arrow">?</div>
+            <div>
+              <strong>下一次有效操作</strong>
+              <p>提示器从当前真实的甲虫格、门开闭和标记消耗状态做穷举；只显示第一步，不直接报整条路线。</p>
+            </div>
+          </div>
+
+          <div id="diagnosisBox" class="diagnosis" hidden></div>
+          <div id="snapshotBox" class="snapshot"></div>
+        </section>
+
+        <section class="panel">
+          <h3>事件记录</h3>
+          <ul id="eventLog" class="event-log" aria-live="polite"></ul>
+        </section>
+
+        <section class="panel legend">
+          <h3>图例与易混列</h3>
+          <div class="legend-grid">
+            <span><i class="swatch wall"></i>格子障碍</span>
+            <span><i class="swatch target-a"></i>琥珀目标</span>
+            <span><i class="swatch target-b"></i>青蓝目标</span>
+            <span><i class="glyph switch">S</i>反复反转标记</span>
+            <span><i class="glyph key">K</i>首次一次性标记</span>
+            <span><i class="glyph door">D</i>共享开闭的门对</span>
+          </div>
+          <p class="note">
+            列头 <code>Pn</code> 是物理列，<code>视图列 n</code> 是当前视图的屏幕列。金色虚线连接的列就是最容易按“同一屏幕列”误判的同一物理列。
+            离格不检查门；只有进入目标格时才检查门当前是否关闭。
+          </p>
+          <p class="note">
+            键盘：方向键 / WASD 移动，<kbd>U</kbd> 或 <kbd>Ctrl/⌘ Z</kbd> 撤销，<kbd>H</kbd> 提示，<kbd>R</kbd> 重置，<kbd>1–3</kbd> 选关。
+          </p>
+          <p class="note verify">本地验证：<code>npm run verify</code>（类型编译 + Node 规则/寻路/回放测试）；浏览器预览：<code>npm start</code>。</p>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="./dist/src/main.js"></script>
+  </body>
+</html>
