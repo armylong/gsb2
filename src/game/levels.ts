@@ -1,0 +1,157 @@
+import type { LevelDef } from './types';
+
+export const levelOne: LevelDef = {
+  id: 'parity-gates',
+  name: '第一关 · 两次拨片',
+  subtitle: '手算短关：同一条斜槽走两颗珠，开关奇偶性决定左右',
+  width: 960,
+  height: 640,
+  brief: [
+    '红珠在第 1 拍发射，蓝珠在第 3 拍从同一发珠格出发（内部时刻 t=0、t=2）。',
+    'A、C、D 上的小开关都会拨动 D 槽；只有真正走过槽的珠才触发。',
+    '目标：红珠先进左出口，蓝珠再进右出口。',
+    '手算关键：红珠过 D 的那一拍，蓝珠正好过 A，SW-D 与 SW-A 同拍影响 D；两个 toggle 会抵消，变化来源仍会逐条记录。',
+  ],
+  nodes: {
+    a: { id: 'a', x: 480, y: 112, kind: 'cell', label: 'A入口' },
+    l: { id: 'l', x: 250, y: 272, kind: 'cell', label: 'L' },
+    r: { id: 'r', x: 710, y: 272, kind: 'cell', label: 'R' },
+    m: { id: 'm', x: 480, y: 404, kind: 'cell', label: 'M' },
+    exitL: { id: 'exitL', x: 210, y: 560, kind: 'exit', bin: 'L', label: '左出口' },
+    exitR: { id: 'exitR', x: 750, y: 560, kind: 'exit', bin: 'R', label: '右出口' },
+  },
+  chutes: [
+    {
+      id: 'A',
+      entry: 'a',
+      outputs: { left: 'l', right: 'r' },
+      initial: 'right',
+      adjustable: true,
+      label: '顶部分流槽',
+      trigger: { id: 'SW-A', toggles: ['D'] },
+    },
+    {
+      id: 'B',
+      entry: 'l',
+      outputs: { left: 'exitL', right: 'm' },
+      initial: 'left',
+      adjustable: true,
+      label: '左中转槽',
+    },
+    {
+      id: 'C',
+      entry: 'r',
+      outputs: { left: 'm', right: 'exitR' },
+      initial: 'right',
+      adjustable: true,
+      label: '右中转槽',
+      trigger: { id: 'SW-C', toggles: ['D'] },
+    },
+    {
+      id: 'D',
+      entry: 'm',
+      outputs: { left: 'exitL', right: 'exitR' },
+      initial: 'left',
+      adjustable: true,
+      label: '最终出口槽',
+      trigger: { id: 'SW-D', toggles: ['D'] },
+    },
+  ],
+  slots: [
+    { id: 'S1', node: 'a', releaseTick: 0, at: { x: 420, y: 48 }, color: 'red' },
+    { id: 'S2', node: 'a', releaseTick: 2, at: { x: 540, y: 48 }, color: 'blue' },
+  ],
+  priority: {
+    kind: 'color-rank',
+    rank: ['red', 'blue'],
+    label: '同格相争红珠优先',
+  },
+  goal: [
+    { color: 'red', bin: 'L', note: '红先左' },
+    { color: 'blue', bin: 'R', note: '蓝后右' },
+  ],
+  maxTicks: 12,
+};
+
+export const levelTwo: LevelDef = {
+  id: 'wait-reorder',
+  name: '第二关 · 等一拍换顺序',
+  subtitle: '手算短关：让两颗珠同拍抢同一格，输家等待后顺序被改写',
+  width: 960,
+  height: 640,
+  brief: [
+    '红、蓝两珠都在第 1 拍发射；本关同格相争时蓝珠优先。',
+    '若把 R1 直接拨向 M，红珠会抄近路先到左出口，顺序错误。',
+    '正解让红珠绕到 r1，并在 M 格与蓝珠同时相争；红珠优先级低，留在原地等一拍。',
+    '蓝珠经过 D 后，D 自带开关把自己拨到另一侧；下一拍红珠才进入 D。',
+    '目标：蓝珠先进左出口，红珠再进右出口。这里的等待是解法，不是失败。',
+  ],
+  nodes: {
+    r0: { id: 'r0', x: 210, y: 112, kind: 'cell', label: '红起点' },
+    b0: { id: 'b0', x: 750, y: 112, kind: 'cell', label: '蓝起点' },
+    r1: { id: 'r1', x: 180, y: 286, kind: 'cell', label: '等待格' },
+    b1: { id: 'b1', x: 790, y: 260, kind: 'cell', label: '蓝中转' },
+    m: { id: 'm', x: 480, y: 398, kind: 'cell', label: '相争格 M' },
+    exitL: { id: 'exitL', x: 300, y: 560, kind: 'exit', bin: 'L', label: '左出口' },
+    exitR: { id: 'exitR', x: 660, y: 560, kind: 'exit', bin: 'R', label: '右出口' },
+  },
+  chutes: [
+    {
+      id: 'R1',
+      entry: 'r0',
+      outputs: { left: 'r1', right: 'm' },
+      initial: 'right',
+      adjustable: true,
+      label: '红珠起始槽：左绕等待，右抄近路',
+    },
+    {
+      id: 'R2',
+      entry: 'r1',
+      outputs: { left: null, right: 'm' },
+      initial: 'right',
+      adjustable: false,
+      label: '红珠回拼槽',
+    },
+    {
+      id: 'B1',
+      entry: 'b0',
+      outputs: { left: null, right: 'b1' },
+      initial: 'right',
+      adjustable: false,
+      label: '蓝珠固定槽',
+    },
+    {
+      id: 'B2',
+      entry: 'b1',
+      outputs: { left: 'm', right: null },
+      initial: 'left',
+      adjustable: false,
+      label: '蓝珠入拼槽',
+    },
+    {
+      id: 'D',
+      entry: 'm',
+      outputs: { left: 'exitL', right: 'exitR' },
+      initial: 'left',
+      adjustable: true,
+      label: '自拨最终槽',
+      trigger: { id: 'SW-D', toggles: ['D'] },
+    },
+  ],
+  slots: [
+    { id: 'SR', node: 'r0', releaseTick: 0, at: { x: 150, y: 50 }, color: 'red' },
+    { id: 'SB', node: 'b0', releaseTick: 0, at: { x: 810, y: 50 }, color: 'blue' },
+  ],
+  priority: {
+    kind: 'color-rank',
+    rank: ['blue', 'red'],
+    label: '同格相争蓝珠优先',
+  },
+  goal: [
+    { color: 'blue', bin: 'L', note: '蓝先左' },
+    { color: 'red', bin: 'R', note: '红后右' },
+  ],
+  maxTicks: 12,
+};
+
+export const levels: LevelDef[] = [levelOne, levelTwo];

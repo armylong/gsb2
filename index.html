@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23fff3d6'/%3E%3Cpath d='M22 28 L78 72' stroke='%238b5a2b' stroke-width='13' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='27' r='15' fill='%23ef4444'/%3E%3Ccircle cx='76' cy='73' r='15' fill='%233b82f6'/%3E%3C/svg%3E"
+    />
+    <title>落珠斜槽 · 确定性小关原型</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <h1>落珠斜槽</h1>
+          <p>固定拍 · 同格竞争 · 真珠触发开关 · 单步可追溯</p>
+        </div>
+        <nav id="levelTabs" class="level-tabs" aria-label="关卡选择"></nav>
+      </header>
+
+      <main class="layout">
+        <section class="stage-card">
+          <div class="canvas-wrap">
+            <canvas id="board" aria-label="落珠斜槽台面"></canvas>
+          </div>
+
+          <div id="banner" class="banner" role="status"></div>
+
+          <div class="transport" aria-label="回放控制">
+            <button data-action="run" class="primary">▶ 放珠运行</button>
+            <button data-action="edit" title="保留当前摆放，清除本次回放并继续修改">↩ 返回摆珠</button>
+            <span class="divider"></span>
+            <button data-action="first" title="回到初始摆放">⏮</button>
+            <button data-action="prev" title="上一单步">◀ 单步</button>
+            <button data-action="playpause">⏯ 播放</button>
+            <button data-action="next" title="下一单步">单步 ▶</button>
+            <input id="scrub" type="range" min="0" max="1" value="0" aria-label="回放进度" />
+            <span id="beatLabel" class="beat-label">未运行</span>
+            <label class="speed">
+              每拍
+              <select id="speedSelect">
+                <option value="900">0.9s</option>
+                <option value="650" selected>0.65s</option>
+                <option value="380">0.38s</option>
+                <option value="180">0.18s</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="legend">
+            <span><i class="dot red"></i>红珠</span>
+            <span><i class="dot blue"></i>蓝珠</span>
+            <span><b class="sw">⚡</b> 开关</span>
+            <span><b class="wait">!</b> 竞争/等待</span>
+            <span class="muted">点击槽身左右半侧可直接拨向该侧；点击发珠圈放当前颜色，右键清空。</span>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="panel">
+            <h2 id="levelName"></h2>
+            <p id="levelSubtitle" class="subtitle"></p>
+            <ul id="levelBrief" class="brief"></ul>
+            <div id="priorityBox" class="priority"></div>
+            <div>
+              <h3>目标到达序列</h3>
+              <div id="goalList" class="goal-list"></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>摆放 / 起始槽</h2>
+              <button data-action="undo" id="undoBtn" class="small">撤销摆放</button>
+            </div>
+
+            <h3>选珠颜色</h3>
+            <div class="palette">
+              <button data-tool="red" class="tool red active">红珠</button>
+              <button data-tool="blue" class="tool blue">蓝珠</button>
+              <button data-tool="eraser" class="tool eraser">清空</button>
+              <button data-action="reset" class="small danger">重置本关</button>
+            </div>
+
+            <h3>发珠位</h3>
+            <div id="slotEditor" class="slot-editor"></div>
+
+            <h3>可调斜槽</h3>
+            <div id="chuteEditor" class="chute-editor"></div>
+
+            <div class="hint-row">
+              <button data-action="hint" class="hint">💡 用同一套引擎搜索提示</button>
+              <button data-action="applyHint" id="applyHintBtn" class="small" hidden>应用提示摆放</button>
+            </div>
+            <div id="hintBox" class="hint-box" hidden></div>
+          </section>
+
+          <section class="panel inspector">
+            <h2>单步记录</h2>
+            <div id="inspector" class="inspector-body"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>本地校验</h2>
+              <button data-action="selfcheck" class="small">重新校验</button>
+            </div>
+            <div id="selfCheck" class="selfcheck"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "falling-beads-chutes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "validate": "tsc --noEmit && vitest run",
+    "check:browser": "node scripts/browser-check.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.1",
+    "playwright-core": "^1.65.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2"
+  }
+}
