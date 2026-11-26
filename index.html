@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>积木接力台 · TypeScript Canvas 原型</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <h1>桌游式积木接力台</h1>
+          <p>摆片、转向、绕开挡柱，让两面终点旗按拍数要求先后倒下。</p>
+        </div>
+        <div class="build-badge">TypeScript · Canvas · 本地确定性回放</div>
+      </header>
+
+      <main class="layout">
+        <section class="board-card">
+          <div id="levelTabs" class="level-tabs" aria-label="选择关卡和样例"></div>
+          <div class="level-head">
+            <h2 id="levelName"></h2>
+            <p id="levelSubtitle"></p>
+            <p id="levelBrief" class="brief"></p>
+          </div>
+
+          <div class="canvas-shell">
+            <canvas id="board" width="900" height="650" aria-label="积木接力地图"></canvas>
+          </div>
+
+          <div class="transport" aria-label="播放和单步控制">
+            <button id="startBtn" class="primary">▶ 开始 / 生成回放</button>
+            <button id="pauseBtn" disabled>⏸ 暂停</button>
+            <button id="stepBackBtn" disabled>⏪ 退回一拍</button>
+            <button id="stepForwardBtn" disabled>前进一拍 ⏩</button>
+            <button id="replayBtn" disabled>↻ 重放</button>
+            <button id="editBtn" class="ghost">✎ 返回原摆放修改</button>
+            <label class="scrub">
+              回看
+              <input id="scrub" type="range" min="0" max="100" value="0" disabled />
+            </label>
+            <span id="beatLabel" class="beat-label">摆放阶段</span>
+            <label class="speed">
+              速度
+              <select id="speedSelect">
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.5">1.5×</option>
+                <option value="2">2×</option>
+              </select>
+            </label>
+          </div>
+          <p class="keyboard-hint">
+            操作：点空槽放当前木片；点已有木片选中；<kbd>R</kbd> / 双击 / “转向”顺时针转；<kbd>Delete</kbd> 拆除；
+            <kbd>Space</kbd> 开始/暂停；<kbd>←</kbd>/<kbd>→</kbd> 单步回看。
+          </p>
+        </section>
+
+        <aside class="sidebar">
+          <section class="panel">
+            <h3>摆放台</h3>
+            <div class="piece-picker">
+              <button id="thinTool" class="tool active">
+                <span class="chip thin"></span>
+                <b>细木片</b>
+                <small>只碰面朝方向的一条邻槽 · 0.6s</small>
+              </button>
+              <button id="wideTool" class="tool">
+                <span class="chip wide"></span>
+                <b>宽木片</b>
+                <small>仅宽槽 · 同时碰面朝向和右侧向 · 0.9s</small>
+              </button>
+            </div>
+            <div class="edit-actions">
+              <button id="rotateBtn">⟳ 转向 (<span id="facingLabel">东 →</span>)</button>
+              <button id="removeBtn">拆除选中</button>
+              <button id="clearBtn">清空</button>
+              <button id="sampleBtn" class="sample" hidden>载入可重复样例摆法</button>
+            </div>
+            <div id="inventory" class="inventory"></div>
+            <p id="directionHint" class="direction-hint"></p>
+          </section>
+
+          <section class="panel">
+            <h3>通关检查</h3>
+            <div id="checks" class="checks">
+              <p class="muted">开始后这里会逐项检查旗序、间隔、禁碰槽和用片数量。</p>
+            </div>
+          </section>
+
+          <section class="panel record-panel">
+            <div class="panel-title-row">
+              <h3>回看记录</h3>
+              <label class="toggle"><input id="labelsToggle" type="checkbox" checked /> 地图提示</label>
+            </div>
+            <div id="recordSummary" class="record-summary muted">尚未生成记录。</div>
+            <div class="record-buttons">
+              <button id="exportBtn" disabled>导出 JSON</button>
+              <button id="copyBtn" disabled>复制记录</button>
+              <button id="downloadWinBtn" disabled>下载通关记录</button>
+            </div>
+            <div id="eventLog" class="event-log" aria-live="polite"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="./dist/src/main.js"></script>
+  </body>
+</html>

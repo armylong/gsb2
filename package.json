@@ -1,0 +1,22 @@
+{
+  "name": "wood-relay-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "description": "桌游式积木接力台 — TypeScript + Canvas 短关原型",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "verify": "npm run build && node dist/scripts/verify-local.js",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "serve": "python3 -m http.server 5173",
+    "start": "npm run build && python3 -m http.server 5173"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  }
+}
