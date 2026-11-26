@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>缩略图预览包核对台</title>
+<style>
+  :root {
+    --bg: #0f1320;
+    --panel: #171c2b;
+    --panel-2: #1f2638;
+    --line: #303a52;
+    --text: #e8edf9;
+    --muted: #9aa7c2;
+    --accent: #60a5fa;
+    --ok: #34d399;
+    --warn: #facc15;
+    --bad: #f87171;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: linear-gradient(180deg, #111728, var(--bg) 240px);
+    color: var(--text); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  header { padding: 22px 26px 14px; border-bottom: 1px solid var(--line); }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  h2 { margin: 0 0 12px; font-size: 16px; }
+  h3 { margin: 16px 0 8px; font-size: 14px; color: var(--muted); }
+  main { padding: 20px 26px 60px; max-width: 1500px; margin: 0 auto; }
+  .sub { color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { border: 1px solid var(--line); background: rgba(255,255,255,.03); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
+  .chip b { color: #fff; }
+  .chip.ok b { color: var(--ok); }
+  .chip.warn b { color: var(--warn); }
+  .chip.bad b { color: var(--bad); }
+  .grid { display: grid; grid-template-columns: minmax(520px, 1.35fr) minmax(330px, .65fr); gap: 16px; align-items: start; }
+  @media (max-width: 1050px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: color-mix(in srgb, var(--panel) 96%, black); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  input[type="file"] { color: var(--muted); max-width: 360px; }
+  button, .button {
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+    border-radius: 9px; padding: 7px 11px; cursor: pointer; font-size: 13px;
+  }
+  button:hover { border-color: var(--accent); }
+  button.active { background: #1d4ed8; border-color: #60a5fa; }
+  label.check { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); user-select: none; }
+  .time-row { display: grid; grid-template-columns: 1fr 118px auto; gap: 10px; align-items: center; margin: 12px 0 4px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="number"], input[type="text"] {
+    width: 118px; background: #0d1220; color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 8px; font-family: var(--mono);
+  }
+  .ticks { position: relative; height: 18px; margin: 0 4px 10px; }
+  .tick { position: absolute; top: 0; width: 2px; height: 9px; background: #7180a3; transform: translateX(-1px); cursor: pointer; border: 0; padding: 0; border-radius: 0; }
+  .tick.collision { background: var(--warn); height: 13px; }
+  .tick.last { background: var(--ok); height: 15px; }
+  .tick:hover { background: #fff; }
+  .compare-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .compare-wrap.overlay-mode { display: none; }
+  .pane-title { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+  .stage {
+    position: relative; width: 100%; aspect-ratio: var(--thumb-ratio, 16 / 9);
+    background: #000; border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    display: grid; place-items: center;
+  }
+  .stage video, .stage canvas { width: 100%; height: 100%; display: block; }
+  .stage video { object-fit: contain; background: #000; }
+  .stage .tile-canvas { image-rendering: auto; }
+  #overlayPane[hidden] { display: none; }
+  #overlayStage video, #overlayStage .tile-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #overlayStage .tile-canvas { pointer-events: none; }
+  .placeholder { padding: 18px; text-align: center; color: var(--muted); }
+  .placeholder.bad { color: #fecaca; background: repeating-linear-gradient(45deg, #4c1d1d, #4c1d1d 12px, #3b1616 12px, #3b1616 24px); }
+  .placeholder .big { font-size: 28px; font-weight: 800; letter-spacing: .12em; color: #fff; }
+  .mono { font-family: var(--mono); }
+  dl { display: grid; grid-template-columns: 118px 1fr; gap: 6px 10px; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 8px; font-size: 12px; border: 1px solid var(--line); }
+  .badge.ok { color: var(--ok); border-color: rgba(52,211,153,.4); }
+  .badge.err { color: var(--bad); border-color: rgba(248,113,113,.5); background: rgba(127,29,29,.25); }
+  .badge.warn { color: var(--warn); border-color: rgba(250,204,21,.45); background: rgba(113,63,18,.25); }
+  .note { border-left: 3px solid var(--accent); background: rgba(96,165,250,.08); padding: 9px 11px; border-radius: 0 8px 8px 0; color: #d7e3ff; margin: 10px 0; }
+  .note.warn { border-color: var(--warn); background: rgba(250,204,21,.08); }
+  .note.bad { border-color: var(--bad); background: rgba(248,113,113,.09); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--panel-2); }
+  tr { cursor: pointer; }
+  tr:hover td { background: rgba(96,165,250,.07); }
+  tr.active td { background: rgba(37,99,235,.22); }
+  .table-scroll { max-height: 430px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+  .page-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .page-tab .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--muted); }
+  .page-tab.ok .dot { background: var(--ok); }
+  .page-tab.error .dot { background: var(--bad); }
+  .page-panel { display: none; }
+  .page-panel.active { display: block; }
+  .sheet { position: relative; width: fit-content; max-width: 100%; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: #0b0f1a; }
+  .sheet img { display: block; max-width: 100%; height: auto; }
+  .sheet svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .issue-list { margin: 8px 0 0; padding-left: 20px; color: #fecaca; }
+  .issue-list li { margin: 3px 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-size: 22px; font-weight: 750; margin-top: 2px; }
+  .diff-canvas { width: 100%; max-width: 420px; image-rendering: pixelated; border: 1px solid var(--line); border-radius: 8px; background: #000; }
+  .row-gap { margin-top: 14px; }
+  .small { font-size: 12px; color: var(--muted); }
+  .right { text-align: right; }
+  .opacity { width: 150px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>缩略图预览包核对台</h1>
+  <div class="sub">拖动时间条时只查询导出的 <span class="mono">manifest.json</span> 与页图；原视频用于同位置核对真实帧。</div>
+  <div id="summaryChips" class="chips"></div>
+</header>
+<main>
+  <section class="card" style="margin-bottom:16px">
+    <div class="controls">
+      <label class="button" for="videoFile">选择原视频</label>
+      <input id="videoFile" type="file" accept="video/*" hidden />
+      <span id="videoSource" class="small">尚未载入视频；也可用 <span class="mono">thumb-pack serve &lt;包目录&gt; --video &lt;视频&gt;</span> 自动载入。</span>
+      <span style="flex:1"></span>
+      <label class="check"><input id="syncVideo" type="checkbox" checked />拖动时同步 seek 视频</label>
+      <label class="check"><input id="overlayMode" type="checkbox" />叠加对照</label>
+      <label class="check opacity">叠加不透明度 <input id="opacity" type="range" min="0" max="1" step="0.02" value="0.55" /></label>
+      <button id="diffBtn">计算像素差异</button>
+      <button id="recheckPages">重新检查页图</button>
+    </div>
+
+    <div class="time-row">
+      <input id="timeRange" type="range" min="0" max="1" step="0.001" value="0" aria-label="时间轴" />
+      <input id="timeInput" type="number" min="0" step="0.001" value="0" />
+      <button id="playPause">播放</button>
+    </div>
+    <div id="ticks" class="ticks"></div>
+
+    <div class="grid">
+      <div>
+        <div id="compareWrap" class="compare-wrap">
+          <div>
+            <div class="pane-title"><span>真实视频帧</span><span id="realTime" class="mono">—</span></div>
+            <div class="stage" id="realStage">
+              <video id="video" controls playsinline muted></video>
+              <div id="videoPlaceholder" class="placeholder">选择生成此包时使用的原视频后，可在同一时间、同一裁剪/填充几何下对照。</div>
+            </div>
+          </div>
+          <div>
+            <div class="pane-title"><span>包内小图（manifest.rect）</span><span id="tilePage" class="mono"></span></div>
+            <div class="stage" id="tileStage">
+              <canvas id="tileCanvas" class="tile-canvas"></canvas>
+              <div id="tilePlaceholder" class="placeholder" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div id="overlayPane" class="row-gap" hidden>
+          <div class="pane-title"><span>同位置叠加：真实视频在下，包内 rect 在上</span><span id="overlayHint" class="small"></span></div>
+          <div class="stage" id="overlayStage"></div>
+        </div>
+        <div id="diffPanel" class="row-gap" hidden>
+          <h3>放大差异图（越亮差异越大）</h3>
+          <canvas id="diffCanvas" class="diff-canvas"></canvas>
+          <div id="diffStats" class="small"></div>
+        </div>
+      </div>
+
+      <aside class="card" style="background:var(--panel-2)">
+        <h2>当前指针诊断</h2>
+        <div id="pointerBadges" style="margin-bottom:10px"></div>
+        <dl>
+          <dt>目标时刻</dt><dd id="dTarget" class="mono"></dd>
+          <dt>查询区间</dt><dd id="dScrub" class="mono"></dd>
+          <dt>源帧号</dt><dd id="dFrame" class="mono"></dd>
+          <dt>帧 PTS</dt><dd id="dPts" class="mono"></dd>
+          <dt>帧覆盖区间</dt><dd id="dFrameInterval" class="mono"></dd>
+          <dt>页名/矩形</dt><dd id="dRect" class="mono"></dd>
+          <dt>同帧目标</dt><dd id="dSame"></dd>
+          <dt>状态/原因</dt><dd id="dStatus"></dd>
+        </dl>
+        <div class="note" id="terminalNote"></div>
+        <button id="copyDiag">复制当前诊断 JSON</button>
+      </aside>
+    </div>
+  </section>
+
+  <section class="stats" id="stats" style="margin-bottom:16px"></section>
+
+  <section class="card" style="margin-bottom:16px">
+    <h2>页图与像素矩形检查</h2>
+    <div class="small">每一页独立加载。某页被移走或矩形超出该页真实像素尺寸时，会在这里给出具体原因；其他页仍可切换检查。</div>
+    <div id="pageTabs" class="page-tabs row-gap"></div>
+    <div id="pagePanels"></div>
+  </section>
+
+  <section class="card">
+    <h2>全部目标 / 格子</h2>
+    <div class="small">点击任意行可定位时间并切换到对应页。黄色帧号表示同一源帧被多个目标时间命中。</div>
+    <div class="table-scroll row-gap">
+      <table>
+        <thead><tr><th>slot</th><th>目标时间</th><th>源帧</th><th>归一 PTS / 覆盖区间</th><th>页 / rect</th><th>状态</th></tr></thead>
+        <tbody id="sampleRows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script id="pack-manifest" type="application/json">__THUMB_PACK_MANIFEST_JSON__</script>
+<script>
+"use strict";
+const MANIFEST = JSON.parse(document.getElementById("pack-manifest").textContent);
+const $ = (id) => document.getElementById(id);
+const state = {
+  time: 0,
+  sample: null,
+  pages: new Map(),
+  activePage: 1,
+  objectUrl: null,
+  scrubbing: false,
+};
+
+function fmt(t, digits = 3) {
+  if (t === null || t === undefined || Number.isNaN(t)) return "—";
+  return Number(t).toFixed(digits);
+}
+function tc(t) {
+  const ms = Math.max(0, Math.round(t * 1000));
+  const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000),
+        s = Math.floor((ms % 60000) / 1000), milli = ms % 1000;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(milli).padStart(3,"0")}`;
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function lookup(time) {
+  const duration = MANIFEST.timeline.duration;
+  const t = Math.max(0, Math.min(time, duration));
+  let found = null;
+  for (const s of MANIFEST.samples) {
+    const iv = s.scrubInterval;
+    if (t + 1e-9 < iv.start) continue;
+    if (iv.terminalEndInclusive) {
+      if (t <= iv.end + 1e-9) return s;
+    } else if (t < iv.end - 1e-9) {
+      return s;
+    }
+    found = s;
+  }
+  const candidates = MANIFEST.samples.filter(s => s.scrubInterval.start <= t + 1e-9);
+  return found || candidates[candidates.length - 1] || MANIFEST.samples[0];
+}
+
+function renderSummary() {
+  const src = MANIFEST.source, sav = MANIFEST.savings, tl = MANIFEST.timeline;
+  const chips = [
+    `<span class="chip">源片 <b>${esc(src.filename)}</b></span>`,
+    `<span class="chip">编码/显示 <b>${src.width}×${src.height}${src.rotation ? ` / rot ${src.rotation}°` : ""} → ${src.displayWidth}×${src.displayHeight}</b></span>`,
+    `<span class="chip ${src.isVfr ? "warn" : "ok"}">VFR <b>${src.isVfr ? "是" : "否"}</b></span>`,
+    `<span class="chip">原始起点 <b>${fmt(tl.originRawPtsTime, 6)}s</b> → 清单归零</span>`,
+    `<span class="chip">时长 <b>${fmt(tl.duration)}s</b></span>`,
+    `<span class="chip ok">最后有效时刻 <b>${fmt(tl.lastValidPreviewTime)}s</b></span>`,
+    `<span class="chip">目标 <b>${sav.requestedTargets}</b></span>`,
+    `<span class="chip warn">唯一帧 <b>${sav.uniqueSourceFrames}</b> / 重复格 <b>${sav.repeatedFrameSlots}</b></span>`,
+    `<span class="chip ok">小图文件 <b>${sav.unpackedImageFiles}</b> → 页图 <b>${sav.actualImageFiles}</b>，少 <b>${sav.savedFileCount}</b> 个散文件</span>`,
+  ];
+  if (MANIFEST.validation.errorTiles) chips.push(`<span class="chip bad">坏格 <b>${MANIFEST.validation.errorTiles}</b></span>`);
+  $("summaryChips").innerHTML = chips.join("");
+
+  const stats = [
+    ["目标时刻", sav.requestedTargets], ["导出块", sav.slots], ["唯一源帧", sav.uniqueSourceFrames],
+    ["页图", sav.pageCount], ["少掉的散文件", sav.savedFileCount], ["坏格", MANIFEST.validation.errorTiles],
+  ];
+  $("stats").innerHTML = stats.map(([k,v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+  $("terminalNote").innerHTML = `<b>最后有效时刻定义：</b>时间轴最大值为 ${fmt(tl.duration,6)}s。最后一个 scrubInterval 为 [${fmt(MANIFEST.samples.at(-1).scrubInterval.start,6)}, ${fmt(tl.duration,6)}]，终点 <b>包含</b>；拖到最右端仍取最后一格。非末尾区间终点不包含，恰好落在边界时取后一格。`;
+  const ratio = MANIFEST.geometry.thumbWidth / MANIFEST.geometry.thumbHeight;
+  document.documentElement.style.setProperty("--thumb-ratio", ratio);
+  $("timeRange").max = tl.duration;
+  $("timeInput").max = tl.duration;
+  const video = $("video");
+  video.style.objectFit = ({contain:"contain", cover:"cover", stretch:"fill"})[MANIFEST.geometry.fit] || "contain";
+  video.style.background = MANIFEST.geometry.letterboxColor || "#000";
+}
+
+function renderTicks() {
+  const dur = MANIFEST.timeline.duration;
+  const groupFrames = new Set(MANIFEST.frameGroups.map(g => g.frameIndex));
+  const ticks = MANIFEST.samples.map(s => {
+    const left = 100 * s.requestedTime / dur;
+    const cls = groupFrames.has(s.source.frameIndex) ? "tick collision" : "tick";
+    return `<button type="button" class="${cls}" style="left:${left}%" title="#${s.slot} t=${fmt(s.requestedTime)} frame=${s.source.frameIndex}" data-seek="${s.requestedTime}"></button>`;
+  });
+  ticks.push(`<button type="button" class="tick last" style="left:100%" title="最后有效时刻 ${fmt(dur)}" data-seek="${dur}"></button>`);
+  $("ticks").innerHTML = ticks.join("");
+  document.querySelectorAll(".tick[data-seek]").forEach(el => el.addEventListener("click", () => setTime(parseFloat(el.dataset.seek), true)));
+}
+
+function pageUrl(file) { return encodeURI(file); }
+function loadAllPages() {
+  $("pageTabs").innerHTML = MANIFEST.pages.map(p =>
+    `<button class="page-tab" data-page="${p.index}"><span class="dot"></span>${esc(p.file)}</button>`).join("");
+  $("pagePanels").innerHTML = MANIFEST.pages.map(p => `
+    <section class="page-panel" id="pagePanel${p.index}">
+      <div class="small mono">${esc(p.file)} · 期望 ${p.width}×${p.height} <span id="pageNatural${p.index}"></span></div>
+      <div class="sheet row-gap" id="sheet${p.index}">
+        <img alt="page ${p.index}" id="pageImg${p.index}" />
+        <svg id="pageSvg${p.index}" preserveAspectRatio="none" viewBox="0 0 ${p.width} ${p.height}"></svg>
+      </div>
+      <ul class="issue-list" id="pageIssues${p.index}"></ul>
+    </section>`).join("");
+  document.querySelectorAll(".page-tab").forEach(btn => btn.addEventListener("click", () => activatePage(parseInt(btn.dataset.page, 10))));
+  MANIFEST.pages.forEach(loadPage);
+  activatePage(state.activePage);
+}
+function loadPage(page) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const rec = { page, status: "loading", image: null, issues: [] };
+    state.pages.set(page.index, rec);
+    img.onload = () => {
+      rec.status = "ok"; rec.image = img; rec.naturalWidth = img.naturalWidth; rec.naturalHeight = img.naturalHeight;
+      validatePage(page, rec);
+      paintPage(page, rec);
+      updatePageTab(page);
+      if (state.sample?.pageIndex === page.index) drawTile(state.sample);
+      resolve(rec);
+    };
+    img.onerror = () => {
+      rec.status = "missing";
+      rec.issues = [{code:"PAGE_MISSING", message:`页图无法加载，可能已被移走、改名或删除：${page.file}`}];
+      paintPage(page, rec);
+      updatePageTab(page);
+      if (state.sample?.pageIndex === page.index) drawTile(state.sample);
+      resolve(rec);
+    };
+    img.src = pageUrl(page.file) + `?check=${Date.now()}`;
+    const el = $(`pageImg${page.index}`);
+    if (el) el.src = img.src;
+  });
+}
+function validatePage(page, rec) {
+  rec.issues = [];
+  if (rec.naturalWidth !== page.width || rec.naturalHeight !== page.height) {
+    rec.issues.push({code:"PAGE_DIMENSION_MISMATCH", message:`实际尺寸 ${rec.naturalWidth}×${rec.naturalHeight} 与清单 ${page.width}×${page.height} 不一致，可能被其他图替换。`});
+  }
+  for (const s of MANIFEST.samples.filter(x => x.pageIndex === page.index)) {
+    const r = s.rect;
+    if (r.x < 0 || r.y < 0 || r.width <= 0 || r.height <= 0) {
+      rec.issues.push({slot:s.slot, code:"RECT_INVALID", message:`slot ${s.slot}: 非法矩形 ${JSON.stringify(r)}`});
+    } else if (r.x + r.width > rec.naturalWidth || r.y + r.height > rec.naturalHeight) {
+      const ox = Math.max(0, r.x + r.width - rec.naturalWidth), oy = Math.max(0, r.y + r.height - rec.naturalHeight);
+      const why = [];
+      if (ox) why.push(`右边超出 ${ox}px`);
+      if (oy) why.push(`下边超出 ${oy}px`);
+      rec.issues.push({slot:s.slot, code:"RECT_OUTSIDE_IMAGE", message:`slot ${s.slot}: rect ${r.x},${r.y},${r.width},${r.height} 超出实际图像 ${rec.naturalWidth}×${rec.naturalHeight}（${why.join("，")}）`});
+    }
+  }
+}
+function updatePageTab(page) {
+  const btn = document.querySelector(`.page-tab[data-page="${page.index}"]`);
+  if (!btn) return;
+  const rec = state.pages.get(page.index);
+  btn.classList.toggle("ok", rec.status === "ok" && rec.issues.length === 0);
+  btn.classList.toggle("error", rec.status !== "ok" || rec.issues.length > 0);
+}
+function paintPage(page, rec) {
+  const idx = page.index;
+  const natural = $(`pageNatural${idx}`), issues = $(`pageIssues${idx}`), svg = $(`pageSvg${idx}`), img = $(`pageImg${idx}`);
+  if (rec.status === "missing") {
+    if (img) img.style.display = "none";
+    if (natural) natural.textContent = "（无法加载）";
+  } else {
+    if (img) img.style.display = "";
+    if (natural) natural.textContent = `· 实际 ${rec.naturalWidth}×${rec.naturalHeight}`;
+  }
+  if (issues) issues.innerHTML = rec.issues.map(i => `<li>${i.slot !== undefined ? `slot ${i.slot}：` : ""}${esc(i.message)}</li>`).join("");
+  if (!svg) return;
+  const rects = MANIFEST.samples.filter(s => s.pageIndex === idx).map(s => {
+    const bad = rec.issues.some(i => i.slot === s.slot);
+    const active = state.sample?.slot === s.slot;
+    const c = s.cellRect, r = s.rect;
+    return `
+      <rect x="${c.x}" y="${c.y}" width="${c.width}" height="${c.height}" rx="3"
+            fill="${active ? "rgba(96,165,250,.18)" : "rgba(0,0,0,0)"}"
+            stroke="${bad ? "#f87171" : active ? "#60a5fa" : "rgba(250,204,21,.55)"}" stroke-width="${active ? 3 : 1.5}" vector-effect="non-scaling-stroke"/>
+      <rect x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}"
+            fill="none" stroke="${bad ? "#fecaca" : "#34d399"}" stroke-width="1" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
+  }).join("");
+  svg.innerHTML = rects;
+}
+function activatePage(index) {
+  state.activePage = index;
+  document.querySelectorAll(".page-tab").forEach(b => b.classList.toggle("active", parseInt(b.dataset.page,10) === index));
+  document.querySelectorAll(".page-panel").forEach(p => p.classList.toggle("active", p.id === `pagePanel${index}`));
+  const page = MANIFEST.pages.find(p => p.index === index);
+  const rec = state.pages.get(index);
+  if (page && rec) paintPage(page, rec);
+}
+
+function setTime(t, seekVideo = false) {
+  const dur = MANIFEST.timeline.duration;
+  state.time = Math.max(0, Math.min(t, dur));
+  const sample = lookup(state.time);
+  state.sample = sample;
+  $("timeRange").value = state.time;
+  $("timeInput").value = fmt(state.time, 3);
+  renderDiagnostic(sample);
+  drawTile(sample);
+  if (sample) activatePageIfNeeded(sample.pageIndex);
+  highlightRow(sample?.slot);
+  if (seekVideo && $("syncVideo").checked && $("video").src) {
+    const v = $("video");
+    if (Math.abs(v.currentTime - state.time) > 0.015) v.currentTime = state.time;
+  }
+}
+function activatePageIfNeeded(index) {
+  if (index && index !== state.activePage) activatePage(index);
+  else {
+    const page = MANIFEST.pages.find(p => p.index === index);
+    const rec = state.pages.get(index);
+    if (page && rec) paintPage(page, rec);
+  }
+}
+function highlightRow(slot) {
+  document.querySelectorAll("#sampleRows tr").forEach(tr => tr.classList.toggle("active", parseInt(tr.dataset.slot,10) === slot));
+}
+
+function renderDiagnostic(s) {
+  if (!s) return;
+  const f = s.source, iv = s.scrubInterval, fi = f.frameInterval;
+  $("dTarget").textContent = `${fmt(s.requestedTime,6)} s；当前拖动 ${fmt(state.time,6)} s`;
+  $("dScrub").textContent = `[${fmt(iv.start,6)}, ${fmt(iv.end,6)}] ${iv.terminalEndInclusive ? "终点包含（最后一格）" : "终点不包含"}`;
+  $("dFrame").innerHTML = `<b style="color:${s.sameFrameSlots.length ? "var(--warn)" : "#fff"}">#${f.frameIndex}</b> / 解码序号；key=${f.keyFrame}`;
+  $("dPts").textContent = `归零 ${fmt(f.normalizedPtsTime,6)}；FFprobe 原始 ${fmt(f.rawPtsTime,6)}`;
+  $("dFrameInterval").textContent = `[${fmt(fi.start,6)}, ${fmt(fi.end,6)}] ${fi.terminalEndInclusive ? "末端包含" : "右端下一帧/不包含"}，dur=${fmt(f.duration,6)}`;
+  $("dRect").textContent = `${s.pageFile} #xywh=${s.rect.x},${s.rect.y},${s.rect.width},${s.rect.height}`;
+  $("dSame").innerHTML = s.sameFrameSlots.length
+    ? `<span class="badge warn">同一帧命中 slots ${s.sameFrameSlots.join(", ")}</span>`
+    : `<span class="small">无重复目标</span>`;
+  if (s.status === "error") {
+    $("dStatus").innerHTML = `<span class="badge err">${esc(s.error.code)}</span><div class="note bad">${esc(s.error.message)}</div>`;
+  } else {
+    $("dStatus").innerHTML = `<span class="badge ok">ok</span>`;
+  }
+  $("tilePage").textContent = s.pageFile;
+  $("pointerBadges").innerHTML = [
+    s.sameFrameSlots.length ? `<span class="badge warn">FRAME COLLISION ×${s.sameFrameSlots.length}</span>` : `<span class="badge ok">UNIQUE FRAME</span>`,
+    s.status === "error" ? `<span class="badge err">BAD TILE</span>` : `<span class="badge ok">TILE OK</span>`,
+  ].join(" ");
+}
+
+function drawTile(s) {
+  const canvas = $("tileCanvas"), ph = $("tilePlaceholder");
+  if (!s) return;
+  canvas.width = s.rect.width; canvas.height = s.rect.height;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const page = MANIFEST.pages.find(p => p.index === s.pageIndex);
+  const rec = state.pages.get(s.pageIndex);
+  if (!page || !rec || rec.status !== "ok") {
+    canvas.style.display = "none"; ph.hidden = false; ph.className = rec?.status === "loading" ? "placeholder" : "placeholder bad";
+    const message = rec?.status === "loading"
+      ? "页图加载中…"
+      : (rec?.issues?.[0]?.message || `缺少页记录 ${s.pageIndex}`);
+    ph.innerHTML = `<div class="big">${rec?.status === "loading" ? "LOADING" : "PAGE UNAVAILABLE"}</div><div>${esc(message)}</div>`;
+    return;
+  }
+  const badRect = rec.issues.some(i => i.slot === s.slot && i.code === "RECT_OUTSIDE_IMAGE");
+  if (badRect) {
+    canvas.style.display = "none"; ph.hidden = false; ph.className = "placeholder bad";
+    const issue = rec.issues.find(i => i.slot === s.slot);
+    ph.innerHTML = `<div class="big">RECT OUTSIDE</div><div>${esc(issue.message)}</div>`;
+    return;
+  }
+  canvas.style.display = "block"; ph.hidden = true;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(rec.image, s.rect.x, s.rect.y, s.rect.width, s.rect.height, 0, 0, s.rect.width, s.rect.height);
+}
+
+function renderTable() {
+  $("sampleRows").innerHTML = MANIFEST.samples.map(s => {
+    const collision = s.sameFrameSlots.length ? "warn" : "";
+    const status = s.status === "error"
+      ? `<span class="badge err">${esc(s.error.code)}</span>`
+      : s.sameFrameSlots.length ? `<span class="badge warn">同帧 ${s.sameFrameSlots.length}</span>` : `<span class="badge ok">ok</span>`;
+    return `<tr data-slot="${s.slot}">
+      <td>${s.slot}</td>
+      <td class="mono">${fmt(s.requestedTime,6)}</td>
+      <td class="mono ${collision ? "warn" : ""}">${s.source.frameIndex}${s.sameFrameSlots.length ? " ⚠" : ""}</td>
+      <td class="mono">${fmt(s.source.normalizedPtsTime,3)}<br><span class="small">[${fmt(s.source.frameInterval.start,3)},${fmt(s.source.frameInterval.end,3)}]</span></td>
+      <td class="mono small">${esc(s.pageFile)}<br>${s.rect.x},${s.rect.y},${s.rect.width},${s.rect.height}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join("");
+  document.querySelectorAll("#sampleRows tr").forEach(tr => tr.addEventListener("click", () => {
+    const s = MANIFEST.samples[parseInt(tr.dataset.slot,10)];
+    setTime(s.requestedTime, true);
+    if (s) activatePage(s.pageIndex);
+  }));
+}
+
+function drawVideoProcessed(targetCanvas) {
+  const v = $("video");
+  if (!v.videoWidth) throw new Error("视频尚未载入或还没有解码帧");
+  const tw = MANIFEST.geometry.thumbWidth, th = MANIFEST.geometry.thumbHeight;
+  targetCanvas.width = tw; targetCanvas.height = th;
+  const ctx = targetCanvas.getContext("2d", {willReadFrequently:true});
+  ctx.fillStyle = MANIFEST.geometry.letterboxColor || "#000";
+  ctx.fillRect(0,0,tw,th);
+  const crop = MANIFEST.source.sourceCrop;
+  const sw = crop?.width || v.videoWidth, sh = crop?.height || v.videoHeight;
+  const sx = crop?.x || 0, sy = crop?.y || 0;
+  const fit = MANIFEST.geometry.fit;
+  let dw = tw, dh = th, dx = 0, dy = 0;
+  if (fit === "contain") {
+    const sc = Math.min(tw / sw, th / sh);
+    dw = sw * sc; dh = sh * sc; dx = (tw-dw)/2; dy=(th-dh)/2;
+  } else if (fit === "cover") {
+    const sc = Math.max(tw / sw, th / sh);
+    dw = sw * sc; dh = sh * sc; dx = (tw-dw)/2; dy=(th-dh)/2;
+  }
+  ctx.drawImage(v, sx, sy, sw, sh, dx, dy, dw, dh);
+  return ctx;
+}
+async function calculateDiff() {
+  const s = state.sample;
+  if (!s || s.status === "error") return;
+  let realCtx;
+  try {
+    const off = document.createElement("canvas");
+    realCtx = drawVideoProcessed(off);
+    var realData = realCtx.getImageData(0,0,off.width,off.height);
+  } catch (e) {
+    $("diffPanel").hidden = false;
+    $("diffStats").innerHTML = `<span class="badge err">无法读取视频像素</span> ${esc(e.message)}。若用 file:// 打开，浏览器可能阻止 canvas 像素读取；请运行 <span class="mono">python -m thumb_pack serve ...</span>。视觉叠加对照仍可用。`;
+    return;
+  }
+  let tileData;
+  try {
+    tileData = $("tileCanvas").getContext("2d", {willReadFrequently:true}).getImageData(0,0,s.rect.width,s.rect.height);
+  } catch (e) {
+    $("diffPanel").hidden = false;
+    $("diffStats").innerHTML = `<span class="badge err">页图像素被浏览器安全策略阻止</span> 请通过本地 serve 命令或 HTTP 服务打开。`;
+    return;
+  }
+  if (realData.data.length !== tileData.data.length) {
+    $("diffStats").textContent = "尺寸不一致，无法比较。"; return;
+  }
+  const outCtx = $("diffCanvas").getContext("2d");
+  $("diffCanvas").width = s.rect.width; $("diffCanvas").height = s.rect.height;
+  const out = outCtx.createImageData(s.rect.width, s.rect.height);
+  let sum = 0, bad = 0, max = 0;
+  for (let i=0; i<realData.data.length; i+=4) {
+    const dr = Math.abs(realData.data[i] - tileData.data[i]);
+    const dg = Math.abs(realData.data[i+1] - tileData.data[i+1]);
+    const db = Math.abs(realData.data[i+2] - tileData.data[i+2]);
+    const d = dr+dg+db;
+    sum += d; max = Math.max(max,d); if (d/3 > 28) bad++;
+    out.data[i] = Math.min(255, dr*4); out.data[i+1] = Math.min(255, dg*4); out.data[i+2] = Math.min(255, db*4); out.data[i+3] = 255;
+  }
+  outCtx.putImageData(out,0,0);
+  const pixels = s.rect.width*s.rect.height;
+  $("diffPanel").hidden = false;
+  $("diffStats").innerHTML = `平均通道差 <b>${(sum/(realData.data.length)*3).toFixed(3)}</b>，差异像素比例 <b>${(bad/pixels*100).toFixed(2)}%</b>，最大三通道差 <b>${max}</b>。编码/缩放会带来误差；若指针取错帧，该值通常显著升高。`;
+}
+
+function setOverlayMode(on) {
+  const wrap = $("compareWrap");
+  const pane = $("overlayPane");
+  const stage = $("overlayStage");
+  const video = $("video");
+  const canvas = $("tileCanvas");
+  if (on) {
+    wrap.classList.add("overlay-mode");
+    pane.hidden = false;
+    stage.appendChild(video);
+    stage.appendChild(canvas);
+    $("overlayHint").textContent = $("video").src ? "若几何一致，人物/边框应重合；可用顶部不透明度滑块检查。" : "请先选择或通过 serve 载入原视频。";
+  } else {
+    pane.hidden = true;
+    wrap.classList.remove("overlay-mode");
+    $("realStage").insertBefore(video, $("videoPlaceholder"));
+    $("tileStage").insertBefore(canvas, $("tilePlaceholder"));
+  }
+}
+
+function bindEvents() {
+  $("timeRange").addEventListener("input", e => { state.scrubbing = true; setTime(parseFloat(e.target.value), true); });
+  $("timeRange").addEventListener("change", e => { state.scrubbing = false; setTime(parseFloat(e.target.value), true); });
+  $("timeInput").addEventListener("change", e => setTime(parseFloat(e.target.value || 0), true));
+  $("videoFile").addEventListener("change", e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+    state.objectUrl = URL.createObjectURL(file);
+    const v = $("video");
+    v.src = state.objectUrl;
+    $("videoPlaceholder").hidden = true;
+    $("videoSource").textContent = `已选择：${file.name}`;
+    v.addEventListener("loadedmetadata", () => setTime(state.time, true), {once:true});
+  });
+  const v = $("video");
+  v.addEventListener("loadedmetadata", () => { $("videoPlaceholder").hidden = true; $("realTime").textContent = `video.currentTime=${fmt(v.currentTime,3)}`; });
+  v.addEventListener("timeupdate", () => {
+    $("realTime").textContent = `video.currentTime=${fmt(v.currentTime,3)}`;
+    if (!state.scrubbing && v.duration) setTime(v.currentTime, false);
+  });
+  v.addEventListener("seeked", () => { $("realTime").textContent = `seeked ${fmt(v.currentTime,6)}`; calculateDiffMaybe(); });
+  $("playPause").addEventListener("click", async () => {
+    if (v.paused) { try { await v.play(); $("playPause").textContent = "暂停"; } catch(e) {} }
+    else { v.pause(); $("playPause").textContent = "播放"; }
+  });
+  v.addEventListener("play", () => $("playPause").textContent = "暂停");
+  v.addEventListener("pause", () => $("playPause").textContent = "播放");
+  $("overlayMode").addEventListener("change", e => setOverlayMode(e.target.checked));
+  $("opacity").addEventListener("input", e => { $("tileCanvas").style.opacity = e.target.value; });
+  $("tileCanvas").style.opacity = $("opacity").value;
+  $("diffBtn").addEventListener("click", calculateDiff);
+  $("recheckPages").addEventListener("click", loadAllPages);
+  $("copyDiag").addEventListener("click", async () => {
+    const payload = {currentTime: state.time, sample: state.sample};
+    try { await navigator.clipboard.writeText(JSON.stringify(payload,null,2)); $("copyDiag").textContent = "已复制"; setTimeout(()=>$("copyDiag").textContent="复制当前诊断 JSON",1200); }
+    catch { prompt("复制诊断 JSON", JSON.stringify(payload,null,2)); }
+  });
+  fetch("__thumb_pack/config.json", {cache:"no-store"}).then(r => r.ok ? r.json() : null).then(cfg => {
+    if (cfg?.videoUrl) {
+      v.src = cfg.videoUrl;
+      $("videoPlaceholder").hidden = true;
+      $("videoSource").innerHTML = `serve 自动载入：<span class="mono">${esc(cfg.video || cfg.videoUrl)}</span>`;
+    }
+  }).catch(() => {});
+}
+let diffQueued = false;
+function calculateDiffMaybe() {
+  if ($("diffPanel").hidden || diffQueued) return;
+  diffQueued = true;
+  requestAnimationFrame(() => { diffQueued = false; calculateDiff(); });
+}
+
+renderSummary();
+renderTicks();
+renderTable();
+loadAllPages();
+bindEvents();
+setTime(0, false);
+</script>
+</body>
+</html>

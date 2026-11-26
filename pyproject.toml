@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thumb-pack"
+version = "0.1.0"
+description = "FFmpeg-backed thumbnail sprite pack generator and local verification workbench"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+thumb-pack = "thumb_pack.cli:main"
+
+[tool.setuptools]
+packages = ["thumb_pack"]
+
+[tool.setuptools.package-data]
+thumb_pack = ["web/*.html"]

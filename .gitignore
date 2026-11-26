@@ -42,3 +42,8 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- thumb-pack 本地生成产物 ----
+thumb_pack_out/
+/demo/
+/examples/output/
