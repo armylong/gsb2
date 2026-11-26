@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>翻转重力送标本 · 本地原型</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 18px;
+        padding: 18px;
+        background: #0c0f14;
+        color: #dfe7f2;
+      }
+      canvas {
+        border: 1px solid #2a3342;
+        border-radius: 8px;
+        background: #14181f;
+      }
+      .panel {
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      h1 { font-size: 17px; margin: 0; }
+      h2 { font-size: 14px; margin: 0 0 6px; color: #9fb2cc; }
+      .card {
+        background: #171d27;
+        border: 1px solid #26303f;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; }
+      button {
+        background: #243044;
+        color: #dfe7f2;
+        border: 1px solid #36465f;
+        border-radius: 6px;
+        padding: 7px 12px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      button:hover { background: #2f3e57; }
+      button.active { border-color: #ffd166; color: #ffd166; }
+      kbd {
+        background: #243044;
+        border: 1px solid #36465f;
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      .kv { display: flex; justify-content: space-between; font: 12px monospace; padding: 2px 0; }
+      .kv b { color: #ffd166; font-weight: normal; }
+      #reject {
+        min-height: 34px;
+        color: #ff8f8f;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      #logs {
+        font: 11px/1.6 monospace;
+        color: #93a5bf;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      #logs .flip-start { color: #ffd166; }
+      #logs .flip-settle { color: #43c98c; }
+      #logs .flip-reject { color: #ff8f8f; }
+      #logs .fail { color: #ff6b6b; font-weight: bold; }
+      #logs .win { color: #43c98c; font-weight: bold; }
+      .hint { font-size: 12px; color: #93a5bf; line-height: 1.6; }
+      label { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="game" width="880" height="560"></canvas>
+
+    <div class="panel">
+      <div class="card">
+        <h1>翻转重力送标本 · 本地原型</h1>
+        <p class="hint" id="room-hint"></p>
+      </div>
+
+      <div class="card">
+        <h2>房间</h2>
+        <div class="row" id="room-buttons"></div>
+      </div>
+
+      <div class="card">
+        <h2>实时状态</h2>
+        <div class="kv"><span>重力方向</span><b id="hud-gravity">-</b></div>
+        <div class="kv"><span>翻转阶段</span><b id="hud-flip">-</b></div>
+        <div class="kv"><span>玩家支撑</span><b id="hud-grounded">-</b></div>
+        <div class="kv"><span>箱入槽 tick</span><b id="hud-seat">-</b></div>
+        <div class="kv"><span>模拟 tick</span><b id="hud-tick">-</b></div>
+        <div class="kv"><span>暂停</span><b id="hud-pause">-</b></div>
+        <div id="reject"></div>
+      </div>
+
+      <div class="card">
+        <h2>操作</h2>
+        <div class="row">
+          <button id="btn-restart">重开 (R)</button>
+          <button id="btn-pause">暂停 (Space)</button>
+          <button id="btn-step">单步 (N)</button>
+        </div>
+        <p class="hint" style="margin-top:8px">
+          <kbd>←</kbd><kbd>→</kbd> 跑 / 推箱 ·
+          <kbd>W</kbd> 重力向上 · <kbd>S</kbd> 重力向下<br />
+          <kbd>Space</kbd> 暂停 · <kbd>N</kbd> 暂停下单步一 tick · <kbd>R</kbd> 重开 · <kbd>F3</kbd> 调试层
+        </p>
+        <label><input type="checkbox" id="debug-toggle" checked /> 显示调试层（接触 / grounded / 速度）</label>
+      </div>
+
+      <div class="card">
+        <h2>事件日志</h2>
+        <div id="logs"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
