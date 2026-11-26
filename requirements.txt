@@ -1,0 +1,5 @@
+numpy>=1.26
+# opencv-python provides the same cv2 module; headless avoids extra GUI Qt
+# dependencies because this application uses PySide6 for its window.
+opencv-python-headless>=4.9
+PySide6>=6.6
