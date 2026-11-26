@@ -1,0 +1,24 @@
+{
+  "name": "cabinet-door-clearance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "三维展柜铰链门开门余量本地观察页 (Three.js + TypeScript)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "verify": "tsc --noEmit && vitest run && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "puppeteer-core": "^23.11.1",
+    "typescript": "^5.7.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.0"
+  }
+}
