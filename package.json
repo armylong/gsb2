@@ -1,0 +1,21 @@
+{
+  "name": "great-circle-atlas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "球面长途航线示意图：Three.js 地球 + 平面投影，同一条大圆最短弧",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "puppeteer-core": "^24.43.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.8"
+  }
+}

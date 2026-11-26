@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%231c4e80'/%3E%3Cellipse cx='16' cy='16' rx='6' ry='14' fill='none' stroke='%238fb6dd' stroke-width='1.4'/%3E%3Cpath d='M2 16h28M5 9h22M5 23h22' stroke='%238fb6dd' stroke-width='1.2' fill='none'/%3E%3Cpath d='M7 20 Q16 8 25 13' stroke='%237db8ff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='7' cy='20' r='2.4' fill='%231baf7a'/%3E%3Ccircle cx='25' cy='13' r='2.4' fill='%23eb6834'/%3E%3C/svg%3E"
+    />
+    <title>球面长途航线示意图 · 大圆最短弧双视图</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <h1>球面长途航线示意图</h1>
+        <p class="subtitle">
+          三维球面与平面投影共享同一条大圆最短弧 · 跨反经线断段 · 沿路径拖动位置指示，两视图读数同源
+        </p>
+      </header>
+
+      <!-- 航线输入与示例 -->
+      <section class="card controls-card" aria-label="航线控制">
+        <div class="endpoint-editors">
+          <fieldset class="ep-editor ep-start">
+            <legend><span class="ep-dot" style="--c: #1baf7a"></span>起点</legend>
+            <label>纬度
+              <input id="startLat" type="number" step="0.0001" min="-90" max="90" />
+            </label>
+            <label>经度
+              <input id="startLon" type="number" step="0.0001" min="-180" max="180" />
+            </label>
+            <button id="pickStart" class="btn" type="button" aria-pressed="false">在球上点选</button>
+          </fieldset>
+
+          <div class="route-arrow" aria-hidden="true">✈</div>
+
+          <fieldset class="ep-editor ep-end">
+            <legend><span class="ep-dot" style="--c: #eb6834"></span>终点</legend>
+            <label>纬度
+              <input id="endLat" type="number" step="0.0001" min="-90" max="90" />
+            </label>
+            <label>经度
+              <input id="endLon" type="number" step="0.0001" min="-180" max="180" />
+            </label>
+            <button id="pickEnd" class="btn" type="button" aria-pressed="false">在球上点选</button>
+          </fieldset>
+        </div>
+
+        <div class="presets">
+          <span class="ctl-label">示例航线</span>
+          <button class="btn chip" type="button" data-preset="antimeridian">跨反经线 · 上海→洛杉矶</button>
+          <button class="btn chip" type="button" data-preset="polar">靠近极点 · 北京→纽约</button>
+          <button class="btn chip" type="button" data-preset="same">起终点重合</button>
+          <button class="btn chip" type="button" data-preset="nearanti">接近正对侧</button>
+          <button class="btn chip" type="button" data-preset="antipodal">正对侧（对跖点）</button>
+        </div>
+      </section>
+
+      <main class="workspace">
+        <!-- 球面视图 -->
+        <section class="card globe-card">
+          <div class="card-head">
+            <h2>球面视图</h2>
+            <div class="head-actions">
+              <span class="head-hint">拖动旋转 · 滚轮缩放 · 靠近蓝线按住可沿路径拖动</span>
+              <button id="resetView" class="btn btn-mini" type="button">框住航线</button>
+            </div>
+          </div>
+          <div id="globeStage" class="globe-stage" aria-label="可旋转的三维地球"></div>
+        </section>
+
+        <div class="right-col">
+          <!-- 平面视图 -->
+          <section class="card map-card">
+            <div class="card-head map-head">
+              <h2>平面视图</h2>
+              <div class="map-controls">
+                <div class="segmented" role="group" aria-label="投影方式">
+                  <button class="seg-btn is-active" type="button" data-proj="equirect">普通经纬图</button>
+                  <button class="seg-btn" type="button" data-proj="azimuthal">方位图（以地标为中心）</button>
+                </div>
+                <label class="center-select">中心
+                  <select id="centerSelect" aria-label="方位投影中心地标"></select>
+                </label>
+              </div>
+            </div>
+            <div class="map-wrap">
+              <canvas id="flatMap" aria-label="平面投影航线图"></canvas>
+            </div>
+          </section>
+
+          <!-- 读数 -->
+          <section class="card readout-card" aria-live="polite">
+            <div class="readout-grid">
+              <div class="readout-dist">
+                <div class="ro-caption" id="roCaption">位置指示</div>
+                <div class="ro-value"><span id="roDistance">0</span><span class="ro-unit">km</span></div>
+                <div class="ro-sub" id="roProgress">全程的 0%</div>
+              </div>
+              <div class="readout-coords">
+                <div class="ro-line"><span class="ro-k">坐标</span><span id="roCoords">—</span></div>
+                <div class="ro-line"><span class="ro-k">距起点</span><span id="roFromStart">—</span></div>
+                <div class="ro-line"><span class="ro-k">距终点</span><span id="roRemaining">—</span></div>
+                <div class="ro-line"><span class="ro-k">航线全程</span><span id="roTotal">—</span></div>
+              </div>
+            </div>
+            <input id="scrub" class="scrub" type="range" min="0" max="1000" value="400"
+                   aria-label="沿航线拖动位置指示" />
+            <div id="statusBox" class="status" role="status"></div>
+            <div id="polarNote" class="polar-note"></div>
+          </section>
+        </div>
+      </main>
+
+      <!-- 说明 + 自检 -->
+      <section class="card notes-card">
+        <h2>计算说明与自检</h2>
+        <div class="notes-grid">
+          <div>
+            <h3>为什么两张图总是一致</h3>
+            <p>
+              航线只构造一次：把起终点变成单位球向量，绕大圆平面法向旋转得到参数
+              <code>t∈[0,1]</code> 的每个点。球面圆管、平面折线、位置指示与距离读数全部来自同一个
+              <code>at(t)</code>；距离 = 地心角 × 地球半径，与经度累加无关。
+            </p>
+            <h3>反经线与投影切割</h3>
+            <p>
+              经纬图上相邻采样点经度跳变超过 180° 即断段，所以上海→洛杉矶穿过 180° 经线时，
+              不会出现横穿整张图的直线。方位等距投影以指定地标为圆心，中心到各处的方位与距离如实表达；
+              中心对跖点是外圆周奇点，路径经过时同样断段。
+            </p>
+          </div>
+          <div>
+            <h3>地平线裁剪</h3>
+            <p>
+              球面上可见性判据统一为 <code>dir·相机方向 ≥ R/d</code>：航线在 shader 中按同一平面丢弃片元，
+              地标、端点、指示点按同一判据显隐。旋转镜头只移动相机，不改变所选航线。
+            </p>
+            <h3>重合与正对侧</h3>
+            <p>
+              起终点重合时距离唯一为 0，但不存在唯一的大圆方向；两端互为对跖点时最短距离唯一
+              （约 20,015 km），却有无穷多条半圆弧，当前只画一条确定性示意；接近对跖时弧仍唯一但对输入误差极敏感。
+            </p>
+            <details class="selftest">
+              <summary>数学自检 <span id="selfTestSummary"></span></summary>
+              <ul id="selfTestList" class="selftest-list"></ul>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <footer class="page-footer">
+        纯程序生成经纬线与地标 · TypeScript + Three.js + Canvas 2D · 本地运行 <code>npm run dev</code>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
