@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>拐角画框搬运谜题</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+          'Microsoft YaHei', sans-serif;
+        background: #eef2f7;
+        color: #0f172a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.16), transparent 34rem),
+          radial-gradient(circle at 90% 10%, rgba(249, 115, 22, 0.13), transparent 30rem), #eef2f7;
+      }
+
+      .app {
+        width: min(1280px, 100%);
+        margin: 0 auto;
+        padding: 22px;
+      }
+
+      header h1 {
+        margin: 0 0 6px;
+        font-size: clamp(24px, 3vw, 36px);
+        letter-spacing: -0.03em;
+      }
+
+      header p {
+        margin: 0;
+        color: #475569;
+        line-height: 1.65;
+      }
+
+      .level-tabs {
+        display: flex;
+        gap: 10px;
+        margin: 18px 0 14px;
+        flex-wrap: wrap;
+      }
+
+      .level-tab {
+        border: 1px solid #cbd5e1;
+        background: rgba(255, 255, 255, 0.72);
+        color: #334155;
+        border-radius: 999px;
+        padding: 9px 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+      }
+
+      .level-tab:hover {
+        transform: translateY(-1px);
+      }
+
+      .level-tab.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: white;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 310px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .canvas-card,
+      .side-card {
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(203, 213, 225, 0.9);
+        border-radius: 22px;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      }
+
+      .canvas-card {
+        padding: 12px;
+        position: relative;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 15px;
+        background: #f6f1e7;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+      }
+
+      canvas.dragging {
+        cursor: grabbing;
+      }
+
+      .side-card {
+        padding: 18px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-bottom: 14px;
+      }
+
+      button.action {
+        appearance: none;
+        border: 0;
+        border-radius: 13px;
+        padding: 11px 12px;
+        font-size: 14px;
+        font-weight: 900;
+        cursor: pointer;
+        color: white;
+        background: #2563eb;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+        transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+      }
+
+      button.action:hover:not(:disabled) {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+
+      button.action:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button.action:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      #undo {
+        background: #475569;
+        box-shadow: 0 8px 18px rgba(71, 85, 105, 0.2);
+      }
+
+      #reset {
+        background: #0f766e;
+        box-shadow: 0 8px 18px rgba(15, 118, 110, 0.2);
+      }
+
+      #hint {
+        background: #7c3aed;
+        box-shadow: 0 8px 18px rgba(124, 58, 237, 0.22);
+      }
+
+      #demo {
+        background: #ea580c;
+        box-shadow: 0 8px 18px rgba(234, 88, 12, 0.22);
+      }
+
+      #ground {
+        grid-column: 1 / -1;
+        background: #16a34a;
+        box-shadow: 0 8px 18px rgba(22, 163, 74, 0.22);
+      }
+
+      .status {
+        min-height: 66px;
+        border-radius: 14px;
+        padding: 12px 13px;
+        font-size: 14px;
+        line-height: 1.55;
+        font-weight: 650;
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+      }
+
+      .status.error {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+      }
+
+      .status.success {
+        background: #f0fdf4;
+        color: #166534;
+        border-color: #bbf7d0;
+      }
+
+      .hint-card {
+        margin-top: 12px;
+        border-radius: 14px;
+        padding: 13px;
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+        color: #4c1d95;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .hint-card[hidden] {
+        display: none;
+      }
+
+      .hint-title {
+        font-weight: 950;
+        margin-bottom: 4px;
+      }
+
+      .instructions {
+        margin: 16px 0 0;
+        padding-left: 20px;
+        color: #475569;
+        font-size: 13.5px;
+        line-height: 1.75;
+      }
+
+      .instructions kbd {
+        background: #0f172a;
+        color: white;
+        border-radius: 5px;
+        padding: 1px 6px;
+        font-size: 12px;
+      }
+
+      .win-banner {
+        position: absolute;
+        inset: 18px;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        border-radius: 15px;
+        background: rgba(240, 253, 244, 0.5);
+        backdrop-filter: blur(2px);
+      }
+
+      .win-card {
+        pointer-events: auto;
+        background: white;
+        border: 3px solid #22c55e;
+        border-radius: 22px;
+        padding: 24px 28px;
+        text-align: center;
+        box-shadow: 0 24px 70px rgba(22, 101, 52, 0.28);
+        max-width: 360px;
+      }
+
+      .win-card h2 {
+        margin: 0 0 8px;
+        font-size: 30px;
+      }
+
+      .win-card p {
+        margin: 0 0 16px;
+        color: #475569;
+        line-height: 1.6;
+      }
+
+      .win-actions {
+        display: flex;
+        gap: 9px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .win-banner[hidden] {
+        display: none;
+      }
+
+      .footnote {
+        margin-top: 14px;
+        font-size: 12.5px;
+        color: #64748b;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .side-card {
+          order: -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>拐角长画框搬运谜题</h1>
+        <p>俯视小地图中，蓝、橙两名搬运工抬着固定间距的双把手长画框。所有长距离拖动都会逐段检查两人和画框扫过的位置，不能让画框穿墙甩过去。</p>
+      </header>
+
+      <nav class="level-tabs" id="levelTabs" aria-label="选择关卡"></nav>
+
+      <main class="layout">
+        <section class="canvas-card">
+          <canvas id="game" width="1000" height="640" aria-label="两人抬长画框过走廊的游戏画布"></canvas>
+          <div class="win-banner" id="winBanner" hidden>
+            <div class="win-card">
+              <h2>🎉 稳妥入架！</h2>
+              <p id="winText">画框完整进入框架，方向标记一致。</p>
+              <div class="win-actions">
+                <button class="action" id="winReplay" type="button">从初始重来</button>
+                <button class="action" id="winNext" type="button">下一关</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-card">
+          <div class="controls">
+            <button class="action" id="undo" type="button">↶ 撤销最近一步</button>
+            <button class="action" id="reset" type="button">⟳ 初始位置重来</button>
+            <button class="action" id="hint" type="button">？ 下一步提示</button>
+            <button class="action" id="demo" type="button">▶ 播放通关演示</button>
+            <button class="action" id="ground" type="button">放下画框</button>
+          </div>
+
+          <div class="status" id="status" role="status" aria-live="polite">准备就绪：拖动一名搬运工开始。</div>
+
+          <div class="hint-card" id="hintCard" hidden>
+            <div class="hint-title" id="hintTitle">下一步提示</div>
+            <div id="hintText"></div>
+          </div>
+
+          <ul class="instructions">
+            <li><b>拖搬运工</b>：以另一名搬运工/把手为固定支点转动。</li>
+            <li><b>拖画框中段</b>：两人保持间距，整体平移。</li>
+            <li>落地后可单独拖人；两人分别靠近不同把手后，按“拿起 / 交换把手”。</li>
+            <li>绿色虚线区才允许落地换手；非法放手不会消耗步骤或复制画框。</li>
+            <li>快捷键：<kbd>Ctrl/⌘</kbd>+<kbd>Z</kbd> 撤销，<kbd>R</kbd> 重来，<kbd>H</kbd> 提示。</li>
+          </ul>
+
+          <p class="footnote">本地验证：<code>npm test</code> 会检查两关演示路线、一次长距离拦截，以及放下再拿起。</p>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./dist/game.js" defer></script>
+  </body>
+</html>

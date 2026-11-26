@@ -1,0 +1,19 @@
+{
+  "name": "corner-frame-puzzle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "两人抬长画框过走廊的 Canvas/TypeScript 短谜题",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/main.ts --bundle --outfile=dist/game.js --target=es2020",
+    "test": "esbuild src/verify.ts --bundle --platform=node --format=cjs --outfile=dist/verify.cjs && node dist/verify.cjs",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "dev": "npm run build && python3 -m http.server 4173"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.0.0"
+  }
+}
