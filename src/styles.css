@@ -1,0 +1,483 @@
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #1f2733;
+  --muted: #6b7686;
+  --line: #dfe3e9;
+  --accent: #2f6fed;
+  --accent-soft: #e6efff;
+  --downbeat: #d64545;
+  --beat: #2f6fed;
+  --sub: #8a94a3;
+  --pickup: #b07a1e;
+  --ok: #1d8a4f;
+  --warn: #c27a00;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-size: 13px;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+}
+h1 small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 8px;
+}
+h2 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+h3 {
+  font-size: 13px;
+  margin: 14px 0 6px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 53px;
+  z-index: 9;
+}
+.position-readout {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+  color: var(--muted);
+}
+.position-readout b {
+  color: var(--ink);
+}
+.ro-item b {
+  font-variant-numeric: tabular-nums;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 14px;
+  padding: 14px 18px 40px;
+  align-items: start;
+}
+.layout-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel,
+.beat-table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  color: #fff;
+  filter: brightness(1.08);
+}
+.btn-small {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.btn-file {
+  display: inline-flex;
+  align-items: center;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.field > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.field input,
+.field select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 13px;
+  width: 100%;
+}
+.field-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* ---- 段落卡片 ---- */
+.seg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.seg-card {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px;
+  background: #fbfcfe;
+}
+.seg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.seg-index {
+  font-weight: 700;
+  color: var(--accent);
+}
+.seg-name {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 0;
+}
+.seg-name:focus {
+  outline: 1px solid var(--line);
+  border-radius: 5px;
+}
+.seg-buttons {
+  display: flex;
+  gap: 4px;
+}
+.seg-buttons button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ramp-hint,
+.pickup-hint {
+  color: var(--muted);
+  font-size: 11px;
+  margin: -2px 0 6px;
+}
+
+/* ---- 拍点表 ---- */
+.beat-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.beat-table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.beat-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.col-bar {
+  width: 64px;
+  font-weight: 700;
+}
+.col-meter {
+  width: 110px;
+}
+.col-time {
+  width: 110px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.beat-table tbody tr {
+  cursor: pointer;
+}
+.beat-table tbody tr:hover {
+  background: #f8fafd;
+}
+tr.row-selected {
+  background: var(--accent-soft);
+}
+tr.row-selected:hover {
+  background: #dceaff;
+}
+tr.is-current {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.row-pickup .col-bar {
+  color: var(--pickup);
+}
+.pickup-tag,
+.seg-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: #fdf3e0;
+  color: var(--pickup);
+}
+.seg-tag {
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+
+.beat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.beat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+.beat-cell .mark {
+  font-size: 10px;
+  line-height: 1;
+}
+.beat-cell .beat-label {
+  font-weight: 700;
+  font-size: 12px;
+}
+.beat-cell .beat-time {
+  font-size: 10px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.cell-downbeat {
+  border-color: #f0b4b4;
+  background: #fdf1f1;
+}
+.cell-downbeat .mark,
+.cell-downbeat .beat-label {
+  color: var(--downbeat);
+}
+.cell-beat .mark,
+.cell-beat .beat-label {
+  color: var(--beat);
+}
+.cell-sub {
+  min-width: 44px;
+  background: #fafbfc;
+}
+.cell-sub .mark,
+.cell-sub .beat-label {
+  color: var(--sub);
+  font-weight: 500;
+}
+.cell-sub .beat-label {
+  font-size: 11px;
+}
+.beat-cell.is-playing {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---- 音色面板 ---- */
+.voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.voice-card {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: #fbfcfe;
+}
+.voice-card.is-disabled {
+  opacity: 0.55;
+}
+.voice-card header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+}
+.voice-hint {
+  font-size: 15px;
+}
+.voice-downbeat {
+  color: var(--downbeat);
+}
+.voice-beat {
+  color: var(--beat);
+}
+.voice-sub {
+  color: var(--sub);
+}
+.vol-readout {
+  font-style: normal;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ---- 导出面板 ---- */
+.export-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+.summary-grid dt {
+  color: var(--muted);
+}
+.summary-grid dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.marker-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.marker-table th,
+.marker-table td {
+  border: 1px solid var(--line);
+  padding: 4px 7px;
+  text-align: left;
+}
+.marker-table th {
+  background: #f3f5f8;
+  color: var(--muted);
+}
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.marker-zero td {
+  font-weight: 700;
+  color: var(--ok);
+}
+.marker-segment-start td {
+  color: var(--accent);
+}
+.marker-last-beat td {
+  color: var(--pickup);
+}
+.kind-downbeat {
+  color: var(--downbeat);
+  font-weight: 700;
+}
+.kind-beat {
+  color: var(--beat);
+}
+.kind-sub {
+  color: var(--sub);
+}
+.hit-table {
+  max-height: 260px;
+  overflow: auto;
+  display: block;
+}
+.ok {
+  color: var(--ok);
+  margin: 4px 0;
+}
+.warn {
+  color: var(--warn);
+  margin: 4px 0;
+}
+details summary {
+  cursor: pointer;
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .layout-side {
+    position: static;
+    max-height: none;
+  }
+}
