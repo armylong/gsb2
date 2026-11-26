@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>探地板 · 解谜原型</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>探地板</h1>
+        <div id="level-tabs"></div>
+      </header>
+      <main>
+        <div id="board-wrap">
+          <canvas id="board"></canvas>
+          <div id="toast" class="hidden"></div>
+        </div>
+        <aside id="panel">
+          <section>
+            <h2 id="level-name"></h2>
+            <p id="level-brief"></p>
+          </section>
+
+          <section>
+            <h3>探头次数</h3>
+            <div id="budgets"></div>
+            <div class="dir-row" id="dir-row">
+              <span>方向：</span>
+              <button data-dir="up">▲</button>
+              <button data-dir="left">◀</button>
+              <button data-dir="down">▼</button>
+              <button data-dir="right">▶</button>
+            </div>
+          </section>
+
+          <section>
+            <h3>工具（点击选中，再点棋盘）</h3>
+            <div class="btn-grid" id="tools">
+              <button data-mode="line">方向探头</button>
+              <button data-mode="adjacency">邻域探头</button>
+              <button data-mode="mark-safe">标记安全</button>
+              <button data-mode="mark-void">标记空洞</button>
+              <button data-mode="mark-unknown">标记不确定</button>
+              <button data-mode="path">画通路</button>
+            </div>
+            <p class="hint-text" id="mode-tip"></p>
+          </section>
+
+          <section>
+            <h3>动作</h3>
+            <div class="btn-grid">
+              <button id="btn-hint" class="primary">提示</button>
+              <button id="btn-clear-path">清空通路</button>
+              <button id="btn-submit" class="primary">交卷</button>
+              <button id="btn-restart">重开本关</button>
+            </div>
+            <div id="hint-box" class="hint-box hidden"></div>
+            <div id="result-box" class="hint-box hidden"></div>
+          </section>
+
+          <section>
+            <h3>读数历史（点击重看覆盖区）</h3>
+            <ol id="history"></ol>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
