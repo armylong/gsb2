@@ -1,0 +1,3 @@
+# 实测版本: PySide6 6.12.0 / Pillow 13.0.0 (Python 3.12)
+PySide6>=6.6
+Pillow>=10.0
