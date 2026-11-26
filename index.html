@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237c4f1c'/%3E%3Cpath d='M16 6v20M9 26h14M6 12h20M6 12l-3 7a4 4 0 0 0 7.5 0L7 12M26 12l-3.5 7a4 4 0 0 0 7.5 0l-1-7' fill='none' stroke='%23fff7e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <title>包裹称重谜题 · 必然之秤</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="30" height="30">
+            <path d="M16 5v22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M7 27h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M5 12h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M5 12l-3.2 7a4 4 0 0 0 7.4 0L6 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M27 12l-3.2 7a4 4 0 0 0 7.4 0L28 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" transform="translate(-1 0)"/>
+          </svg>
+        </div>
+        <div>
+          <h1>包裹称重谜题 <span class="brand-sub">· 必然之秤</span></h1>
+          <p class="tagline">外形相同的编号包裹 · 有限重量候选 · 用天平记录做联合推理 · 找出必然等重的分组</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-ghost" data-act="restart" data-testid="restart" title="清空全部称量记录与次数，重新开始本关">↻ 重新开始</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="col-main">
+        <nav class="level-tabs" id="levelTabs" aria-label="选择预设关卡"></nav>
+
+        <article class="card level-brief-card">
+          <div class="level-brief-head">
+            <h2 id="levelName"></h2>
+            <span class="badge-tag" id="levelTag"></span>
+          </div>
+          <p id="levelBrief" class="brief"></p>
+          <details class="hints">
+            <summary>思路提示（会卡关再展开）</summary>
+            <ol id="hintList"></ol>
+          </details>
+        </article>
+
+        <article class="card scale-card">
+          <div class="hud">
+            <div class="attempts" id="attemptsBar" aria-live="polite"></div>
+            <div class="view-caption" id="scaleCaption"></div>
+          </div>
+          <canvas id="scaleCanvas" aria-label="天平示意图"></canvas>
+          <div class="outcome-line" id="outcomeLine" aria-live="polite"></div>
+
+          <div class="composer">
+            <div class="composer-title">称量摆法 <span class="muted">（摆放、切换都不消耗次数，只有「确认称量」消耗 1 次）</span></div>
+            <div class="tray-rows" id="trayRows"></div>
+            <div class="composer-actions">
+              <button class="btn" data-act="clear-tray" data-testid="clear-tray">清空摆法</button>
+              <button class="btn btn-primary" id="confirmBtn" data-act="confirm" data-testid="confirm-weighing">确认称量</button>
+              <span class="confirm-reason" id="confirmReason"></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card history-card">
+          <h3>称量记录 <span class="muted">· 已确认的摆法与结果都会保留，点击可翻查</span></h3>
+          <div id="historyList" class="history-list"></div>
+        </article>
+      </section>
+
+      <aside class="col-side">
+        <article class="card possibility-card">
+          <h3>可能性档案 <span class="muted">· 与全部记录同时成立</span></h3>
+          <div id="possibilityPanel"></div>
+        </article>
+
+        <article class="card shelf-card">
+          <h3>提交货架分组</h3>
+          <p class="muted small">把每个包裹分到两个货架。提交时会枚举<b>所有</b>剩余可能重量：只有两架在每一种可能下都等重，才算必然公平。</p>
+          <div id="shelfPanel"></div>
+          <div class="submit-row">
+            <button class="btn btn-primary btn-block" id="submitBtn" data-act="submit">提交分组，检验必然性</button>
+          </div>
+          <div id="verdictPanel" class="verdict-panel"></div>
+        </article>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>纯 TypeScript + Canvas 实现 · 可能性由候选重量的完整笛卡尔积枚举并按全部记录过滤，判定不作弊</span>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
