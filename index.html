@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>轮流观星 · 天文馆策略短关</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="title-block">
+          <h1>轮流观星 <span class="subtitle">两座窗格 · 两台望远镜 · 固定回合天象</span></h1>
+          <p id="levelTagline" class="tagline"></p>
+        </div>
+        <nav id="levelTabs" class="level-tabs" aria-label="选择关卡或演示"></nav>
+      </header>
+
+      <main class="layout">
+        <section class="stage-card">
+          <div class="brief" id="levelBrief"></div>
+
+          <div class="transport">
+            <button id="playBtn" class="btn btn-primary" type="button">▶ 播放</button>
+            <button id="stepBtn" class="btn" type="button" title="按当前时间线推进一拍，不改写已有命令">⏭ 单步推进</button>
+            <button id="backBtn" class="btn" type="button">⏮ 上一拍</button>
+            <button id="resetBtn" class="btn" type="button">↺ 重来</button>
+            <label class="speed-control">
+              播放速度
+              <select id="speedSelect" aria-label="播放速度">
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+                <option value="4">4×</option>
+              </select>
+            </label>
+            <button id="loadScriptBtn" class="btn btn-ghost" type="button">载入参考动作</button>
+            <button id="selfcheckBtn" class="btn btn-check" type="button">本地核对</button>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="stage" width="2000" height="1360" aria-label="天文馆俯视图"></canvas>
+            <div id="phasePill" class="phase-pill"></div>
+            <div id="playStatePill" class="play-state-pill"></div>
+          </div>
+
+          <div class="timeline-card">
+            <div class="timeline-head">
+              <strong>逐拍时间线</strong>
+              <span id="playheadLabel" class="muted"></span>
+              <span class="timeline-legend">
+                <i class="dot dot-credited"></i>有效
+                <i class="dot dot-loss"></i>损失
+                <i class="dot dot-record"></i>合格记录
+              </span>
+            </div>
+            <div id="timeline" class="timeline" aria-label="逐拍时间线"></div>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>本拍动作</h2>
+              <div id="scopeTabs" class="scope-tabs"></div>
+            </div>
+            <div id="scopeStatus" class="scope-status"></div>
+            <div class="action-grid">
+              <button class="btn action" data-action="rotate-left" type="button">↶ 左转一拍</button>
+              <button class="btn action" data-action="rotate-right" type="button">↷ 右转一拍</button>
+              <button class="btn action" data-action="start" type="button">◎ 开始/继续观测</button>
+              <button class="btn action" data-action="stop" type="button">■ 停止观测</button>
+              <button class="btn action" data-action="move-prev" type="button">← 搬向 A 窗</button>
+              <button class="btn action" data-action="move-next" type="button">搬向 B 窗 →</button>
+              <button class="btn action idle-action" data-action="idle" type="button">～ 空过本拍并结算既有观测</button>
+            </div>
+            <div class="filter-row" aria-label="切换滤片">
+              <button class="btn filter" data-filter="clear" type="button">白光</button>
+              <button class="btn filter" data-filter="red" type="button">红滤片</button>
+              <button class="btn filter" data-filter="blue" type="button">蓝滤片</button>
+            </div>
+            <div id="actionReason" class="action-reason" role="status"></div>
+            <p class="tip">每个节拍只能把一个动作交给一台镜子；已开始且未被打断的观测会在另一台镜子动作时自动跟踪。回到较早拍后选择新动作，会从该拍改写。</p>
+          </section>
+
+          <section class="panel">
+            <h2>下一小段可见窗口与镜头</h2>
+            <div id="forecast" class="forecast"></div>
+          </section>
+
+          <section class="panel">
+            <h2>交到的观测记录</h2>
+            <div id="records" class="record-list"></div>
+          </section>
+
+          <section class="panel panel-losses">
+            <h2>播放后损失检查</h2>
+            <div id="lossSummary" class="loss-summary"></div>
+            <div id="losses" class="loss-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div id="checkModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="checkTitle">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2 id="checkTitle">本地核对</h2>
+          <button id="closeChecks" class="btn" type="button">关闭</button>
+        </div>
+        <p class="muted">这些断言直接运行同一套纯函数回合引擎；也可在仓库中执行 <code>npm test</code>。</p>
+        <div id="checkResults" class="check-results"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
