@@ -42,3 +42,6 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 端到端截图（本地验证产物） ----
+screenshots/
