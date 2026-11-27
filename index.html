@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>透视插值 vs 屏幕直接插值 · WebGL2 对照实验</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>同一块地砖：透视正确插值 与 屏幕空间直接插值 对照</h1>
+      <p class="sub">
+        左侧按 GPU 规则做透视校正（uv/w ÷ 1/w），右侧在屏幕三角形内直接做重心线性插值。
+        两边共用同一台相机、同一套裁剪后的三角形、同一张程序生成纹理。
+      </p>
+    </header>
+
+    <main>
+      <section class="stage">
+        <div class="panels">
+          <div class="panel" id="panelLeft">
+            <div class="panel-title">① 透视校正插值（perspective-correct）</div>
+            <div class="canvas-wrap">
+              <canvas id="glcanvas"></canvas>
+              <canvas id="overlay"></canvas>
+            </div>
+          </div>
+          <div class="panel" id="panelRight">
+            <div class="panel-title">② 屏幕直接插值（affine，无透视）</div>
+            <div class="canvas-wrap">
+              <canvas id="glcanvas2"></canvas>
+              <canvas id="overlay2"></canvas>
+            </div>
+          </div>
+        </div>
+        <p class="hint">
+          点击板子任意位置取样（两边标出的是同一个屏幕取样点）；点在板外 / 背景上显示「无取样」。
+          黄线是当前使用的对角线，白线是实际参与绘制的三角形边（含近裁剪后的形状）。
+        </p>
+      </section>
+
+      <aside class="sidebar">
+        <section class="card">
+          <h2>对照组（一键切换，视角与取样点随组保存）</h2>
+          <div class="preset-row" id="presetRow"></div>
+        </section>
+
+        <section class="card">
+          <h2>相机（两边一致）</h2>
+          <label>方位角 <input type="range" id="azimuth" min="-180" max="180" step="0.5" /> <span id="azimuthVal"></span></label>
+          <label>俯仰角 <input type="range" id="elevation" min="3" max="90" step="0.5" /> <span id="elevationVal"></span></label>
+          <label>距离 <input type="range" id="distance" min="3" max="30" step="0.1" /> <span id="distanceVal"></span></label>
+          <label>视场 FOV <input type="range" id="fov" min="20" max="110" step="1" /> <span id="fovVal"></span></label>
+          <label>近裁面 near <input type="range" id="near" min="0.1" max="8" step="0.05" /> <span id="nearVal"></span></label>
+          <label>远裁面 far <input type="range" id="far" min="10" max="200" step="1" /> <span id="farVal"></span></label>
+        </section>
+
+        <section class="card">
+          <h2>三角形对角线</h2>
+          <div class="btn-row">
+            <button id="diagA">对角线 A（0→2）</button>
+            <button id="diagB">对角线 B（1→3）</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>输出与校验</h2>
+          <div class="btn-row">
+            <button id="saveBtn">保存当前组并排图 PNG</button>
+            <button id="testBtn">用已知投影点自检</button>
+          </div>
+          <div id="testResults" class="test-results"></div>
+        </section>
+
+        <section class="card">
+          <h2>取样读数</h2>
+          <div id="readout" class="readout"></div>
+          <div class="thumb-wrap">
+            <div class="thumb-title">程序纹理上的实际取样位置</div>
+            <canvas id="thumb" width="320" height="224"></canvas>
+            <div class="legend">
+              <span><i class="dot green"></i>透视校正</span>
+              <span><i class="dot orange"></i>屏幕直接</span>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

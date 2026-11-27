@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>headless-selftest</title>
+    <style>
+      body { margin: 0; background: #111; }
+      .row { display: flex; }
+      canvas { width: 640px; height: 480px; display: block; }
+      #log {
+        color: #d7e0ea;
+        font: 13px/1.6 ui-monospace, monospace;
+        white-space: pre-wrap;
+        padding: 12px;
+      }
+      .ok { color: #4ade80; }
+      .bad { color: #f87171; }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <canvas id="c1" width="1280" height="960"></canvas>
+      <canvas id="c2" width="1280" height="960"></canvas>
+    </div>
+    <div id="log">running…</div>
+    <script type="module" src="/src/headless.ts"></script>
+  </body>
+</html>
