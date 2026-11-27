@@ -1,0 +1,21 @@
+{
+  "name": "epicycle-trace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "手画封闭曲线 -> 带旋转方向的傅里叶圆链 -> 逐步恢复轮廓的本地 Canvas 画板",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "npm run build && node smoke/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  }
+}

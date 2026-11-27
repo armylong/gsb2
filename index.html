@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>转圈描曲线 · Epicycle Trace</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1>转圈描曲线 <span class="sub">手画封闭线 → 傅里叶圆链 → 逐步恢复轮廓</span></h1>
+      </header>
+
+      <div class="layout">
+        <aside class="panel">
+          <section class="group">
+            <h2>1 · 画线</h2>
+            <p class="hint">在画布上按住拖一圈。取样按弧长等分，手速不影响粗细与采样密度。</p>
+            <div class="row">
+              <button id="btn-clear" class="btn">清空重画</button>
+              <button id="btn-preset-leaf" class="btn">歪叶片</button>
+              <button id="btn-preset-lop" class="btn">不对称轮廓</button>
+              <button id="btn-preset-circle" class="btn">正圆参照</button>
+            </div>
+            <div id="closure-banner" class="banner hidden"></div>
+            <div id="closure-actions" class="row hidden">
+              <button data-close="auto-close" class="btn small">吸附闭合</button>
+              <button data-close="bridge-line" class="btn small">直线桥接</button>
+              <button data-close="keep-open" class="btn small">保留缺口</button>
+              <button data-close="redraw" class="btn small warn">重画</button>
+            </div>
+          </section>
+
+          <section class="group">
+            <h2>2 · 圆链</h2>
+            <label class="slider-label">
+              保留旋转圆
+              <span class="value"><b id="keep-value">24</b> / <span id="keep-total">–</span></span>
+            </label>
+            <input id="keep" type="range" min="1" max="359" value="24" />
+            <div class="row">
+              <label class="check"><input type="checkbox" id="show-chain" checked /> 圆链</label>
+              <label class="check"><input type="checkbox" id="show-original" checked /> 原线</label>
+              <label class="check"><input type="checkbox" id="show-trail" checked /> 重建轨迹</label>
+            </div>
+            <label class="slider-label">展示顺序（同一批成分）</label>
+            <div class="row" id="order-mode">
+              <button data-order="frequency" class="btn small active">按频率</button>
+              <button data-order="amplitude" class="btn small">按振幅</button>
+              <button data-order="reverse" class="btn small">反向装配</button>
+            </div>
+            <p class="hint" id="order-note">末端 = 复数加法，换顺序只改圆链嵌套，轨迹不变。</p>
+          </section>
+
+          <section class="group">
+            <h2>3 · 播放</h2>
+            <div class="row">
+              <button id="btn-play" class="btn primary">暂停</button>
+              <button id="btn-step-back" class="btn">← 单步</button>
+              <button id="btn-step-fwd" class="btn">单步 →</button>
+              <button id="btn-restart" class="btn">回到起点</button>
+            </div>
+            <label class="slider-label">
+              相位进度 <span class="value" id="phase-value">0.000 / 1.000</span>
+            </label>
+            <input id="phase" type="range" min="0" max="1000" value="0" />
+            <label class="slider-label">
+              转速 <span class="value" id="speed-value">1.0×</span>
+            </label>
+            <input id="speed" type="range" min="0" max="200" value="50" />
+            <div class="row stats">
+              <span>正转 <b id="ccw-count">0</b></span>
+              <span>反转 <b id="cw-count">0</b></span>
+              <span>当前误差 <b id="live-err">–</b></span>
+            </div>
+          </section>
+
+          <section class="group">
+            <h2>4 · 偏差图</h2>
+            <div class="row">
+              <button id="btn-view-trace" class="btn small active">描线视图</button>
+              <button id="btn-view-deviation" class="btn small">偏差视图</button>
+            </div>
+            <div id="deviation-stats" class="dev-stats"></div>
+            <div id="heat-legend" class="legend hidden">
+              <span>0 形变</span>
+              <div class="colorbar"></div>
+              <span>最大</span>
+            </div>
+            <div id="references" class="refs hidden">
+              <h3>位置平移 vs 真正形变</h3>
+              <figure>
+                <canvas id="ref-circle" width="220" height="150"></canvas>
+                <figcaption>正圆：无形变（基线应全暗）</figcaption>
+              </figure>
+              <figure>
+                <canvas id="ref-translated" width="220" height="150"></canvas>
+                <figcaption>整体平移：去重心后形变仍为零</figcaption>
+              </figure>
+            </div>
+          </section>
+
+          <section class="group">
+            <h2>5 · 导出一圈</h2>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="exp-original" checked /> 原线</label>
+              <label class="check"><input type="checkbox" id="exp-rebuilt" checked /> 重建线</label>
+              <label class="check"><input type="checkbox" id="exp-chain" /> 圆链</label>
+              <label class="check"><input type="checkbox" id="exp-heat" /> 偏差热图</label>
+            </div>
+            <div class="row">
+              <label class="field">宽 px
+                <input id="exp-w" type="number" value="1600" min="200" max="8000" />
+              </label>
+              <label class="field">高 px
+                <input id="exp-h" type="number" value="1200" min="200" max="8000" />
+              </label>
+            </div>
+            <div class="row">
+              <button id="btn-export-png" class="btn primary">PNG</button>
+              <button id="btn-export-svg" class="btn">SVG</button>
+              <button id="btn-export-json" class="btn">JSON</button>
+            </div>
+            <p class="hint">导出尺寸独立于浏览器窗口与页面缩放。</p>
+          </section>
+
+          <section class="group">
+            <h2>本地自检</h2>
+            <button id="btn-checks" class="btn">运行自检（9 项）</button>
+            <ul id="check-list" class="check-list"></ul>
+          </section>
+        </aside>
+
+        <main class="stage">
+          <canvas id="canvas"></canvas>
+          <div id="canvas-hint" class="canvas-hint">按住鼠标 / 手指在这里画一条封闭线</div>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
