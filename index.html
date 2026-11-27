@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>地面立体画投影台</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: -apple-system, "PingFang SC", sans-serif; background: #1d2126; color: #e6e6e6; }
+      #app { display: flex; height: 100vh; }
+      #view { flex: 1; position: relative; min-width: 0; }
+      #view canvas { display: block; }
+      #panel { width: 340px; overflow-y: auto; background: #262b33; padding: 12px 14px; font-size: 13px; }
+      #panel h1 { font-size: 16px; margin: 4px 0 10px; }
+      #panel h2 { font-size: 13px; margin: 14px 0 6px; color: #9fc3ff; }
+      .row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+      .row label { width: 64px; flex: none; color: #aab; }
+      .row input[type="range"] { flex: 1; }
+      .row .val { width: 48px; text-align: right; font-family: monospace; }
+      button { background: #3a4356; color: #e6e6e6; border: 1px solid #4a5568; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+      button:hover { background: #4a5568; }
+      button.primary { background: #2b6cb0; border-color: #3182ce; }
+      .btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+      #drafts .draft { border: 1px solid #3a4356; border-radius: 6px; padding: 6px 8px; margin: 6px 0; }
+      #drafts .draft .meta { font-family: monospace; font-size: 11px; color: #9aa; }
+      #info { background: #1d2126; border-radius: 6px; padding: 6px 8px; min-height: 40px; font-size: 12px; white-space: pre-wrap; }
+      #overlay { width: 100%; border: 1px solid #3a4356; border-radius: 4px; image-rendering: pixelated; }
+      .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 10px; vertical-align: middle; }
+      .hint { color: #8899aa; font-size: 11px; }
+      #verifyOut { font-family: monospace; font-size: 11px; white-space: pre-wrap; color: #b8e6b8; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="view"></div>
+      <div id="panel">
+        <h1>地面立体画投影台</h1>
+
+        <h2>观察点(米)</h2>
+        <div class="row"><label>左右 x</label><input id="eyeX" type="range" min="-6" max="6" step="0.05" value="0.3" /><span class="val" id="eyeXv"></span></div>
+        <div class="row"><label>高度 y</label><input id="eyeY" type="range" min="0.3" max="6" step="0.05" value="4.5" /><span class="val" id="eyeYv"></span></div>
+        <div class="row"><label>前后 z</label><input id="eyeZ" type="range" min="1.5" max="9" step="0.05" value="6.0" /><span class="val" id="eyeZv"></span></div>
+
+        <h2>目标图尺寸(米)</h2>
+        <div class="row"><label>宽</label><input id="imgW" type="range" min="1" max="4" step="0.1" value="2.4" /><span class="val" id="imgWv"></span></div>
+        <div class="row"><label>高</label><input id="imgH" type="range" min="1" max="4.5" step="0.1" value="2.6" /><span class="val" id="imgHv"></span></div>
+        <div class="row"><label>网格密度</label>
+          <select id="gridN">
+            <option value="80">80 × 100</option>
+            <option value="120" selected>120 × 150</option>
+            <option value="160">160 × 200</option>
+          </select>
+        </div>
+
+        <div class="btns">
+          <button id="gen" class="primary">生成新稿</button>
+          <button id="presetEye">观察点视角</button>
+          <button id="presetTop">俯视</button>
+          <button id="presetFree">自由视角</button>
+        </div>
+        <div class="btns">
+          <button id="loadDefault">默认示例</button>
+          <button id="loadOccluded">台阶遮挡示例</button>
+          <button id="clearMarkers">清除标记</button>
+        </div>
+        <div class="hint">改观察点/图尺寸不会改动已生成的稿,需点"生成新稿"。在左侧目标图上点一下可查看落点与所属面。</div>
+
+        <h2>点选结果</h2>
+        <div id="info">尚未点选</div>
+
+        <h2>目标图与问题格</h2>
+        <canvas id="overlay" width="256" height="320"></canvas>
+        <div class="legend">
+          <span style="background:#e53e3e"></span>射出场景
+          <span style="background:#ed8936"></span>跨面边缘
+          <span style="background:#9f7aea"></span>不可画面
+        </div>
+        <div id="markStats" class="hint"></div>
+
+        <h2>草稿(旧稿不会被修改)</h2>
+        <div id="drafts"></div>
+
+        <h2>导出核对</h2>
+        <div id="verifyOut">生成草稿后可核对导出顶点折回三维的对位误差。</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
