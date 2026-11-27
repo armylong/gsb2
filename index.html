@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>深度替身对照场景</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #101318; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    #hud {
+      position: fixed; top: 10px; left: 10px; color: #cfe3ff;
+      background: rgba(10, 14, 20, .75); padding: 10px 12px; font-size: 12px;
+      line-height: 1.75; white-space: pre; border-radius: 6px; pointer-events: none;
+    }
+    #thumbs { position: fixed; left: 10px; bottom: 10px; display: flex; gap: 6px; }
+    .thumb {
+      border-radius: 4px; background: rgba(10, 14, 20, .75); padding: 4px;
+      text-align: center; color: #9fb4d8; font-size: 11px;
+    }
+    .thumb canvas { width: 64px; height: 64px; display: block; image-rendering: pixelated; border-radius: 2px; }
+    #help {
+      position: fixed; right: 10px; bottom: 10px; color: #8fa3c8; font-size: 11px;
+      background: rgba(10, 14, 20, .65); padding: 8px 10px; border-radius: 6px; line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud"></div>
+  <div id="thumbs"></div>
+  <div id="help">左键拖拽: 绕场旋转 · 滚轮: 缩放 · 右键: 平移<br>
+    紫红 = 原视图没拍到的区域(高亮模式)<br>
+    右上面板: 摆放方向/尺寸 · 破洞处理 · 预设机位</div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
