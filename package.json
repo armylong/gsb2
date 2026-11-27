@@ -1,0 +1,19 @@
+{
+  "name": "gallery-lift-puzzle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "validate": "tsx scripts/validate.ts",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}
