@@ -1,0 +1,22 @@
+{
+  "name": "pond-patrol",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "池边巡护 —— 从终态倒推动物清晨位置的本地小谜题",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify": "tsx tools/verify.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}

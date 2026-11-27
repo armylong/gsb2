@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>池边巡护 · 倒推小谜题</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">池边巡护</span>
+          <span class="brand-sub">倒着走回清晨</span>
+        </div>
+        <nav class="levels" id="level-nav" aria-label="关卡"></nav>
+      </header>
+
+      <main class="stage">
+        <section class="board-wrap">
+          <canvas id="board" aria-label="池边地图"></canvas>
+          <div class="board-caption" id="board-caption"></div>
+          <div class="demo-bar" id="demo-bar" hidden></div>
+        </section>
+
+        <aside class="panel" id="panel"></aside>
+      </main>
+
+      <footer class="statusbar">
+        <div class="status-left" id="status-left"></div>
+        <div class="status-right" id="status-right"></div>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
