@@ -1,0 +1,16 @@
+{
+  "name": "lantern-parade-seating",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "灯船巡游岸边临时座位布局小游戏",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test dist/test/verify.test.js",
+    "serve": "npm run build && python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.5.0"
+  }
+}
