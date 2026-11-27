@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>发面时辰 · 回合制烘焙谜题</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #efe6d3;
+        font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+      }
+      #app {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      canvas {
+        display: block;
+        border-radius: 12px;
+        box-shadow: 0 12px 40px rgba(90, 66, 38, 0.25);
+        cursor: pointer;
+        max-width: 100%;
+        max-height: calc(100vh - 24px);
+        width: auto;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game" width="1160" height="780"></canvas>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
