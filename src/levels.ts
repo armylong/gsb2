@@ -1,0 +1,122 @@
+import type { Level } from './engine.js';
+
+// 坐标：x 向右，y 向下，原点 (0,0) 在左上角。
+export const LEVELS: Level[] = [
+  {
+    id: 1,
+    name: '第 1 关 · 对折两孔',
+    brief: '沿竖线把右半边折到左半边，在双层处打一孔，展开后左右各得一孔。中间一列要完整保留。',
+    width: 3,
+    height: 3,
+    maxFolds: 1,
+    maxPunches: 1,
+    maxThickness: 2,
+    targets: [
+      { x: 0, y: 1 },
+      { x: 2, y: 1 },
+    ],
+    preserves: [{ x: 1, y: 1 }],
+    solution: [
+      { kind: 'fold', axis: 'v', line: 1, side: 'gt' },
+      { kind: 'punch', x: 0, y: 1, depth: 2 },
+      { kind: 'unfold' },
+    ],
+  },
+  {
+    id: 2,
+    name: '第 2 关 · 三折同孔',
+    brief: '长条纸两次竖折，把三个格子叠成一摞，一孔打穿三层。注意每次翻面后层序会反转，左两格要完整保留。',
+    width: 5,
+    height: 1,
+    maxFolds: 2,
+    maxPunches: 1,
+    maxThickness: 3,
+    targets: [
+      { x: 0, y: 0 },
+      { x: 2, y: 0 },
+      { x: 4, y: 0 },
+    ],
+    preserves: [
+      { x: 1, y: 0 },
+      { x: 3, y: 0 },
+    ],
+    solution: [
+      { kind: 'fold', axis: 'v', line: 2, side: 'gt' },
+      { kind: 'fold', axis: 'v', line: 1, side: 'gt' },
+      { kind: 'punch', x: 0, y: 0, depth: 3 },
+      { kind: 'unfold' },
+      { kind: 'unfold' },
+    ],
+  },
+  {
+    id: 3,
+    name: '第 3 关 · 横线对折',
+    brief: '换成横线：把下边折到上边，打孔后上下镜像出洞。中间一行完整保留。',
+    width: 3,
+    height: 3,
+    maxFolds: 1,
+    maxPunches: 1,
+    maxThickness: 2,
+    targets: [
+      { x: 1, y: 0 },
+      { x: 1, y: 2 },
+    ],
+    preserves: [{ x: 1, y: 1 }],
+    solution: [
+      { kind: 'fold', axis: 'h', line: 1, side: 'gt' },
+      { kind: 'punch', x: 1, y: 0, depth: 2 },
+      { kind: 'unfold' },
+    ],
+  },
+  {
+    id: 4,
+    name: '第 4 关 · 横折再竖折',
+    brief: '先横折后竖折，四角之一叠成四层，一孔打穿。厚层处的层序在侧边小图里逐层核对。',
+    width: 4,
+    height: 4,
+    maxFolds: 2,
+    maxPunches: 1,
+    maxThickness: 4,
+    targets: [
+      { x: 1, y: 1 },
+      { x: 1, y: 3 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+    ],
+    preserves: [
+      { x: 0, y: 0 },
+      { x: 2, y: 2 },
+    ],
+    solution: [
+      { kind: 'fold', axis: 'h', line: 2, side: 'gt' },
+      { kind: 'fold', axis: 'v', line: 2, side: 'gt' },
+      { kind: 'punch', x: 1, y: 1, depth: 4 },
+      { kind: 'unfold' },
+      { kind: 'unfold' },
+    ],
+  },
+  {
+    id: 5,
+    name: '第 5 关 · 只打顶层',
+    brief: '竖折后有一格叠到原纸面之外（负坐标，仍可打孔）。每孔只打穿 1 层，靠落点选择原始格子，左两格必须完好。',
+    width: 4,
+    height: 1,
+    maxFolds: 1,
+    maxPunches: 2,
+    maxThickness: 4,
+    targets: [
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ],
+    preserves: [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+    ],
+    solution: [
+      { kind: 'fold', axis: 'v', line: 1, side: 'gt' },
+      { kind: 'punch', x: 0, y: 0, depth: 1 },
+      { kind: 'punch', x: -1, y: 0, depth: 1 },
+      { kind: 'unfold' },
+    ],
+  },
+];

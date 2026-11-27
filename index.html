@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>折纸打孔 · 星图短关</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>折纸打孔 · 星图短关</h1>
+      <label class="level-pick">
+        关卡
+        <select id="levelSelect"></select>
+      </label>
+    </header>
+
+    <p id="brief" class="brief"></p>
+
+    <div class="layout">
+      <section class="board">
+        <div class="toolbar">
+          <label><input type="radio" name="mode" id="modeFold" checked /> 折叠模式</label>
+          <label><input type="radio" name="mode" id="modePunch" /> 打孔模式（点格子）</label>
+        </div>
+
+        <div class="fold-panel">
+          <label>折痕
+            <select id="foldAxis">
+              <option value="v">竖线（左右翻）</option>
+              <option value="h">横线（上下翻）</option>
+            </select>
+          </label>
+          <label>线位
+            <select id="foldLine"></select>
+          </label>
+          <label>折动侧
+            <select id="foldSide">
+              <option value="gt">大坐标侧折向小坐标侧</option>
+              <option value="lt">小坐标侧折向大坐标侧</option>
+            </select>
+          </label>
+          <button id="foldApply" class="primary" onclick="submitFold()">执行折叠</button>
+        </div>
+
+        <div class="punch-panel">
+          <label>一次打穿
+            <select id="punchDepth"></select>
+          </label>
+          <span class="hint">在主画布点选纸格即打孔；只穿顶层数量以内的纸层。</span>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="mainCanvas"></canvas>
+        </div>
+        <div id="selectedInfo" class="selected-info"></div>
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <h2>逐层小图</h2>
+          <canvas id="layerCanvas"></canvas>
+        </div>
+        <div class="card">
+          <h2>展开预览（不消耗次数）</h2>
+          <canvas id="previewCanvas"></canvas>
+          <p class="legend">
+            <span class="dot target"></span>目标孔格
+            <span class="dot preserve"></span>完整保留格
+          </p>
+        </div>
+        <div class="card controls">
+          <button id="undoBtn">撤销上一步</button>
+          <button id="unfoldBtn">展开最近一次折叠</button>
+          <button id="restartBtn">从头再试</button>
+          <button id="demoBtn">播放通关示例</button>
+          <button id="stopDemoBtn">停止播放</button>
+        </div>
+        <div class="card">
+          <h2>动作记录</h2>
+          <ul id="logList" class="log"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div id="counters" class="counters"></div>
+      <div id="status" class="status"></div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+    <script src="dist/bundle.js"></script>
+  </body>
+</html>

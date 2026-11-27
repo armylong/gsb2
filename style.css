@@ -1,0 +1,259 @@
+:root {
+  --ink: #3a3328;
+  --paper: #f7f3ea;
+  --line: #d8d2c4;
+  --accent: #d4543a;
+  --green: #2f7d4f;
+  --blue: #1f5fa8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 18px 22px 70px;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.level-pick select,
+.fold-panel select,
+.punch-panel select {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+}
+
+.brief {
+  margin: 10px 0 16px;
+  max-width: 880px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+}
+
+.board,
+.card {
+  background: #fffdf6;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 18px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.fold-panel,
+.punch-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+button {
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.hint {
+  color: #8a7f6d;
+  font-size: 12px;
+}
+
+.canvas-wrap {
+  overflow: auto;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background:
+    linear-gradient(45deg, #f0eadd 25%, transparent 25%) 0 0 / 18px 18px,
+    linear-gradient(-45deg, #f0eadd 25%, transparent 25%) 0 9px / 18px 18px;
+  padding: 8px;
+}
+
+#mainCanvas {
+  display: block;
+  cursor: crosshair;
+}
+
+.selected-info {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b6151;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#layerCanvas,
+#previewCanvas {
+  display: block;
+  max-width: 100%;
+}
+
+.legend {
+  font-size: 12px;
+  margin: 8px 0 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+
+.dot.target {
+  background: var(--green);
+}
+
+.dot.preserve {
+  background: var(--blue);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.controls button {
+  width: 100%;
+}
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 12px;
+  font-family: ui-monospace, 'SF Mono', monospace;
+}
+
+.log li {
+  padding: 5px 6px;
+  border-bottom: 1px solid #efe8d8;
+  line-height: 1.45;
+}
+
+.log li[data-kind='fold']::before {
+  content: '折 ';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.log li[data-kind='unfold']::before {
+  content: '展 ';
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.log li[data-kind='punch']::before {
+  content: '孔 ';
+  color: #4a3b2a;
+  font-weight: 700;
+}
+
+footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: rgba(255, 253, 246, 0.94);
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.status .ok {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translate(-50%, -16px);
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #5a4632;
+  color: #fff;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  max-width: 70vw;
+  z-index: 10;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast[data-kind='good'] {
+  background: var(--green);
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fold-punch-puzzle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --outfile=dist/bundle.js --format=iife",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/engine.test.ts",
+    "smoke": "node --import tsx tests/browser.smoke.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.7",
+    "esbuild": "^0.24.0",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
