@@ -1,0 +1,17 @@
+{
+  "name": "streamline-canvas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "本地流线绘图页：程序生成的二维流速场，canvas 绘制流线",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "start": "npm run build && node scripts/server.js",
+    "check": "npm run build && node dist/tests/check.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

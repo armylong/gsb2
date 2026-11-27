@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>流线绘图台 · 本地流速场</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="panel">
+      <header>
+        <h1>流线绘图台</h1>
+        <p class="sub">程序生成流速场 · canvas 本地绘制 · 无外部数据</p>
+      </header>
+
+      <section class="group">
+        <h2>流速图</h2>
+        <select id="fieldSelect" aria-label="选择流速图"></select>
+        <p id="fieldDesc" class="desc"></p>
+      </section>
+
+      <section class="group">
+        <h2>起点</h2>
+        <label class="row">
+          线间密度
+          <select id="densitySelect" aria-label="线间密度">
+            <option value="sparse">稀疏（弱密度）</option>
+            <option value="normal" selected>标准</option>
+            <option value="dense">较密</option>
+          </select>
+        </label>
+        <div class="btn-grid">
+          <button id="btnRedistribute" type="button">重新分布自动起点</button>
+          <button id="btnClearAuto" type="button">清除未锁定起点</button>
+        </div>
+        <div class="btn-grid">
+          <button id="btnLock" type="button">锁定 / 解锁选中</button>
+          <button id="btnDelete" type="button">删除选中起点</button>
+        </div>
+        <p class="hint">点击画布放置手动起点（粉色）；锁定后重新分布与切换流速图都会保留。</p>
+      </section>
+
+      <section class="group">
+        <h2>显示</h2>
+        <label class="check"><input type="checkbox" id="chkArrowGrid" checked /> 规则箭头网格</label>
+        <label class="check"><input type="checkbox" id="chkStreamArrows" checked /> 流线方向箭头</label>
+        <label class="check"><input type="checkbox" id="chkZones" checked /> 静止区 / 涡核</label>
+        <label class="check"><input type="checkbox" id="chkReference" /> 解析参考曲线（检查场）</label>
+        <div class="btn-grid">
+          <button id="btnZoomIn" type="button">放大 +</button>
+          <button id="btnZoomOut" type="button">缩小 −</button>
+          <button id="btnResetView" type="button">复位视图</button>
+        </div>
+        <label class="row">
+          工具
+          <select id="toolSelect" aria-label="指针工具">
+            <option value="seed" selected>放置 / 选择起点</option>
+            <option value="probe">探测速度方向</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="group">
+        <h2>导出与检查</h2>
+        <div class="btn-grid">
+          <button id="btnExportJSON" type="button">导出路径 JSON（场景坐标）</button>
+          <button id="btnExportPNG" type="button">导出对照图 PNG</button>
+        </div>
+        <button id="btnRunCheck" class="full" type="button">运行本地检查（直线 / 圆路径）</button>
+        <div id="checkSummary" class="check-summary" hidden></div>
+      </section>
+
+      <section class="group">
+        <h2>选中起点</h2>
+        <div id="seedInfo" class="seed-info muted">未选中</div>
+      </section>
+
+      <footer class="tips">
+        <p>拖拽平移 · 滚轮缩放（锚定光标） · Alt+点击切换为探测</p>
+        <p>停止点颜色：<span class="dot" style="background:#898781"></span>边界
+          <span class="dot" style="background:#fab219"></span>零速
+          <span class="dot" style="background:#ec835a"></span>静止区
+          <span class="dot" style="background:#199e70"></span>闭合
+          <span class="dot" style="background:#e36363"></span>步数保护</p>
+      </footer>
+    </aside>
+
+    <main class="stage">
+      <canvas id="canvas"></canvas>
+      <div id="statusBar" class="status-bar"></div>
+    </main>
+  </div>
+
+  <script type="module" src="dist/src/app/main.js"></script>
+</body>
+</html>
