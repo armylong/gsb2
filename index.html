@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>共振峰合成试听台</title>
+  </head>
+  <body>
+    <div id="app" class="viz-root">
+      <header class="topbar">
+        <div>
+          <h1>共振峰合成试听台</h1>
+          <p class="subtitle">纯本地合成 · 无真人素材 · 基频恒定，只摆动共振位置模拟口形变化</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="example-label">内置例子：</span>
+          <button id="ex-static" class="btn">① 静止口形 /a/</button>
+          <button id="ex-glide" class="btn">② 口形渐变 /i/→/a/</button>
+          <button id="ex-breathy" class="btn">③ 掺入气音</button>
+          <button id="theme-toggle" class="btn btn-ghost" title="切换明暗主题">◐</button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <!-- 声源 -->
+        <section class="card" id="card-source">
+          <h2>1 · 声源混合</h2>
+          <div class="row">
+            <label>基频 f0（恒定，不随时间线变化）
+              <span class="ctl">
+                <input type="range" id="f0-range" min="50" max="400" step="1" />
+                <input type="number" id="f0-num" min="40" max="1000" step="1" class="num" /> Hz
+              </span>
+            </label>
+          </div>
+          <div class="row">
+            <label>气音（无固定音高噪声）比例
+              <span class="ctl">
+                <input type="range" id="noise-range" min="0" max="1" step="0.01" />
+                <input type="number" id="noise-num" min="0" max="1" step="0.01" class="num" />
+              </span>
+            </label>
+          </div>
+          <div class="row">
+            <label>短音时长
+              <span class="ctl">
+                <input type="range" id="dur-range" min="0.4" max="3" step="0.05" />
+                <input type="number" id="dur-num" min="0.2" max="5" step="0.05" class="num" /> s
+              </span>
+            </label>
+          </div>
+          <div class="row vowel-row">
+            <span class="vowel-label">元音起点（写入当前选中节点）：</span>
+            <button class="btn btn-small" data-vowel="i">元音 /i/（F2 高）</button>
+            <button class="btn btn-small" data-vowel="a">元音 /a/（F1 高）</button>
+            <button class="btn btn-small" data-vowel="u">元音 /u/（F2 低）</button>
+          </div>
+          <p class="hint" id="vowel-hint"></p>
+        </section>
+
+        <!-- 共振区 -->
+        <section class="card" id="card-formants">
+          <h2>2 · 三个共振区（中心 / 宽度 / 增益独立可调）</h2>
+          <div class="node-switch">
+            <span>当前编辑节点：</span>
+            <button class="btn btn-small" data-node="0">起点</button>
+            <button class="btn btn-small" data-node="1">拐点</button>
+            <button class="btn btn-small" data-node="2">终点</button>
+            <label class="inline-check"><input type="checkbox" id="middle-enable" /> 启用中间拐点</label>
+            <label class="inline-check">拐点位置
+              <input type="range" id="middle-pos" min="0.05" max="0.95" step="0.01" />
+              <span id="middle-pos-val"></span>
+            </label>
+          </div>
+          <div id="formant-editor"></div>
+        </section>
+
+        <!-- 频谱图 -->
+        <section class="card card-wide" id="card-spectrum">
+          <h2>3 · 频率分布（源声 / 共振形状 / 成音同屏）</h2>
+          <div class="legend">
+            <span class="lg"><i class="swatch swatch-source"></i>源声频率分布（谐波茎）</span>
+            <span class="lg"><i class="swatch swatch-shape"></i>共振形状（三段合成）</span>
+            <span class="lg"><i class="swatch swatch-output"></i>成音频率分布（实测 FFT）</span>
+            <span class="lg"><i class="swatch swatch-band"></i>共振区带宽</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="spectrum-canvas"></canvas>
+            <div id="spectrum-tip" class="tip hidden"></div>
+          </div>
+          <div class="warnings" id="warnings"></div>
+        </section>
+
+        <!-- 时间线 -->
+        <section class="card card-wide" id="card-timeline">
+          <h2>4 · 口形时间线（点击/拖动改变试听与分析位置）</h2>
+          <div class="canvas-wrap">
+            <canvas id="timeline-canvas"></canvas>
+          </div>
+        </section>
+
+        <!-- 试听 -->
+        <section class="card" id="card-playback">
+          <h2>5 · 试听与音量统一</h2>
+          <div class="play-buttons">
+            <button id="play" class="btn btn-primary">▶ 整段试听</button>
+            <button id="stop" class="btn">■ 停止</button>
+            <button id="freeze" class="btn">◉ 定住当前位置</button>
+            <button id="resume" class="btn">↩ 回到整段（从此处继续）</button>
+          </div>
+          <div class="row">
+            <label>当前位置
+              <span class="ctl">
+                <input type="range" id="cursor-range" min="0" max="1" step="0.001" />
+                <span id="cursor-val" class="num-readout"></span>
+              </span>
+            </label>
+          </div>
+          <div class="row">
+            <label class="inline-check"><input type="checkbox" id="normalize-enable" checked /> 响度统一（RMS 归一化）</label>
+          </div>
+          <div class="row">
+            <label>目标响度
+              <span class="ctl">
+                <input type="range" id="targetdb-range" min="-30" max="-6" step="0.5" />
+                <span id="targetdb-val" class="num-readout"></span>
+              </span>
+            </label>
+          </div>
+          <div class="row">
+            <label>主音量
+              <span class="ctl">
+                <input type="range" id="master-range" min="-24" max="6" step="0.5" />
+                <span id="master-val" class="num-readout"></span>
+              </span>
+            </label>
+          </div>
+          <div class="row meter-row">
+            <span>电平：</span>
+            <div class="meter"><div id="meter-fill"></div></div>
+            <span id="meter-db" class="num-readout"></span>
+          </div>
+          <p class="hint" id="play-state-hint"></p>
+        </section>
+
+        <!-- 导出回读 -->
+        <section class="card" id="card-export">
+          <h2>6 · 导出 WAV 与回读检查</h2>
+          <div class="play-buttons">
+            <button id="export" class="btn btn-primary">⬇ 导出当前声音 WAV</button>
+          </div>
+          <p class="hint">导出后自动从 WAV 字节回读，检查各时间节点附近的共振峰与基频。</p>
+          <div id="readback"></div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        所有合成、分析与编解码均在浏览器本地完成，不发送任何数据。
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
