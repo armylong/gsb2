@@ -1,0 +1,5 @@
+numpy>=1.26
+opencv-python-headless>=4.8
+PySide6>=6.6
+# 仅测试需要
+pytest>=7.4
