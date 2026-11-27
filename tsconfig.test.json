@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outFile": "dist/test.js",
+    "lib": ["ES2020", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["src/types.ts", "src/state-machine.ts", "src/audio-engine.ts", "src/transport.ts",
+    "test/state-machine.test.ts", "test/transport.test.ts"]
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>区域自适应配乐 · 小节边界换编排演示</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>区域自适应配乐</h1>
+    <p class="muted">
+      角色在<strong>静区</strong>与<strong>热闹区</strong>之间移动时, 两套程序生成音乐共用同一条节拍线
+      (96 BPM, 4/4 拍), 编排只在<strong>整小节边界</strong>通过专用过门切换, 不会在半拍上断掉.
+    </p>
+  </header>
+
+  <!-- 传输控制 -->
+  <section class="panel">
+    <h2>传输控制</h2>
+    <div class="controls">
+      <button id="btn-play" class="primary">▶ 开始播放</button>
+      <button id="btn-pause">⏸ 暂停</button>
+      <button id="btn-resume">⏵ 恢复</button>
+      <button id="btn-reset">⏹ 从头开始(清理请求)</button>
+      <label class="volume">
+        整体音量
+        <input id="volume" type="range" min="0" max="100" value="80">
+      </label>
+    </div>
+    <div id="pause-hint" class="hint"></div>
+  </section>
+
+  <!-- 场景请求 -->
+  <section class="panel">
+    <h2>场景切换请求</h2>
+    <div class="controls">
+      <button id="btn-calm" disabled>角色走进静区</button>
+      <button id="btn-lively" disabled>角色走进热闹区</button>
+    </div>
+    <div id="hud-mode" class="mode mode-idle"></div>
+  </section>
+
+  <!-- 播放图 -->
+  <section class="panel">
+    <h2>播放图 · 当前小节与听到的段落</h2>
+    <div class="hud">
+      <div><span class="hud-label">状态</span><span id="hud-playing" class="badge">—</span></div>
+      <div><span class="hud-label">当前段落</span><span id="hud-section" class="badge badge-calm">静区</span></div>
+      <div><span class="hud-label">听到的段落</span><span id="hud-kind" class="badge badge-calm">静区主段</span></div>
+      <div><span class="hud-label">当前小节</span><span id="hud-bar" class="hud-num">0</span></div>
+      <div><span class="hud-label">小节内拍位</span><span id="hud-inbar" class="hud-num">0.00</span></div>
+      <div><span class="hud-label">全局拍位</span><span id="hud-beat" class="hud-num">0.00</span></div>
+    </div>
+    <div class="beat-track"><div id="beat-progress"></div></div>
+    <div id="timeline" class="timeline"></div>
+    <div class="legend">
+      <span class="dot dot-calm"></span>静区主段
+      <span class="dot dot-lively"></span>热闹主段
+      <span class="dot dot-fill"></span>专用过门
+      <span class="dot dot-will"></span>预计过门(挂起)
+      <span class="dot dot-current"></span>当前小节
+    </div>
+  </section>
+
+  <!-- 请求日志 -->
+  <section class="panel">
+    <h2>请求日志 · 预计生效 vs 实际生效拍位</h2>
+    <div id="log-table" class="log-table">
+      <table>
+        <thead>
+        <tr>
+          <th>#</th><th>来源</th><th>方向</th><th>点击拍位</th>
+          <th>预计过门(小节/拍)</th><th>实际过门(小节/拍)</th><th>状态</th><th>说明</th>
+        </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 快速往返示例 -->
+  <section class="panel">
+    <h2>快速往返操作示例</h2>
+    <p class="muted">每个示例都会先「从头开始」再自动播放, 按时间线模拟点击; 运行中也可手动暂停验证拍位保持.</p>
+    <div id="scenarios" class="scenarios"></div>
+    <div id="scenario-progress" class="hint"></div>
+  </section>
+
+  <footer class="muted">
+    声音全部由 Web Audio 实时合成(振荡器 + 滤波噪声), 无任何音频文件.
+  </footer>
+</main>
+<script src="dist/app.js"></script>
+</body>
+</html>

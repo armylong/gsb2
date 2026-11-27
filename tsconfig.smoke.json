@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outFile": "dist/smoke.js",
+    "lib": ["ES2020", "DOM"]
+  },
+  "include": ["src/types.ts", "src/state-machine.ts", "src/audio-engine.ts", "src/transport.ts", "test/smoke.ts"]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "adaptive-zone-music",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地浏览器演示: 角色在静区/热闹区之间移动时, 程序生成配乐在小节边界换编排",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.test.json && node dist/test.js",
+    "smoke": "tsc -p tsconfig.smoke.json",
+    "e2e": "node scripts/ui-e2e.mjs",
+    "start": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "typescript": "^5.6.0"
+  }
+}
