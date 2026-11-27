@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>彩玻璃小窗 · 分件预览</title>
+    <meta
+      name="description"
+      content="可拖动、可调分量的加权 Voronoi 玻璃分件预览，支持凹口分片、面积核对与 SVG 切片导出。"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <h1>彩玻璃小窗</h1>
+            <p class="brand-sub">加权 Voronoi 分件 · 本地预览</p>
+          </div>
+        </div>
+
+        <div class="demos" id="demo-switch" role="tablist" aria-label="演示窗口">
+          <button class="demo-tab" data-demo="equal" role="tab">等分</button>
+          <button class="demo-tab" data-demo="notch" role="tab">凹口分片</button>
+          <button class="demo-tab" data-demo="empty" role="tab">有空编号</button>
+        </div>
+
+        <div class="top-actions">
+          <div class="area-chip" id="area-chip" title="外框面积与各分件面积之和">
+            <span class="area-chip-label">面积核对</span>
+            <span class="area-chip-value" id="area-chip-value">—</span>
+            <span class="area-chip-detail" id="area-chip-detail"></span>
+          </div>
+          <button class="btn btn-ghost" id="btn-theme" title="切换明暗主题">明/暗</button>
+          <button class="btn" id="btn-export-svg">导出彩色 SVG</button>
+          <button class="btn" id="btn-export-slices">导出切片轮廓</button>
+        </div>
+      </header>
+
+      <main class="stage-wrap">
+        <section class="canvas-panel" aria-label="窗口预览画布">
+          <canvas id="stage"></canvas>
+          <div class="stage-toolbar" id="stage-toolbar">
+            <label class="toggle"><input type="checkbox" id="t-labels" checked /> 编号</label>
+            <label class="toggle"><input type="checkbox" id="t-seams" checked /> 接缝</label>
+            <label class="toggle"><input type="checkbox" id="t-points" checked /> 点</label>
+            <label class="toggle"><input type="checkbox" id="t-grid" /> 网格</label>
+            <span class="toolbar-sep"></span>
+            <span class="legend-mini">
+              <span class="kind-swatch"></span>外框边
+              <span class="kind-swatch dashed"></span>公共边
+            </span>
+            <span class="hint" id="cursor-hint">拖动点 · 点接缝看两侧 · 双击空白加点</span>
+          </div>
+          <div class="empty-state" id="empty-state" hidden>
+            <span class="empty-state-title">外框里还没有点</span>
+            <span class="empty-state-body">在外框内双击空白处添加第一个点，或切到上方演示。</span>
+          </div>
+        </section>
+
+        <aside class="side" aria-label="控制面板">
+          <section class="card" id="card-demo">
+            <div class="card-head">
+              <h2 id="demo-name">等分</h2>
+              <span class="badge" id="demo-badge">演示</span>
+            </div>
+            <p class="card-lead" id="demo-tagline"></p>
+            <div class="row">
+              <button class="btn btn-small" id="btn-reset">重置此演示</button>
+              <button class="btn btn-small btn-ghost" id="btn-feature-point">加大演示点分量</button>
+            </div>
+            <p class="card-lead" id="demo-note" style="margin-top: 8px; margin-bottom: 0"></p>
+          </section>
+
+          <section class="card" id="card-point">
+            <div class="card-head">
+              <h2>点与分量</h2>
+              <span class="badge" id="point-badge">未选择</span>
+            </div>
+            <div class="points-strip" id="points-strip" aria-label="点的列表"></div>
+            <div class="btn-row">
+              <button class="btn btn-small btn-ghost" id="btn-add-point">加点</button>
+              <button class="btn btn-small btn-ghost" id="btn-del-point" disabled>删点</button>
+              <span class="unit" id="point-count">0 / 20</span>
+            </div>
+            <div class="field" id="field-weight">
+              <div class="field-head">
+                <label for="weight-slider">分量</label>
+                <span class="field-value" id="weight-value">—</span>
+              </div>
+              <input type="range" id="weight-slider" min="-8000" max="20000" step="50" value="0" />
+              <div class="field-actions">
+                <input type="number" id="weight-number" class="num-input" step="50" />
+                <span class="unit">mm²</span>
+                <button class="btn btn-small btn-ghost" id="btn-weight-zero">归零</button>
+              </div>
+              <div class="preview-row">
+                <label class="toggle"
+                  ><input type="checkbox" id="t-preview" /> 接缝预演</label
+                >
+                <span class="unit">+Δ</span>
+                <input type="number" id="preview-delta" class="num-input narrow" step="100" value="1000" />
+                <span class="unit">mm²</span>
+              </div>
+              <p class="field-hint">
+                分量是功率 Voronoi 的权重（mm²）。分量每增加 Δ，与邻点 j 的接缝沿 i→j 方向移动 Δ / (2·点距)。
+                勾选接缝预演可看到橙色虚线（预测位置）和箭头（移动方向）。
+              </p>
+            </div>
+            <p class="card-note" id="point-empty-note" hidden></p>
+          </section>
+
+          <section class="card" id="card-boundary">
+            <div class="card-head">
+              <h2>边界检查</h2>
+              <span class="badge" id="boundary-badge">未点选</span>
+            </div>
+            <p class="card-lead" id="boundary-lead">在画布上点一条接缝或外框边，查看两侧编号与边类型。</p>
+            <div id="boundary-body" class="boundary-body" hidden></div>
+          </section>
+
+          <section class="card" id="card-diagnostics">
+            <div class="card-head">
+              <h2>诊断</h2>
+              <span class="badge" id="diag-badge">0</span>
+            </div>
+            <div id="diag-list" class="diag-list"></div>
+          </section>
+
+          <section class="card" id="card-areas">
+            <div class="card-head">
+              <h2>面积对照</h2>
+              <span class="badge" id="areas-badge">mm²</span>
+            </div>
+            <p class="card-lead" id="areas-lead">拖动分量时这里是实时值；锁定基准后可以看每块玻璃的面积增减。</p>
+            <div class="row areas-actions">
+              <button class="btn btn-small" id="btn-baseline">叠图对比</button>
+              <button class="btn btn-small btn-ghost" id="btn-baseline-update" disabled>更新基准</button>
+              <button class="btn btn-small btn-ghost" id="btn-baseline-clear" disabled>清除</button>
+            </div>
+            <div id="areas-list" class="areas-list"></div>
+            <div class="area-total" id="areas-total"></div>
+          </section>
+
+          <section class="card" id="card-export">
+            <div class="card-head">
+              <h2>导出</h2>
+            </div>
+            <p class="card-lead">
+              彩色图和每个编号的切片都使用外框原坐标（左上角 0,0，单位 mm），同一个 viewBox，叠在一起即可拼合。
+            </p>
+            <label class="toggle"><input type="checkbox" id="t-export-labels" checked /> SVG 内打印编号</label>
+            <label class="toggle"><input type="checkbox" id="t-export-seams" checked /> SVG 内画接缝</label>
+            <div class="row">
+              <button class="btn btn-small" id="btn-export-svg-2">彩色 SVG</button>
+              <button class="btn btn-small" id="btn-export-slices-2">切片 ZIP</button>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <span id="footer-status">准备就绪</span>
+        <span class="footer-hint">拖动点移动 · 双击空白加点 · Esc 取消选择</span>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

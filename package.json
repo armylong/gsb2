@@ -1,0 +1,33 @@
+{
+  "name": "stained-glass-voronoi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Stained-glass window partition preview: weighted Voronoi panes clipped to a notched frame.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo:areas": "tsx tools/check-areas.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/armylong/gsb2.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "polygon-clipping": "^0.15.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.11",
+    "playwright-core": "^1.65.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.8",
+    "vitest": "^3.2.7"
+  }
+}
