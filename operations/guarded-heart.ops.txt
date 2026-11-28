@@ -1,0 +1,15 @@
+@name 护心 · 挡墨操作串
+@level guarded-heart
+@about 先铺铁锈，护住中心再盖靛青十字；四条肘三格补角，靛青刚好用尽。
+
+# mask C3 on|off 用来放下或收回临时挡墨纸；color rust 表示收回后该格仍是铁锈。
+# masked C3 表示这一印在 C3 被挡墨纸护住、没有沾墨。
+
+stamp square3 rust at B2 rot 0 flip 0 cost 9 ink 0 status playing new-clean - // 方三格铺铁锈底
+mask C3 on // 给正中心 C3 贴挡墨纸
+stamp plus indigo at C3 rot 0 flip 0 cost 4 ink 12 status playing masked C3 // 靛青十字，中心被挡只染四臂
+mask C3 off color rust // 拿掉挡墨纸，中心仍是铁锈
+stamp elbow indigo at A1 rot 0 flip 0 cost 3 ink 9 status playing // 左上角肘三格
+stamp elbow indigo at F1 rot 0 flip 1 cost 3 ink 6 status playing // 右上角肘三格（翻面）
+stamp elbow indigo at A6 rot 2 flip 1 cost 3 ink 3 status playing // 左下角肘三格（翻面）
+stamp elbow indigo at F6 rot 2 flip 0 cost 3 ink 0 status solved // 右下角肘三格

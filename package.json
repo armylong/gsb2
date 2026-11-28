@@ -1,0 +1,25 @@
+{
+  "name": "die-print-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "叠印 · 纸版印画 — 一个用 TypeScript 与 Canvas 制作的纸版叠印解谜小游戏",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "vite-node scripts/verify-ops.ts",
+    "e2e": "node scripts/e2e.mjs",
+    "e2e:keys": "node scripts/interactions.mjs",
+    "shots": "node scripts/screenshot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.8",
+    "vitest": "^3.2.7"
+  }
+}

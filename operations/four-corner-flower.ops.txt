@@ -1,0 +1,17 @@
+@name 四角花 · 标准操作串
+@level four-corner-flower
+@about 含一次故意落在保留格上的失败、一次墨量不足、一次完整撤回，最后完成样图。
+
+# 坐标写成 A1 这样的“列字母 + 行号”。rot 是顺时针 90° 的次数，flip 1 表示翻面。
+# 每行的 expect 字段由验证器核对；reject ink 表示这一印应因墨量不足被整次拒绝。
+
+stamp hook rust at A6 rot 2 flip 1 cost 4 ink 12 status playing new-clean - // 左下角钩（翻面）
+stamp elbow rust at B2 rot 0 flip 0 cost 3 ink 9 status failed new-clean B2 // 故意把肘三格压在保留格 B2
+undo ink rust 12 status playing // 撤回失败的一印，返还 3 格铁锈
+stamp hook rust at A1 rot 0 flip 0 cost 4 ink 8 status playing // 左上角钩
+stamp hook rust at F1 rot 0 flip 1 cost 4 ink 4 status playing // 右上角钩（翻面）
+stamp hook rust at F6 rot 2 flip 0 cost 4 ink 0 status playing // 右下角钩
+stamp hook rust at C3 rot 0 flip 0 reject ink // 铁锈已用尽，再盖整次被拒
+stamp plus indigo at C3 rot 0 flip 0 cost 5 ink 0 status solved // 靛青十字收口
+undo ink indigo 5 status playing // 撤回十字，靛青全额返还
+stamp plus indigo at C3 rot 0 flip 0 cost 5 ink 0 status solved // 重盖十字，结果可复现
