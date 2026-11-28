@@ -42,3 +42,9 @@ coverage/
 .idea/
 .vscode/
 *.swp
+
+# ---- 本项目运行期产物 ----
+examples/
+verify_out/
+verify/
+*.grab.png
